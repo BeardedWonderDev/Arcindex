@@ -41,6 +41,8 @@ workflow:
         - business_case_clarity: true
         - target_user_definition: true
         - success_metrics_defined: true
+        - elicit: true
+        - elicitation_checkpoint: true
       workflow_tasks:
         - stakeholder_analysis
         - market_research
@@ -57,6 +59,8 @@ workflow:
         - acceptance_criteria_measurable: true
         - architecture_input_sufficient: true
         - user_stories_detailed: true
+        - elicit: true
+        - elicitation_checkpoint: true
       workflow_tasks:
         - feature_prioritization
         - user_story_creation
@@ -78,6 +82,8 @@ workflow:
         - swift_conventions_defined: true
         - file_structure_complete: true
         - integration_patterns_documented: true
+        - elicit: true
+        - elicitation_checkpoint: true
       workflow_tasks:
         - system_architecture_design
         - swift_patterns_selection
@@ -100,6 +106,8 @@ workflow:
         - implementation_task_specificity: true
         - validation_commands_project_specific: true
         - context_completeness_verification: true
+        - elicit: true
+        - elicitation_checkpoint: true
       workflow_tasks:
         - context_synthesis
         - documentation_research

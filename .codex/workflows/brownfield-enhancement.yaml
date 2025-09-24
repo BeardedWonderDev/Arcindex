@@ -1,0 +1,205 @@
+# CODEX Brownfield Enhancement Workflow - With Interactive Elicitation
+name: "Brownfield Enhancement"
+id: "brownfield-enhancement"
+description: "Enhance existing codebase with new features using mandatory elicitation gates"
+version: "1.0.0"
+elicitation_mode: "interactive"  # Default mode, can be overridden
+
+phases:
+  - name: "Discovery"
+    id: "discovery"
+    agent: "analyst"
+    elicit: true
+    elicitation_checkpoint: true
+    validation:
+      level: 0  # Elicitation validation first
+      checks:
+        - "Verify elicitation_completed[discovery] == true"
+        - "Check existing codebase understanding documented"
+    tasks:
+      - "Analyze existing codebase structure"
+      - "Identify integration points"
+      - "Document current patterns and conventions"
+      - "Map dependency relationships"
+    deliverables:
+      - "Codebase analysis document"
+      - "Integration strategy"
+    handoff:
+      to: "pm"
+      requires_elicitation: true
+      validation: "Zero Knowledge Test"
+
+  - name: "Requirements"
+    id: "requirements"
+    agent: "pm"
+    elicit: true
+    elicitation_checkpoint: true
+    validation:
+      level: 0  # Elicitation validation first
+      checks:
+        - "Verify elicitation_completed[requirements] == true"
+        - "Check enhancement requirements validated"
+    tasks:
+      - "Define enhancement requirements"
+      - "Create user stories for new features"
+      - "Validate against existing functionality"
+      - "Define acceptance criteria"
+    deliverables:
+      - "Enhancement PRD"
+      - "User stories with acceptance criteria"
+    handoff:
+      to: "architect"
+      requires_elicitation: true
+      validation: "Requirements Completeness Check"
+
+  - name: "Architecture"
+    id: "architecture"
+    agent: "architect"
+    elicit: true
+    elicitation_checkpoint: true
+    validation:
+      level: 0  # Elicitation validation first
+      checks:
+        - "Verify elicitation_completed[architecture] == true"
+        - "Check architectural decisions documented"
+    tasks:
+      - "Design integration architecture"
+      - "Select compatible technologies"
+      - "Define API contracts"
+      - "Create migration strategy if needed"
+    deliverables:
+      - "Architecture enhancement document"
+      - "API specifications"
+      - "Migration plan"
+    handoff:
+      to: "prp-creator"
+      requires_elicitation: true
+      validation: "Architecture Coherence Check"
+
+  - name: "PRP Creation"
+    id: "prp_creator"
+    agent: "prp-creator"
+    elicit: true
+    elicitation_checkpoint: true
+    validation:
+      level: 0  # Elicitation validation first
+      checks:
+        - "Verify elicitation_completed[prp_creator] == true"
+        - "Check PRP completeness and quality"
+    tasks:
+      - "Create enhanced PRP with brownfield context"
+      - "Include existing codebase patterns"
+      - "Define integration implementation tasks"
+      - "Create validation criteria for enhancement"
+    deliverables:
+      - "Enhanced PRP for brownfield implementation"
+    handoff:
+      to: "dev"
+      requires_elicitation: true
+      validation: "PRP Quality Gate"
+
+  - name: "Implementation"
+    id: "implementation"
+    agent: "dev"
+    elicit: false  # Implementation typically doesn't need elicitation
+    validation:
+      level: 1  # Start with syntax validation
+      progressive: true
+    tasks:
+      - "Implement enhancement following existing patterns"
+      - "Integrate with existing codebase"
+      - "Maintain backward compatibility"
+      - "Create/update tests"
+    deliverables:
+      - "Working enhancement implementation"
+      - "Updated test suite"
+    handoff:
+      to: "qa"
+      requires_elicitation: false
+      validation: "Code Quality Check"
+
+  - name: "Testing"
+    id: "testing"
+    agent: "qa"
+    elicit: false  # Testing typically doesn't need elicitation
+    validation:
+      levels: [2, 3, 4]  # All test levels
+      progressive: true
+    tasks:
+      - "Run existing regression tests"
+      - "Test new functionality"
+      - "Validate integration points"
+      - "Performance impact assessment"
+    deliverables:
+      - "Test results report"
+      - "Performance impact analysis"
+    handoff:
+      to: "orchestrator"
+      requires_elicitation: false
+      validation: "All Tests Pass"
+
+workflow_settings:
+  elicitation:
+    enabled: true
+    default_mode: "interactive"
+    enforcement_level: "hard"
+    phase_requirements:
+      discovery: true
+      requirements: true
+      architecture: true
+      prp_creator: true
+      implementation: false
+      testing: false
+
+  validation:
+    level_0_required: true  # Elicitation validation mandatory
+    progressive_gates: true
+    failure_handling: "halt_and_report"
+
+  context_management:
+    breakpoint_threshold: 40000
+    checkpoint_frequency: "per_phase"
+    handoff_validation: "zero_knowledge_test"
+
+  recovery:
+    enabled: true
+    checkpoint_retention: "all"
+    resume_from_failure: true
+
+# Story implementations from PRD
+stories:
+  story_1_1:
+    title: "Workflow Mode Selection"
+    implementation: "User prompted for Interactive/Batch/YOLO on workflow start"
+
+  story_1_2:
+    title: "Phase Transition Elicitation"
+    implementation: "Mandatory elicitation gates at discovery, requirements, architecture, PRP phases"
+
+  story_1_3:
+    title: "Elicitation Menu Display"
+    implementation: "0-8 + 9 format using advanced-elicitation.md"
+
+  story_1_4:
+    title: "State Persistence"
+    implementation: "All elicitation tracked in workflow.json elicitation_history"
+
+  story_1_5:
+    title: "Violation Detection"
+    implementation: "⚠️ indicators log to .codex/debug-log.md"
+
+  story_1_6:
+    title: "Batch Processing"
+    implementation: "Batch mode accumulates elicitation for phase end"
+
+  story_1_7:
+    title: "Recovery Support"
+    implementation: "Resume from elicitation_history on interruption"
+
+# Integration with existing CODEX features
+integrations:
+  - "Uses existing CODEX agent definitions"
+  - "Compatible with 4-level validation system"
+  - "Supports context checkpoint management"
+  - "Integrates with language-specific agents"
+  - "Maintains backward compatibility"

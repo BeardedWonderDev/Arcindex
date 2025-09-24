@@ -13,12 +13,19 @@ When this task is invoked:
 3. **ACTIONABLE FEEDBACK** - Failed validations provide specific guidance for resolution
 4. **LANGUAGE AGENT COORDINATION** - Level 4 integrates with specialized language agents for domain expertise
 
-**SUCCESS REQUIREMENT:** All 4 levels must pass for implementation to be considered complete and ready.
+**SUCCESS REQUIREMENT:** All 5 levels (0-4) must pass for implementation to be considered complete and ready.
 
 ## Validation Level Overview
 
 ```yaml
 validation_levels:
+  level_0:
+    name: "Elicitation Validation"
+    purpose: "Ensure required elicitation completed before phase progression"
+    timing: "At every phase transition"
+    blocking: true
+    enforcement: "HARD STOP - halt_workflow_immediately if incomplete"
+
   level_1:
     name: "Syntax & Style Validation"
     purpose: "Immediate feedback on code syntax, formatting, and style compliance"
@@ -43,6 +50,51 @@ validation_levels:
     timing: "Final implementation review"
     blocking: true
 ```
+
+## Level 0: Elicitation Validation (Highest Priority)
+
+### Purpose: Enforce Required User Interaction
+
+This level validates that all required elicitation has been completed for the current phase before allowing progression to the next phase.
+
+### Validation Checks
+
+1. **Check Operation Mode**:
+   - Read `.codex/state/workflow.json` for `operation_mode`
+   - If mode is `yolo`, skip elicitation validation (but log)
+   - If mode is `batch` or `interactive`, continue validation
+
+2. **Check Phase Requirements**:
+   - Read `.codex/config/codex-config.yaml` for `elicitation.phase_requirements`
+   - Determine if current phase requires elicitation
+   - If not required, pass validation
+
+3. **Check Completion Status**:
+   - Read `.codex/state/workflow.json` for `elicitation_completed[current_phase]`
+   - If `false` and elicitation required: **HALT WORKFLOW**
+   - Display: "⚠️ VIOLATION INDICATOR: Elicitation required for [phase] phase before proceeding"
+
+4. **Check Elicitation History**:
+   - Verify `elicitation_history` contains entry for current phase
+   - Validate method selected and user response recorded
+   - If missing: **HALT WORKFLOW**
+
+### Failure Protocol
+
+When Level 0 fails:
+1. **HARD STOP** - Do not proceed to Level 1
+2. Log violation to `.codex/debug-log.md`
+3. Present elicitation options using `.codex/tasks/advanced-elicitation.md`
+4. Update state when elicitation completed
+5. Re-run Level 0 validation
+
+### Success Criteria
+
+- Operation mode checked and appropriate action taken
+- Elicitation requirements for phase verified
+- Completion status confirmed as `true` if required
+- History contains valid entry for phase
+- Proceed to Level 1
 
 ## Level 1: Syntax & Style Validation
 

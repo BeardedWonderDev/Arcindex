@@ -154,9 +154,23 @@ Save checkpoint state to multiple locations:
 
 ## Zero Knowledge Validation Test
 
+### ELICITATION COMPLETION CHECK
+
+**⚠️ VIOLATION: No handoff allowed without elicitation completion**
+
+Before executing validation test, verify elicitation status:
+```yaml
+elicitation_checkpoint_validation:
+  check_workflow_state: "Read .codex/state/workflow.json for elicitation_completed status"
+  current_phase_validation: "Ensure elicitation_completed[current_phase] == true"
+  violation_detection: "Block handoff if elicitation_completed[current_phase] == false"
+  enforcement_message: "⚠️ VIOLATION: Elicitation required for [phase] phase before proceeding"
+  hard_stop_condition: "HALT workflow until elicitation completed"
+```
+
 ### Comprehensive Validation Criteria
 
-Execute this validation test on every checkpoint:
+Execute this validation test on every checkpoint ONLY after elicitation completion check passes:
 
 ```yaml
 zero_knowledge_test:

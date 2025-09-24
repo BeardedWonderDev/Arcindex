@@ -23,17 +23,20 @@ If a YAML Template has not been provided, list all templates from .codex/templat
 
 **When `elicit: true`, this is a HARD STOP requiring user interaction:**
 
+**⚠️ NO SHORTCUTS ALLOWED ⚠️**
+
 **YOU MUST:**
 
 1. Present section content
 2. Provide detailed rationale (explain trade-offs, assumptions, decisions made)
-3. **STOP and present numbered options 1-9:**
-   - **Option 1:** Always "Proceed to next section"
-   - **Options 2-9:** Select 8 methods from .codex/data/elicitation-methods.md
-   - End with: "Select 1-9 or just type your question/feedback:"
+3. **STOP and present numbered options 0-8 + 9 using advanced-elicitation.md:**
+   - **Options 0-8:** Select 9 methods from .codex/data/elicitation-methods.md
+   - **Option 9:** Always "Proceed / No Further Actions"
+   - Use .codex/tasks/advanced-elicitation.md for intelligent method selection
+   - End with: "Choose a number (0-8) or 9 to proceed:"
 4. **WAIT FOR USER RESPONSE** - Do not proceed until user selects option or provides feedback
 
-**WORKFLOW VIOLATION:** Creating content for elicit=true sections without user interaction violates this task.
+**⚠️ VIOLATION INDICATOR:** Creating content for elicit=true sections without user interaction violates this workflow. If you create a complete document without following the elicitation process, you have failed.
 
 **NEVER ask yes/no questions or use any other format.**
 
@@ -61,9 +64,9 @@ When presenting section content, ALWAYS include rationale that explains:
 
 ## Elicitation Results Flow
 
-After user selects elicitation method (2-9):
+After user selects elicitation method (0-8):
 
-1. Execute method from .codex/data/elicitation-methods.md
+1. Execute method from .codex/data/elicitation-methods.md via advanced-elicitation.md
 2. Present results with insights
 3. Offer options:
    - **1. Apply changes and update section**
@@ -97,10 +100,11 @@ User can type `#yolo` to toggle to YOLO mode (process all sections at once).
 
 **✅ ALWAYS:**
 
-- Use exact 1-9 format when elicit: true
-- Select options 2-9 from .codex/data/elicitation-methods.md only
+- Use exact 0-8 + 9 format when elicit: true
+- Select options 0-8 from .codex/data/elicitation-methods.md only (9 methods total)
+- Use .codex/tasks/advanced-elicitation.md for intelligent method selection
 - Provide detailed rationale explaining decisions
-- End with "Select 1-9 or just type your question/feedback:"
+- End with "Choose a number (0-8) or 9 to proceed:"
 
 ## CODEX Integration Notes
 

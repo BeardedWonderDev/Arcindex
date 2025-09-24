@@ -98,7 +98,101 @@ subcommands:
       2. If missing: Report "No active workflow to validate."
       3. Launch orchestrator via Task tool with instructions:
          "Activate CODEX orchestrator at .codex/agents/orchestrator.md
-          Execute 4-level validation gate system for current phase"
+          Execute 5-level validation gate system for current phase"
+
+  # Operation Mode Commands
+  mode:
+    description: Show current operation mode (interactive|batch|yolo)
+    arguments: none
+    routing: |
+      1. Check if .codex/state/workflow.json exists
+      2. If missing: Report "No active workflow to check mode."
+      3. Launch orchestrator via Task tool with instructions:
+         "Activate CODEX orchestrator at .codex/agents/orchestrator.md
+          Display current operation mode and explain mode options"
+
+  interactive:
+    description: Return to interactive mode (default, full elicitation)
+    arguments: none
+    routing: |
+      1. Check if .codex/state/workflow.json exists
+      2. If missing: Report "No active workflow to set mode."
+      3. Launch orchestrator via Task tool with instructions:
+         "Activate CODEX orchestrator at .codex/agents/orchestrator.md
+          Set operation mode to 'interactive' and update workflow state"
+
+  batch:
+    description: Toggle batch mode (minimal interaction, batch elicitation)
+    arguments: none
+    routing: |
+      1. Check if .codex/state/workflow.json exists
+      2. If missing: Report "No active workflow to set mode."
+      3. Launch orchestrator via Task tool with instructions:
+         "Activate CODEX orchestrator at .codex/agents/orchestrator.md
+          Set operation mode to 'batch' and update workflow state"
+
+  yolo:
+    description: Toggle YOLO mode (skip elicitation confirmations)
+    arguments: none
+    routing: |
+      1. Check if .codex/state/workflow.json exists
+      2. If missing: Report "No active workflow to set mode."
+      3. Launch orchestrator via Task tool with instructions:
+         "Activate CODEX orchestrator at .codex/agents/orchestrator.md
+          Set operation mode to 'yolo' and update workflow state"
+
+  chat-mode:
+    description: Start conversational mode with relaxed elicitation timing
+    arguments: none
+    routing: |
+      1. Launch orchestrator via Task tool with instructions:
+         "Activate CODEX orchestrator at .codex/agents/orchestrator.md
+          Enter chat-mode for conversational assistance with flexible elicitation"
+
+  # System Management Commands
+  rollback:
+    description: Revert to previous checkpoint (if git integration available)
+    arguments: none
+    routing: |
+      1. Check if .codex/state/workflow.json exists
+      2. If missing: Report "No active workflow to rollback."
+      3. Launch orchestrator via Task tool with instructions:
+         "Activate CODEX orchestrator at .codex/agents/orchestrator.md
+          Execute rollback to previous checkpoint"
+
+  agents:
+    description: List and coordinate with specialized agents
+    arguments: "[agent-name]"
+    routing: |
+      1. Launch orchestrator via Task tool with instructions:
+         "Activate CODEX orchestrator at .codex/agents/orchestrator.md
+          List available agents and coordination options"
+
+  workflows:
+    description: List available workflow definitions
+    arguments: none
+    routing: |
+      1. Launch orchestrator via Task tool with instructions:
+         "Activate CODEX orchestrator at .codex/agents/orchestrator.md
+          List all available workflows from .codex/workflows/"
+
+  config:
+    description: Show and modify CODEX configuration
+    arguments: "[setting] [value]"
+    routing: |
+      1. Launch orchestrator via Task tool with instructions:
+         "Activate CODEX orchestrator at .codex/agents/orchestrator.md
+          Display or modify CODEX configuration settings"
+
+  state:
+    description: Display detailed workflow state information
+    arguments: none
+    routing: |
+      1. Check if .codex/state/workflow.json exists
+      2. If missing: Report "No workflow state to display."
+      3. Launch orchestrator via Task tool with instructions:
+         "Activate CODEX orchestrator at .codex/agents/orchestrator.md
+          Display detailed workflow state including elicitation tracking"
 
   help:
     description: Display available commands and workflows
@@ -138,19 +232,36 @@ dependencies:
   workflows:
     - greenfield-swift.yaml
     - health-check.yaml
+    - brownfield-enhancement.yaml
   config:
     - codex-config.yaml
   state:
     - workflow.json
+  tasks:
+    - advanced-elicitation.md
 
 help-display-template: |
   === CODEX Orchestration System ===
 
-  Available Commands:
+  Workflow Management:
   /codex start [workflow] [name] .. Initialize new workflow
   /codex continue ................. Resume from checkpoint
   /codex status ................... Show workflow state
-  /codex validate ................. Run validation gates
+  /codex validate ................. Run 5-level validation gates
+  /codex rollback ................. Revert to previous checkpoint
+
+  Operation Modes (Interactive Elicitation):
+  /codex mode ..................... Show current operation mode
+  /codex interactive .............. Full elicitation mode (default)
+  /codex batch .................... Batch elicitation mode
+  /codex yolo ..................... Skip elicitation confirmations
+  /codex chat-mode ................ Conversational mode
+
+  System Management:
+  /codex workflows ................ List available workflow definitions
+  /codex agents ................... List and coordinate with agents
+  /codex config ................... Show CODEX configuration
+  /codex state .................... Display detailed workflow state
   /codex help ..................... Display this help
 
   Available Workflows:
@@ -158,9 +269,11 @@ help-display-template: |
 
   Examples:
   /codex start greenfield-swift "My iOS App"
+  /codex mode
+  /codex interactive
   /codex status
   /codex continue
 
   💡 CODEX orchestrates complete development workflows with
-  context preservation and systematic validation gates.
+  interactive elicitation, context preservation, and 5-level validation gates.
 ```
