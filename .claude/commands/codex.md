@@ -1,0 +1,166 @@
+---
+name: codex
+description: CODEX orchestration system for AI-assisted development workflows
+arguments: "[subcommand] [options] - e.g., 'start greenfield-swift' or 'status'"
+---
+
+# /codex Command
+
+When this command is used, process according to the following configuration:
+
+<!-- Powered by CODEX™ Core -->
+
+# CODEX Command Router
+
+ACTIVATION-NOTICE: This file contains the command routing configuration for CODEX orchestration system.
+
+CRITICAL: Read the full YAML BLOCK that FOLLOWS to understand command routing behavior:
+
+## COMPLETE COMMAND DEFINITION FOLLOWS
+
+```yaml
+IDE-FILE-RESOLUTION:
+  - Dependencies map to .codex/{type}/{name}
+  - type=folder (agents|workflows|tasks|templates|config|data), name=file-name
+  - Example: orchestrator.md → .codex/agents/orchestrator.md
+  - IMPORTANT: Only load these files when processing specific subcommands
+
+REQUEST-RESOLUTION: Match subcommands from $ARGUMENTS flexibly (e.g., "begin"→start, "resume"→continue), ask for clarification if no clear match.
+
+command-processing-instructions:
+  - STEP 1: Parse $ARGUMENTS to extract subcommand and options
+  - STEP 2: Match subcommand to command-routing rules below
+  - STEP 3: For each subcommand, follow the specific routing instructions
+  - STEP 4: Delegate complex logic to orchestrator agent via Task tool
+  - DO NOT: Execute implementation logic directly in this command
+  - ONLY: Route to appropriate agent or display information
+  - CRITICAL: All workflow management happens in orchestrator agent
+
+command:
+  name: CODEX Router
+  id: codex
+  title: CODEX Orchestration System Command Router
+  icon: 🎯
+  purpose: Route CODEX commands to orchestrator agent for workflow management
+
+routing:
+  role: Command Router & Dispatcher
+  responsibility: Parse user commands and delegate to CODEX orchestrator
+  core_principles:
+    - Parse $ARGUMENTS for subcommand identification
+    - Route all workflow logic to orchestrator agent
+    - Maintain stateless command processing
+    - Provide clear error messages for invalid commands
+    - Never implement business logic in this router
+
+subcommands:
+  start:
+    description: Initialize new CODEX workflow
+    arguments: "[workflow-type] [project-name]"
+    routing: |
+      1. Extract workflow-type and project-name from $ARGUMENTS
+      2. Verify .codex/ directory exists
+      3. If directory missing: Report "CODEX system not installed. Please ensure .codex/ directory exists."
+      4. If no workflow-type: List available workflows from .codex/workflows/
+      5. Launch orchestrator via Task tool with instructions:
+         "Activate CODEX orchestrator at .codex/agents/orchestrator.md
+          Initialize workflow: {workflow-type}
+          Project name: {project-name}
+          Create initial state and begin first phase"
+
+  continue:
+    description: Resume workflow from last checkpoint
+    arguments: none
+    routing: |
+      1. Check if .codex/state/workflow.json exists
+      2. If missing: Report "No active workflow found. Use 'start' to begin."
+      3. Launch orchestrator via Task tool with instructions:
+         "Activate CODEX orchestrator at .codex/agents/orchestrator.md
+          Resume existing workflow from checkpoint"
+
+  status:
+    description: Show current workflow state and system status
+    arguments: none
+    routing: |
+      1. Launch orchestrator via Task tool with instructions:
+         "Activate CODEX orchestrator at .codex/agents/orchestrator.md
+          Provide comprehensive status report:
+          - System health check
+          - Current workflow state
+          - Available workflows
+          - Recent activity"
+
+  validate:
+    description: Run validation gates for current phase
+    arguments: none
+    routing: |
+      1. Check if .codex/state/workflow.json exists
+      2. If missing: Report "No active workflow to validate."
+      3. Launch orchestrator via Task tool with instructions:
+         "Activate CODEX orchestrator at .codex/agents/orchestrator.md
+          Execute 4-level validation gate system for current phase"
+
+  help:
+    description: Display available commands and workflows
+    arguments: none
+    routing: |
+      1. Display command list with descriptions
+      2. List workflows from .codex/workflows/ if directory exists
+      3. Show usage examples
+      4. No orchestrator activation needed
+
+error-handling:
+  unknown-subcommand: |
+    Report: "Unknown subcommand: {subcommand}"
+    Display available commands (same as help)
+    Suggest: "Use '/codex help' for available commands"
+
+  missing-directory: |
+    Report: "CODEX system not found"
+    Suggest: "Ensure .codex/ directory is properly installed"
+
+  invalid-arguments: |
+    Report specific argument error
+    Show correct usage for the subcommand
+    Provide example of correct usage
+
+orchestrator-delegation:
+  agent-location: .codex/agents/orchestrator.md
+  activation-method: Task tool
+  delegation-pattern: |
+    Always use Task tool to launch orchestrator with specific instructions
+    Never implement workflow logic in this command file
+    Pass all context through activation instructions
+
+dependencies:
+  agents:
+    - orchestrator.md
+  workflows:
+    - greenfield-swift.yaml
+    - health-check.yaml
+  config:
+    - codex-config.yaml
+  state:
+    - workflow.json
+
+help-display-template: |
+  === CODEX Orchestration System ===
+
+  Available Commands:
+  /codex start [workflow] [name] .. Initialize new workflow
+  /codex continue ................. Resume from checkpoint
+  /codex status ................... Show workflow state
+  /codex validate ................. Run validation gates
+  /codex help ..................... Display this help
+
+  Available Workflows:
+  [Dynamically list from .codex/workflows/]
+
+  Examples:
+  /codex start greenfield-swift "My iOS App"
+  /codex status
+  /codex continue
+
+  💡 CODEX orchestrates complete development workflows with
+  context preservation and systematic validation gates.
+```

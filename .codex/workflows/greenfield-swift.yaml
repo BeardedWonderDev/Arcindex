@@ -1,0 +1,303 @@
+workflow:
+  id: greenfield-swift-ios
+  name: "Greenfield Swift iOS/macOS Application Development"
+  description: >-
+    Complete CODEX workflow from concept to validated implementation for Swift projects.
+    Orchestrates business analysis, product management, architecture, enhanced PRP creation,
+    and coordinated implementation with language-specific agents for quality assurance.
+  type: greenfield
+  project_types:
+    - ios-app
+    - macos-app
+    - swift-package
+    - watchos-app
+    - tvos-app
+    - visionos-app
+
+  context_management:
+    breakpoint_strategy: "document_driven"
+    validation_required: "zero_knowledge_test"
+    max_context_per_phase: 45000  # tokens
+    checkpoint_frequency: 600  # seconds
+
+  language_support:
+    primary: "swift"
+    agents:
+      - swift-feature-developer
+      - swift-syntax-reviewer
+      - swift-architecture-reviewer
+      - swift-performance-reviewer
+      - swift-testing-reviewer
+      - swift-refactor
+      - ios-security-auditor
+
+  sequence:
+    - agent: analyst
+      creates: "docs/project-brief.md"
+      template: "project-brief-template.yaml"
+      description: "Business analysis and project requirements gathering"
+      validation:
+        - context_completeness_for_pm: true
+        - business_case_clarity: true
+        - target_user_definition: true
+        - success_metrics_defined: true
+      workflow_tasks:
+        - stakeholder_analysis
+        - market_research
+        - problem_definition
+        - business_goals_alignment
+
+    - agent: pm
+      creates: "docs/prd.md"
+      template: "prd-template.yaml"
+      requires: ["docs/project-brief.md"]
+      description: "Product requirements and feature specification"
+      validation:
+        - feature_specifications_complete: true
+        - acceptance_criteria_measurable: true
+        - architecture_input_sufficient: true
+        - user_stories_detailed: true
+      workflow_tasks:
+        - feature_prioritization
+        - user_story_creation
+        - acceptance_criteria_definition
+        - mvp_scope_establishment
+
+    - agent: architect
+      creates: "docs/architecture.md"
+      template: "architecture-template.yaml"
+      requires: ["docs/prd.md"]
+      description: "Technical architecture and Swift-specific design patterns"
+      enhancements:
+        - swift_patterns_research: true
+        - ios_architecture_patterns: true
+        - technology_stack_validation: true
+        - performance_considerations: true
+      validation:
+        - implementation_guidance_specific: true
+        - swift_conventions_defined: true
+        - file_structure_complete: true
+        - integration_patterns_documented: true
+      workflow_tasks:
+        - system_architecture_design
+        - swift_patterns_selection
+        - data_flow_definition
+        - security_architecture_planning
+
+    - agent: prp-creator
+      creates: "PRPs/{feature-name}.md"
+      template: "prp-enhanced-template.md"
+      requires: ["docs/prd.md", "docs/architecture.md"]
+      description: "Enhanced PRP creation with complete workflow context integration"
+      enhancements:
+        - codebase_pattern_analysis: true
+        - swift_documentation_research: true
+        - technology_gotchas_identification: true
+        - validation_commands_verification: true
+      validation:
+        - zero_knowledge_test: true
+        - url_accessibility_check: true
+        - implementation_task_specificity: true
+        - validation_commands_project_specific: true
+        - context_completeness_verification: true
+      workflow_tasks:
+        - context_synthesis
+        - documentation_research
+        - implementation_planning
+        - validation_strategy_creation
+
+    - phase: implementation_coordination
+      primary_agent: dev
+      description: "Coordinated implementation with language-specific agent enhancement"
+      language_agents:
+        - swift-feature-developer
+        - swift-syntax-reviewer
+        - swift-architecture-reviewer
+        - swift-performance-reviewer
+        - ios-security-auditor
+
+      coordination:
+        - agent: dev
+          action: prp_execution_prep
+          description: "Prepare enhanced PRP for implementation"
+          validates: ["prp_context_completeness", "referenced_files_exist", "validation_commands_tested"]
+
+        - agents: [dev, swift-feature-developer]
+          action: parallel_implementation
+          description: "Core feature implementation with Swift best practices"
+          tasks: ["core_feature_implementation", "test_generation", "documentation_creation"]
+          coordination_method: "parallel_task_execution"
+
+        - agents: [swift-syntax-reviewer, swift-architecture-reviewer]
+          action: quality_enhancement
+          description: "Code quality and architecture compliance review"
+          input: "implementation_files"
+          output: "enhanced_implementation"
+          coordination_method: "sequential_review_process"
+
+        - agent: swift-performance-reviewer
+          action: performance_optimization
+          description: "Performance analysis and optimization recommendations"
+          condition: "performance_requirements_in_prd"
+          coordination_method: "conditional_execution"
+
+        - agent: ios-security-auditor
+          action: security_validation
+          description: "OWASP Mobile Top 10 and App Store compliance validation"
+          mandatory: true
+          coordination_method: "mandatory_validation"
+
+        - agent: dev
+          action: validation_orchestration
+          description: "Execute all 4 validation levels with agent coordination"
+          executes: ["level_1_validation", "level_2_validation", "level_3_validation", "level_4_validation"]
+          requires: "all_language_agents_complete"
+
+      validation_gates:
+        level_1:
+          name: "Syntax & Style Validation"
+          commands:
+            - "swiftlint --config .swiftlint.yml"
+            - "swift build"
+            - "swift-format --lint --recursive Sources/"
+          required: true
+          timeout: 300
+
+        level_2:
+          name: "Unit Test Validation"
+          commands:
+            - "swift test"
+            - "swift test --enable-code-coverage"
+            - "xcrun llvm-cov report .build/debug/codecov/default.profdata"
+          coverage_threshold: 80
+          required: true
+          timeout: 600
+
+        level_3:
+          name: "Integration Test Validation"
+          commands:
+            - "xcodebuild test -scheme {scheme_name} -destination 'platform=iOS Simulator,name=iPhone 15'"
+            - "xcodebuild test -scheme {scheme_name} -destination 'platform=macOS'"
+          required: true
+          timeout: 1200
+
+        level_4:
+          name: "Creative & Domain-Specific Validation"
+          agents: ["swift-performance-reviewer", "ios-security-auditor", "swift-testing-reviewer"]
+          custom_validation: true
+          required: true
+          timeout: 900
+
+      completion_criteria:
+        - all_validation_levels_pass: true
+        - prd_acceptance_criteria_met: true
+        - architecture_compliance_verified: true
+        - zero_knowledge_handoff_ready: true
+        - language_agent_quality_gates_passed: true
+
+  context_breakpoints:
+    after_project_brief:
+      validation: "pm_can_create_prd_without_analyst_context"
+      checkpoint_file: "docs/project-brief.md"
+      test_criteria: "Business context complete for product planning"
+
+    after_prd:
+      validation: "architect_can_design_without_pm_context"
+      checkpoint_file: "docs/prd.md"
+      test_criteria: "Feature requirements complete for technical design"
+
+    after_architecture:
+      validation: "prp_creator_has_complete_technical_context"
+      checkpoint_file: "docs/architecture.md"
+      test_criteria: "Technical design complete for PRP creation"
+
+    after_enhanced_prp:
+      validation: "dev_agent_can_implement_without_workflow_context"
+      checkpoint_file: "PRPs/{feature-name}.md"
+      test_criteria: "Implementation guidance complete for development"
+
+    after_implementation:
+      validation: "qa_can_validate_without_implementation_context"
+      checkpoint_files: ["implementation_summary.md", "validation_results.md"]
+      test_criteria: "Implementation complete for quality assurance"
+
+  error_recovery:
+    validation_failure:
+      strategy: "return_to_source_agent_with_specific_feedback"
+      max_iterations: 3
+      escalation: "manual_intervention_required"
+
+    context_overflow:
+      strategy: "create_emergency_breakpoint_with_summary"
+      fallback: "manual_context_curation"
+      recovery_guidance: "Resume from last successful checkpoint"
+
+    agent_coordination_failure:
+      strategy: "sequential_fallback_execution"
+      isolation: "execute_problematic_agent_separately"
+      diagnostics: "agent_coordination_log_analysis"
+
+    swift_compilation_failure:
+      strategy: "syntax_analysis_and_correction"
+      tools: ["swift build --verbose", "swiftlint --verbose"]
+      recovery_actions: ["fix_syntax_errors", "resolve_dependencies", "update_swift_version"]
+
+  quality_assurance:
+    code_quality_metrics:
+      - swift_lint_compliance: "100%"
+      - test_coverage: ">80%"
+      - architecture_compliance: "verified"
+      - security_scan_pass: "required"
+
+    performance_benchmarks:
+      - app_launch_time: "<2 seconds"
+      - memory_usage: "within iOS guidelines"
+      - battery_impact: "minimal"
+      - network_efficiency: "optimized"
+
+    app_store_compliance:
+      - privacy_manifest: "required"
+      - accessibility_compliance: "WCAG AA"
+      - security_requirements: "OWASP Mobile Top 10"
+      - apple_guidelines: "HIG compliant"
+
+  swift_specific_configurations:
+    swift_version: "5.10+"
+    ios_deployment_target: "15.0+"
+    macos_deployment_target: "12.0+"
+
+    frameworks:
+      ui: ["SwiftUI", "UIKit"]
+      networking: ["URLSession", "Combine"]
+      persistence: ["SwiftData", "CoreData"]
+      testing: ["XCTest", "Swift Testing"]
+
+    architecture_patterns:
+      - "MVVM with SwiftUI"
+      - "Clean Architecture"
+      - "Repository Pattern"
+      - "Dependency Injection"
+
+  success_metrics:
+    workflow_efficiency:
+      - context_breakpoint_count: "≤3 per feature"
+      - zero_knowledge_validation_pass_rate: "≥95%"
+      - one_pass_implementation_success: "≥85%"
+
+    code_quality:
+      - validation_gate_pass_rate: "≥90%"
+      - language_agent_enhancement_adoption: "≥80%"
+      - swift_best_practices_compliance: "≥95%"
+
+    developer_experience:
+      - workflow_completion_without_intervention: "≥85%"
+      - average_feature_development_time: "reduced by 40%"
+      - developer_satisfaction_rating: "≥4.5/5"
+
+  workflow_metadata:
+    version: "1.0.0"
+    created_by: "CODEX Architecture Team"
+    last_updated: "2025-09-24"
+    tested_environments: ["iOS 17+", "macOS 14+", "Xcode 15+"]
+    estimated_duration: "2-5 days for typical features"
+    complexity_rating: "advanced"

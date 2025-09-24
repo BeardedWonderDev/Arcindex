@@ -1,0 +1,304 @@
+# <!-- Powered by CODEX™ Core -->
+template:
+  id: codex-architecture-template-v1
+  name: CODEX System Architecture Document
+  version: 1.0
+  output:
+    format: markdown
+    filename: docs/architecture.md
+    title: "{{project_name}} System Architecture"
+
+workflow:
+  mode: interactive
+  elicitation: advanced-elicitation
+
+context-integration:
+  - source: docs/project-brief.md
+    purpose: Understand business context and constraints
+    required: true
+  - source: docs/prd.md
+    purpose: Extract technical requirements and user stories
+    required: true
+  - source: .codex/state/workflow.json
+    purpose: Maintain workflow state
+    required: false
+
+sections:
+  - id: overview
+    title: Architecture Overview
+    instruction: |
+      Provide high-level system architecture overview.
+      Connect technical decisions to business requirements.
+      Include architecture diagram (C4 Level 1 - System Context).
+    sections:
+      - id: system-context
+        title: System Context
+        type: structured
+        instruction: Define system boundaries and external interactions
+        components:
+          - Core System Description
+          - External Systems and Integrations
+          - User Types and Access Patterns
+          - High-Level Data Flows
+      - id: architecture-goals
+        title: Architecture Goals & Principles
+        type: bullet-list
+        instruction: Key architectural drivers from business requirements
+        examples:
+          - "Scalability: Support 10,000 concurrent users within 6 months"
+          - "Modularity: Enable feature teams to work independently"
+          - "Security: Zero-trust architecture with defense in depth"
+      - id: constraints
+        title: Constraints & Assumptions
+        type: structured-list
+        categories:
+          - Business Constraints (budget, timeline, team size)
+          - Technical Constraints (platform, legacy systems)
+          - Regulatory Constraints (compliance, data residency)
+
+  - id: technology-stack
+    title: Technology Stack
+    instruction: |
+      Define technology choices with rationale.
+      Link each choice to specific requirements.
+      Consider team expertise and ecosystem.
+    elicit: true
+    sections:
+      - id: platform-selection
+        title: Platform & Framework Selection
+        type: table
+        columns: [Layer, Technology, Version, Rationale, Alternatives Considered]
+        rows:
+          - Frontend
+          - Backend
+          - Database
+          - Infrastructure
+          - DevOps
+      - id: third-party-services
+        title: Third-Party Services
+        type: structured-list
+        template: |
+          Service: [Name]
+          Purpose: [What it provides]
+          Integration: [How it connects]
+          Fallback: [Backup plan if service fails]
+          Cost Model: [Pricing structure]
+      - id: development-tools
+        title: Development & Build Tools
+        type: structured-list
+        categories:
+          - IDE and Development Environment
+          - Build and Compilation Tools
+          - Testing Frameworks
+          - CI/CD Pipeline
+          - Monitoring and Observability
+
+  - id: component-architecture
+    title: Component Architecture
+    instruction: |
+      Detail internal system components and their interactions.
+      Use C4 Level 2 (Container Diagram) approach.
+      Define clear boundaries and responsibilities.
+    elicit: true
+    sections:
+      - id: component-map
+        title: Component Map
+        type: hierarchical-list
+        instruction: Break down system into major components/services
+        template: |
+          Component: [Name]
+          Type: [Service/Library/Module]
+          Responsibility: [Single sentence description]
+          Dependencies: [Other components it depends on]
+          Interface: [API/Protocol/Events]
+          Technology: [Specific tech stack for this component]
+      - id: data-architecture
+        title: Data Architecture
+        type: structured
+        components:
+          - Entity Relationship Model
+          - Data Storage Strategy (SQL/NoSQL/Hybrid)
+          - Caching Strategy
+          - Data Synchronization Approach
+          - Backup and Recovery Plan
+      - id: api-design
+        title: API Design
+        type: structured
+        instruction: Define API architecture and standards
+        components:
+          - API Style (REST/GraphQL/gRPC)
+          - Authentication & Authorization
+          - Versioning Strategy
+          - Rate Limiting & Quotas
+          - Error Handling Standards
+          - Documentation Approach
+
+  - id: implementation-design
+    title: Implementation Design Patterns
+    instruction: |
+      Define patterns and conventions for implementation.
+      Provide enough detail for consistent development.
+      Include code organization and project structure.
+    elicit: true
+    sections:
+      - id: project-structure
+        title: Project Structure
+        type: code-block
+        language: tree
+        instruction: Define directory structure and organization
+        example: |
+          src/
+          ├── app/            # Application entry points
+          ├── features/       # Feature modules
+          ├── core/          # Core business logic
+          ├── infrastructure/# External services
+          ├── shared/        # Shared utilities
+          └── tests/         # Test suites
+      - id: design-patterns
+        title: Design Patterns
+        type: structured-list
+        instruction: Key patterns to be used throughout implementation
+        categories:
+          - Architectural Patterns (MVC, MVVM, Clean Architecture)
+          - Behavioral Patterns (Observer, Strategy, Command)
+          - Structural Patterns (Adapter, Facade, Decorator)
+          - Concurrency Patterns (Actor, Producer-Consumer)
+      - id: coding-standards
+        title: Coding Standards
+        type: structured-list
+        categories:
+          - Naming Conventions
+          - Error Handling Approach
+          - Logging Standards
+          - Documentation Requirements
+          - Testing Requirements
+
+  - id: security-architecture
+    title: Security Architecture
+    instruction: |
+      Define security measures at every layer.
+      Address OWASP Top 10 and platform-specific concerns.
+      Include threat model and mitigation strategies.
+    sections:
+      - id: security-layers
+        title: Security Layers
+        type: table
+        columns: [Layer, Security Measures, Implementation, Monitoring]
+        rows:
+          - Network
+          - Application
+          - Data
+          - Identity
+      - id: threat-model
+        title: Threat Model
+        type: table
+        columns: [Threat, Category, Likelihood, Impact, Mitigation]
+        instruction: Use STRIDE or similar framework
+      - id: compliance
+        title: Compliance & Privacy
+        type: checklist
+        instruction: Regulatory and compliance requirements
+        options: [GDPR, CCPA, HIPAA, SOC2, PCI-DSS, App Store Guidelines]
+
+  - id: infrastructure-deployment
+    title: Infrastructure & Deployment
+    instruction: |
+      Define deployment architecture and operations.
+      Include scaling strategy and disaster recovery.
+    elicit: true
+    sections:
+      - id: deployment-architecture
+        title: Deployment Architecture
+        type: structured
+        components:
+          - Environment Strategy (Dev/Staging/Prod)
+          - Container/Serverless Strategy
+          - Load Balancing Approach
+          - Auto-scaling Rules
+          - Geographic Distribution
+      - id: monitoring-observability
+        title: Monitoring & Observability
+        type: structured-list
+        categories:
+          - Metrics Collection
+          - Log Aggregation
+          - Distributed Tracing
+          - Alerting Rules
+          - Performance Monitoring
+      - id: disaster-recovery
+        title: Disaster Recovery
+        type: structured
+        components:
+          - RTO/RPO Targets
+          - Backup Strategy
+          - Failover Procedures
+          - Data Recovery Plan
+          - Incident Response Process
+
+  - id: migration-evolution
+    title: Migration & Evolution Strategy
+    condition: Brownfield project or future phases planned
+    instruction: |
+      Define migration path from current state.
+      Plan for future evolution and technical debt management.
+    sections:
+      - id: migration-plan
+        title: Migration Plan
+        type: phased-list
+        template: |
+          Phase: [Number/Name]
+          Duration: [Estimated time]
+          Components: [What gets migrated]
+          Risk: [Migration risks]
+          Rollback: [Rollback strategy]
+      - id: evolution-roadmap
+        title: Evolution Roadmap
+        type: timeline
+        instruction: Future architectural improvements and scaling plans
+      - id: technical-debt
+        title: Technical Debt Management
+        type: structured-list
+        categories:
+          - Known Compromises
+          - Future Refactoring
+          - Upgrade Path
+          - Deprecation Plan
+
+  - id: appendices
+    title: Appendices
+    sections:
+      - id: architecture-decisions
+        title: Architecture Decision Records (ADRs)
+        type: structured-list
+        template: |
+          ADR-[Number]: [Title]
+          Status: [Proposed/Accepted/Deprecated]
+          Context: [Why this decision was needed]
+          Decision: [What was decided]
+          Consequences: [Implications of this decision]
+      - id: reference-architectures
+        title: Reference Architectures
+        type: bullet-list
+        instruction: Similar systems or patterns used as reference
+      - id: glossary
+        title: Technical Glossary
+        type: definition-list
+        instruction: Define all technical terms and acronyms
+
+validation:
+  completeness-check:
+    - All PRD requirements addressed
+    - Technology choices justified
+    - Security measures comprehensive
+    - Scalability approach defined
+    - Development patterns documented
+  handoff-readiness:
+    - Sufficient detail for PRP creation
+    - Implementation patterns clear
+    - Testing approach defined
+    - Deployment strategy documented
+  zero-knowledge-test:
+    - New developer can understand system
+    - All design decisions explained
+    - No implicit assumptions
+    - Complete context provided

@@ -1,0 +1,72 @@
+system:
+  version: "1.0.0"
+  context_limit: 45000  # tokens per phase before breakpoint
+  validation_levels: 4
+  default_workflow: "greenfield-swift"
+
+workflows:
+  available:
+    - greenfield-swift
+    - health-check
+  directory: ".codex/workflows/"
+
+state:
+  persistence: ".codex/state/"
+  checkpoint_frequency: 600  # seconds (10 minutes)
+  workflow_file: "workflow.json"
+  context_checkpoints: "context-checkpoints.json"
+
+agent_coordination:
+  max_parallel_agents: 5
+  coordination_timeout: 300  # seconds
+  handoff_validation_required: true
+
+validation:
+  level_1_commands:
+    - syntax_check
+    - style_check
+    - format_check
+  level_2_commands:
+    - unit_tests
+    - component_tests
+  level_3_commands:
+    - integration_tests
+    - system_tests
+  level_4_agents:
+    - language_specific_validation
+    - security_audit
+    - performance_review
+
+context_management:
+  breakpoint_threshold: 40000  # tokens
+  zero_knowledge_test_required: true
+  checkpoint_validation: true
+
+git_integration:
+  enabled: false  # MVP - git integration is NFR not core
+  auto_commit: false
+  branch_pattern: "codex/{workflow-type}/{feature-name}"
+  commit_message_pattern: "CODEX: {phase} {status} - {feature}"
+
+language_agents:
+  global_agents_directory: "~/.claude/agents/"
+  swift_agents:
+    - swift-feature-developer
+    - swift-syntax-reviewer
+    - swift-architecture-reviewer
+    - swift-performance-reviewer
+    - swift-testing-reviewer
+    - swift-refactor
+    - ios-security-auditor
+
+documentation:
+  templates_directory: ".codex/templates/"
+  output_directory: "docs/"
+  prp_directory: "PRPs/"
+
+logging:
+  level: "INFO"
+  workflow_events: true
+  agent_coordination: true
+  validation_results: true
+  context_breakpoints: true

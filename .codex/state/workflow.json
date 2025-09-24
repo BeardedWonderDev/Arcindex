@@ -1,0 +1,12 @@
+{
+  "workflow_id": "codex-20250923-215820",
+  "workflow_type": "health-check",
+  "project_name": "CODEX Project",
+  "current_phase": "initialization",
+  "completed_phases": [],
+  "documents": {},
+  "context_checkpoints": [],
+  "started_at": "2025-09-23T21:58:20.044080",
+  "last_updated": "2025-09-23T21:58:20.044082",
+  "status": "active"
+}

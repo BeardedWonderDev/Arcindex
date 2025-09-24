@@ -1,0 +1,150 @@
+workflow:
+  id: health-check
+  name: "CODEX System Health Check"
+  description: >-
+    Simple validation workflow for testing CODEX orchestration.
+    Creates test file, modifies it, validates, and cleans up to verify basic operation.
+  type: validation
+  project_types:
+    - system-test
+    - validation
+    - verification
+
+  context_management:
+    breakpoint_strategy: "minimal"
+    validation_required: false
+    max_context_per_phase: 10000  # tokens - smaller for test workflow
+
+  sequence:
+    - phase: test_file_creation
+      action: create_test_file
+      creates: "codex-health-check-test.md"
+      description: "Create test file to verify CODEX file operations"
+      validation:
+        - file_exists: true
+        - content_validation: true
+
+    - phase: test_file_modification
+      action: modify_test_file
+      requires: ["codex-health-check-test.md"]
+      updates: "codex-health-check-test.md"
+      description: "Modify test file to verify CODEX edit operations"
+      validation:
+        - modification_applied: true
+        - content_integrity: true
+
+    - phase: validation_testing
+      action: validate_operations
+      requires: ["codex-health-check-test.md"]
+      description: "Run validation tests to verify workflow coordination"
+      validation:
+        - read_operation: true
+        - edit_operation: true
+        - write_operation: true
+
+    - phase: cleanup
+      action: cleanup_test_files
+      requires: ["codex-health-check-test.md"]
+      description: "Clean up test artifacts after validation"
+      validation:
+        - cleanup_complete: true
+
+  validation_gates:
+    level_1:
+      commands: ["echo 'Level 1: File operations validation'"]
+      required: true
+
+    level_2:
+      commands: ["echo 'Level 2: Content validation'"]
+      required: true
+
+    level_3:
+      commands: ["echo 'Level 3: Workflow coordination validation'"]
+      required: true
+
+    level_4:
+      commands: ["echo 'Level 4: Health check complete'"]
+      required: true
+
+  completion_criteria:
+    - all_validation_levels_pass: true
+    - test_file_operations_successful: true
+    - workflow_coordination_verified: true
+    - cleanup_completed: true
+
+  context_breakpoints:
+    after_creation:
+      validation: "modification_phase_can_proceed_without_creation_context"
+      checkpoint_file: "codex-health-check-test.md"
+
+    after_modification:
+      validation: "validation_phase_has_complete_test_context"
+      checkpoint_file: "codex-health-check-test.md"
+
+  error_recovery:
+    validation_failure:
+      strategy: "retry_with_detailed_logging"
+      max_iterations: 2
+
+    file_operation_failure:
+      strategy: "report_error_and_abort"
+      cleanup_required: true
+
+  workflow_implementation:
+    test_file_creation:
+      content: |
+        # CODEX Health Check Test
+
+        This file was created by the CODEX health check workflow to verify basic system operations.
+
+        ## Test Status
+        - [x] File creation successful
+        - [ ] File modification pending
+        - [ ] Validation pending
+        - [ ] Cleanup pending
+
+        ## Test Timestamp
+        Created: {timestamp}
+
+        ## Test Purpose
+        Verify that CODEX can:
+        1. Create files using Write tool
+        2. Modify files using Edit tool
+        3. Read files using Read tool
+        4. Coordinate workflow phases
+        5. Execute validation gates
+        6. Clean up test artifacts
+
+    test_file_modification:
+      operation: "edit_file"
+      target: "- [ ] File modification pending"
+      replacement: "- [x] File modification successful"
+      additional_content: |
+
+        Modified: {timestamp}
+        Workflow phase: test_file_modification
+        Status: SUCCESS
+
+    validation_operations:
+      checks:
+        - verify_file_exists
+        - verify_content_contains_creation_marker
+        - verify_content_contains_modification_marker
+        - verify_workflow_coordination
+
+    cleanup_operations:
+      actions:
+        - remove_test_file
+        - verify_cleanup_complete
+        - report_success
+
+  success_criteria:
+    - test_file_created_successfully: true
+    - test_file_modified_successfully: true
+    - validation_checks_passed: true
+    - cleanup_completed_successfully: true
+    - no_errors_encountered: true
+
+  expected_duration: "2-3 minutes"
+  complexity: "minimal"
+  agent_coordination_required: false

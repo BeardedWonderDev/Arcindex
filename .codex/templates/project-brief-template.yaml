@@ -1,0 +1,193 @@
+name: "Project Brief Template"
+description: "Comprehensive project brief generation with business analysis and stakeholder alignment"
+output_file: "docs/project-brief.md"
+agent_permissions:
+  owner: analyst
+  editors: [analyst, pm]
+
+sections:
+  - name: project_overview
+    title: "Project Overview"
+    instruction: "Create a compelling 2-3 sentence project summary that captures the essential value proposition and target outcome"
+    elicit: true
+    content: |
+      # {{project_name}} - Project Brief
+
+      ## Project Overview
+
+      {{project_description}}
+
+      **Primary Goal**: {{primary_goal}}
+
+      **Target Outcome**: {{target_outcome}}
+
+  - name: problem_statement
+    title: "Problem Statement"
+    instruction: "Define the specific problem being solved with quantifiable impact where possible. Focus on user pain points and business challenges."
+    elicit: true
+    content: |
+      ## Problem Statement
+
+      ### Current State Challenges
+      {{current_challenges}}
+
+      ### Impact Assessment
+      - **Users affected**: {{users_affected}}
+      - **Business impact**: {{business_impact}}
+      - **Technical debt**: {{technical_debt}}
+
+      ### Root Cause Analysis
+      {{root_causes}}
+
+  - name: target_users
+    title: "Target Users & Stakeholders"
+    instruction: "Identify primary and secondary users with their specific needs, goals, and contexts of use"
+    elicit: true
+    content: |
+      ## Target Users & Stakeholders
+
+      ### Primary Users
+      - **User Type**: {{primary_user_type}}
+      - **Characteristics**: {{primary_user_characteristics}}
+      - **Goals**: {{primary_user_goals}}
+      - **Pain Points**: {{primary_user_pain_points}}
+
+      ### Secondary Users
+      {{secondary_users}}
+
+      ### Stakeholders
+      {{stakeholders}}
+
+  - name: business_goals
+    title: "Business Goals & Success Metrics"
+    instruction: "Define measurable business objectives and key performance indicators that will determine project success"
+    elicit: true
+    content: |
+      ## Business Goals & Success Metrics
+
+      ### Primary Business Goals
+      1. {{business_goal_1}}
+      2. {{business_goal_2}}
+      3. {{business_goal_3}}
+
+      ### Success Metrics (KPIs)
+      - **Metric 1**: {{kpi_1}}
+      - **Metric 2**: {{kpi_2}}
+      - **Metric 3**: {{kpi_3}}
+
+      ### Success Timeline
+      - **Short-term (1-3 months)**: {{short_term_success}}
+      - **Medium-term (3-6 months)**: {{medium_term_success}}
+      - **Long-term (6+ months)**: {{long_term_success}}
+
+  - name: scope_boundaries
+    title: "Project Scope & Boundaries"
+    instruction: "Clearly define what is included and excluded from this project to prevent scope creep"
+    elicit: true
+    content: |
+      ## Project Scope & Boundaries
+
+      ### In Scope
+      {{in_scope_items}}
+
+      ### Out of Scope
+      {{out_of_scope_items}}
+
+      ### Future Considerations
+      {{future_considerations}}
+
+      ### Dependencies
+      {{project_dependencies}}
+
+  - name: constraints_assumptions
+    title: "Constraints & Assumptions"
+    instruction: "Document technical, business, and resource constraints along with key assumptions being made"
+    elicit: false
+    content: |
+      ## Constraints & Assumptions
+
+      ### Technical Constraints
+      {{technical_constraints}}
+
+      ### Business Constraints
+      - **Budget**: {{budget_constraints}}
+      - **Timeline**: {{timeline_constraints}}
+      - **Resources**: {{resource_constraints}}
+
+      ### Key Assumptions
+      {{key_assumptions}}
+
+  - name: competitive_landscape
+    title: "Competitive Landscape"
+    instruction: "Brief analysis of existing solutions and competitive differentiation"
+    elicit: false
+    condition: "requires_market_analysis"
+    content: |
+      ## Competitive Landscape
+
+      ### Existing Solutions
+      {{existing_solutions}}
+
+      ### Competitive Advantages
+      {{competitive_advantages}}
+
+      ### Market Positioning
+      {{market_positioning}}
+
+  - name: risk_assessment
+    title: "Risk Assessment"
+    instruction: "Identify potential risks and mitigation strategies"
+    elicit: false
+    content: |
+      ## Risk Assessment
+
+      ### High-Risk Items
+      {{high_risk_items}}
+
+      ### Medium-Risk Items
+      {{medium_risk_items}}
+
+      ### Mitigation Strategies
+      {{mitigation_strategies}}
+
+  - name: next_steps
+    title: "Next Steps"
+    instruction: "Define immediate next actions and handoff to product management phase"
+    elicit: false
+    agent_permissions:
+      owner: analyst
+      readonly: true
+    content: |
+      ## Next Steps
+
+      ### Immediate Actions
+      1. **Product Requirements**: Create detailed PRD based on this brief
+      2. **Stakeholder Validation**: Review and approve project direction
+      3. **Technical Planning**: Begin architecture and design phase
+
+      ### Handoff Requirements
+      - This brief provides complete context for PRD creation
+      - All business requirements and constraints documented
+      - Success criteria established for validation
+
+      ### Document Status
+      - **Created**: {{creation_date}}
+      - **Status**: Ready for PRD phase
+      - **Next Phase**: Product Management (PM Agent)
+
+validation:
+  completeness_check:
+    - problem_clearly_defined: true
+    - target_users_identified: true
+    - business_goals_measurable: true
+    - scope_boundaries_clear: true
+
+  handoff_validation:
+    - pm_can_create_prd: true
+    - business_context_complete: true
+    - success_criteria_defined: true
+
+workflow_context:
+  next_phase: "pm"
+  creates_document: "docs/project-brief.md"
+  handoff_validation: "pm_agent_has_complete_context_for_prd_creation"
