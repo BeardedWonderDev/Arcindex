@@ -66,7 +66,9 @@ subcommands:
          "Activate CODEX orchestrator at .codex/agents/orchestrator.md
           Initialize workflow: {workflow-type}
           Project name: {project-name}
-          Create initial state and begin first phase"
+          Set operation mode (default: interactive) with elicitation enforcement enabled
+          Create initial state and prepare for Level 0 validation requirements
+          Begin first phase with mandatory elicitation validation protocol"
 
   continue:
     description: Resume workflow from last checkpoint
@@ -76,7 +78,10 @@ subcommands:
       2. If missing: Report "No active workflow found. Use 'start' to begin."
       3. Launch orchestrator via Task tool with instructions:
          "Activate CODEX orchestrator at .codex/agents/orchestrator.md
-          Resume existing workflow from checkpoint"
+          CRITICAL: Execute mandatory Level 0 elicitation validation before any agent launch
+          Check elicitation_completed status for current phase
+          If elicitation required but incomplete: HALT and present elicitation menu
+          Resume existing workflow from checkpoint ONLY after validation passes"
 
   status:
     description: Show current workflow state and system status
@@ -98,7 +103,10 @@ subcommands:
       2. If missing: Report "No active workflow to validate."
       3. Launch orchestrator via Task tool with instructions:
          "Activate CODEX orchestrator at .codex/agents/orchestrator.md
-          Execute 5-level validation gate system for current phase"
+          Execute 5-level validation gate system for current phase
+          PRIORITY: Level 0 elicitation validation must pass before other levels
+          Use .codex/tasks/validation-gate.md for complete validation protocol
+          Report any elicitation violations and block progression until resolved"
 
   # Operation Mode Commands
   mode:
@@ -119,7 +127,9 @@ subcommands:
       2. If missing: Report "No active workflow to set mode."
       3. Launch orchestrator via Task tool with instructions:
          "Activate CODEX orchestrator at .codex/agents/orchestrator.md
-          Set operation mode to 'interactive' and update workflow state"
+          Set operation mode to 'interactive' and update workflow state
+          Enable full elicitation enforcement at all phase transitions
+          Activate Level 0 validation requirements for all agents"
 
   batch:
     description: Toggle batch mode (minimal interaction, batch elicitation)
@@ -129,7 +139,9 @@ subcommands:
       2. If missing: Report "No active workflow to set mode."
       3. Launch orchestrator via Task tool with instructions:
          "Activate CODEX orchestrator at .codex/agents/orchestrator.md
-          Set operation mode to 'batch' and update workflow state"
+          Set operation mode to 'batch' and update workflow state
+          Enable batch elicitation collection at phase boundaries
+          Maintain Level 0 validation enforcement with batch processing"
 
   yolo:
     description: Toggle YOLO mode (skip elicitation confirmations)
@@ -139,7 +151,9 @@ subcommands:
       2. If missing: Report "No active workflow to set mode."
       3. Launch orchestrator via Task tool with instructions:
          "Activate CODEX orchestrator at .codex/agents/orchestrator.md
-          Set operation mode to 'yolo' and update workflow state"
+          Set operation mode to 'yolo' and update workflow state
+          Skip elicitation prompts but maintain decision logging
+          WARNING: Reduced quality assurance in YOLO mode"
 
   chat-mode:
     description: Start conversational mode with relaxed elicitation timing
