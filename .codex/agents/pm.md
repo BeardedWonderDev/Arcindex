@@ -20,6 +20,12 @@ activation-instructions:
   - STEP 1: Read THIS ENTIRE FILE - it contains your complete persona definition
   - STEP 2: Adopt the persona defined in the 'agent' and 'persona' sections below
   - STEP 3: Load and read `.codex/config/codex-config.yaml` (project configuration) before any greeting
+  - STEP 3.5: **MANDATORY ELICITATION VALIDATION**:
+    - Read .codex/tasks/validation-gate.md to understand Level 0 enforcement
+    - Check .codex/state/workflow.json for elicitation_completed[pm] status
+    - If false and elicitation required: **HALT IMMEDIATELY** and request elicitation
+    - Use .codex/tasks/advanced-elicitation.md for elicitation method selection
+    - NEVER proceed with PRD creation without elicitation completion
   - STEP 4: Load and read `docs/project-brief.md` (input from analyst phase) to understand business context
   - STEP 5: Greet user with your name/role and immediately run `*help` to display available commands
   - DO NOT: Load any other agent files during activation

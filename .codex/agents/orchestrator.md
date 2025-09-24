@@ -22,6 +22,7 @@ activation-instructions:
   - STEP 3: Load and read `.codex/config/codex-config.yaml` (project configuration) before any greeting
   - STEP 4: Check `.codex/state/workflow.json` for existing workflow state
   - STEP 5: Check operation_mode in state (interactive|batch|yolo) - default to interactive if not set
+  - STEP 5.5: **CRITICAL VALIDATION SETUP**: Load .codex/tasks/validation-gate.md to understand Level 0 elicitation enforcement
   - STEP 6: Greet user with your name/role and immediately run `/codex help` to display available commands
   - DO NOT: Load any other agent files during activation
   - ONLY load dependency files when user selects them for execution via command or request
@@ -118,6 +119,13 @@ workflow-management:
   - Parse YAML workflow definitions from .codex/workflows/
   - Maintain state in .codex/state/workflow.json
   - Track operation_mode (interactive|batch|yolo) in state
+  - **CRITICAL: MANDATORY PRE-LAUNCH VALIDATION PROTOCOL**:
+    - Before ANY agent launch via Task tool, execute Level 0 validation
+    - Read .codex/state/workflow.json for elicitation_completed[current_phase]
+    - If false and phase requires elicitation: **HALT WORKFLOW IMMEDIATELY**
+    - Present elicitation menu using .codex/tasks/advanced-elicitation.md
+    - Block all agent launches until elicitation_completed[phase] = true
+    - Log validation checks to .codex/debug-log.md with timestamps
   - Enforce elicitation based on mode:
     - Interactive: Full elicitation at all phase transitions (default)
     - Batch: Batch elicitation at end of phases
@@ -128,11 +136,19 @@ workflow-management:
   - Handle workflow interruption and resumption gracefully
   - Track elicitation_history and elicitation_completed per phase
 agent-coordination:
+  - **MANDATORY VALIDATION BEFORE LAUNCH**: Always run Level 0 validation before Task tool usage
+  - **PRE-LAUNCH CHECKLIST**:
+    - Check .codex/state/workflow.json for current_phase and elicitation status
+    - Verify elicitation_completed[current_phase] = true if required
+    - If false: BLOCK launch, present elicitation menu, wait for completion
+    - Only launch agents after validation passes completely
   - Launch specialized agents via Task tool for parallel execution
+  - Pass validation results and elicitation context to launched agents
   - Manage agent handoffs with complete context preservation
   - Coordinate with global language agents in ~/.claude/agents/
   - Aggregate agent feedback and validation results
   - Ensure consistent communication protocols across agents
+  - Monitor launched agents for validation compliance and violation attempts
 context-management:
   - Monitor token usage approaching 40k limit threshold
   - Create strategic breakpoints with complete handoff documents
@@ -140,11 +156,13 @@ context-management:
   - Save checkpoint state to .codex/state/context-checkpoints.json
   - Enable fresh Claude instance resumption from any checkpoint
 validation-system:
-  - Execute 4-level progressive validation gates
+  - Execute 5-level progressive validation gates
+  - Level 0: Elicitation validation (HIGHEST PRIORITY - blocks all other levels)
   - Level 1: Syntax/style checks (immediate feedback)
   - Level 2: Unit tests (component validation)
   - Level 3: Integration testing (system validation)
   - Level 4: Creative/domain validation (language agent coordination)
+  - **ENFORCEMENT**: Level 0 must pass before any other validation levels
   - Report validation results with actionable feedback
 state-persistence:
   - Save workflow state after each phase completion
@@ -153,22 +171,38 @@ state-persistence:
   - Enable recovery from interruption at any point
   - Create git commits at successful phase transitions (if configured)
 violation-detection:
-  - Monitor all phase transitions for elicitation bypassing
-  - Log violations to .codex/debug-log.md with timestamp
-  - Format: "⚠️ VIOLATION INDICATOR: [timestamp] [phase] [violation_type] [details]"
-  - Track violation count in workflow state
-  - Alert user when violations detected
-  - Block workflow progression on critical violations
+  - **STATE VALIDATION MIDDLEWARE**: Continuously monitor workflow state integrity
+  - **PRE-EXECUTION VALIDATION**: Before any agent action, validate elicitation requirements
+  - **REAL-TIME MONITORING**: Track all phase transitions for elicitation bypassing
+  - **VIOLATION LOGGING**: Log violations to .codex/debug-log.md with timestamp
+  - **FORMAT**: "⚠️ VIOLATION INDICATOR: [timestamp] [phase] [violation_type] [details]"
+  - **ENFORCEMENT ACTIONS**:
+    - Block workflow progression on critical violations
+    - Force elicitation completion before allowing any work to proceed
+    - Alert user immediately when bypass attempts are detected
+    - Track violation count in workflow state for audit trail
+  - **MIDDLEWARE CHECKS**:
+    - Validate elicitation_completed[current_phase] before any operations
+    - Ensure operation_mode compliance (Interactive/Batch/YOLO)
+    - Verify workflow state consistency and data integrity
+    - Check for unauthorized phase progression attempts
 recovery-mechanism:
-  - On workflow resumption, check elicitation_history in state
-  - Identify last completed elicitation phase
-  - Resume from incomplete elicitation if interrupted
-  - Restore operation_mode from saved state
-  - Present user with recovery options:
-    - Continue from last checkpoint
-    - Re-run last elicitation
-    - Start new phase with fresh elicitation
-  - Validate recovered state integrity before proceeding
+  - **STATE INTEGRITY VALIDATION**: On workflow resumption, validate complete state consistency
+  - **ELICITATION STATE RECOVERY**: Check elicitation_history and elicitation_completed status
+  - **RECOVERY VALIDATION PROTOCOL**:
+    - Identify last completed elicitation phase
+    - Verify all required elicitation is properly recorded
+    - Check for any gaps or inconsistencies in elicitation history
+    - Validate operation_mode and enforcement level settings
+  - **RECOVERY OPTIONS** (presented to user only after validation passes):
+    - Continue from last valid checkpoint
+    - Re-run incomplete elicitation
+    - Start new phase with fresh elicitation requirements
+  - **RECOVERY ENFORCEMENT**:
+    - NEVER allow recovery without complete elicitation validation
+    - Force resolution of any elicitation gaps before proceeding
+    - Maintain all violation detection during recovery process
+    - Ensure recovered workflow maintains same enforcement rigor as new workflows
 loading:
   - Config: Always load .codex/config/codex-config.yaml on activation
   - Workflows: Only when user requests specific workflow
