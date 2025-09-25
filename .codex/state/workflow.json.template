@@ -1,0 +1,145 @@
+{
+  "workflow_id": "codex-{timestamp}",
+  "workflow_type": "{greenfield-swift|brownfield-enhancement|health-check}",
+  "project_name": "{project_name}",
+  "current_phase": "{discovery|analyst|pm|architect|prp_creator|dev|qa}",
+  "completed_phases": [],
+  "operation_mode": "interactive",
+
+  "project_discovery": {
+    "project_name": "{captured_project_name}",
+    "project_concept": "{user_provided_concept}",
+    "existing_inputs": "{research_brainstorming_or_fresh_start}",
+    "discovery_timestamp": "{iso_timestamp}",
+    "discovery_completed": false
+  },
+
+  "enhancement_discovery": {
+    "enhancement_description": "{what_enhancement_feature}",
+    "affected_component": "{which_component_area}",
+    "constraints_requirements": "{any_constraints}",
+    "existing_context_loaded": false,
+    "discovery_timestamp": "{iso_timestamp}",
+    "discovery_completed": false
+  },
+
+  "agent_context": {
+    "current_agent": "{orchestrator|analyst|pm|architect|prp_creator|dev|qa}",
+    "transformation_history": [
+      {
+        "from": "orchestrator",
+        "to": "analyst",
+        "timestamp": "{iso_timestamp}",
+        "context_passed": {
+          "project_discovery": true,
+          "workflow_type": "greenfield-swift"
+        }
+      }
+    ],
+    "last_transformation": "{iso_timestamp}"
+  },
+
+  "elicitation_history": [
+    {
+      "phase": "{phase_name}",
+      "timestamp": "{iso_timestamp}",
+      "method_selected": "{method_name_or_number}",
+      "user_response": "{user_input}",
+      "applied_changes": "{description_of_changes}"
+    }
+  ],
+
+  "elicitation_required": {
+    "discovery": false,
+    "analyst": true,
+    "pm": true,
+    "architect": true,
+    "prp_creator": true,
+    "dev": false,
+    "qa": false
+  },
+
+  "elicitation_completed": {
+    "discovery": false,
+    "analyst": false,
+    "pm": false,
+    "architect": false,
+    "prp_creator": false,
+    "dev": false,
+    "qa": false
+  },
+
+  "documents": {
+    "project-brief.md": {
+      "created": "{iso_timestamp}",
+      "last_modified": "{iso_timestamp}",
+      "version": 1,
+      "elicitation_count": 0
+    },
+    "prd.md": {
+      "created": "{iso_timestamp}",
+      "last_modified": "{iso_timestamp}",
+      "version": 1,
+      "elicitation_count": 0
+    },
+    "architecture.md": {
+      "created": "{iso_timestamp}",
+      "last_modified": "{iso_timestamp}",
+      "version": 1,
+      "elicitation_count": 0
+    }
+  },
+
+  "context_checkpoints": [
+    {
+      "checkpoint_id": "{uuid}",
+      "phase": "{phase_name}",
+      "timestamp": "{iso_timestamp}",
+      "token_count": 0,
+      "validation_passed": false,
+      "checkpoint_file": "{file_path}"
+    }
+  ],
+
+  "validation_results": {
+    "level_0": {
+      "passed": false,
+      "last_check": "{iso_timestamp}",
+      "violations": []
+    },
+    "level_1": {
+      "passed": false,
+      "last_check": "{iso_timestamp}",
+      "errors": [],
+      "warnings": []
+    },
+    "level_2": {
+      "passed": false,
+      "last_check": "{iso_timestamp}",
+      "test_coverage": 0
+    },
+    "level_3": {
+      "passed": false,
+      "last_check": "{iso_timestamp}",
+      "integration_tests": 0
+    },
+    "level_4": {
+      "passed": false,
+      "last_check": "{iso_timestamp}",
+      "agent_feedback": {}
+    }
+  },
+
+  "violation_log": [
+    {
+      "timestamp": "{iso_timestamp}",
+      "phase": "{phase_name}",
+      "violation_type": "{elicitation_bypass|validation_skip}",
+      "details": "{violation_description}"
+    }
+  ],
+
+  "started_at": "{iso_timestamp}",
+  "last_updated": "{iso_timestamp}",
+  "status": "{active|paused|completed|failed}"
+}

@@ -8,19 +8,47 @@ elicitation_mode: "interactive"  # Default mode, can be overridden
 phases:
   - name: "Discovery"
     id: "discovery"
+    agent: "orchestrator"
+    description: "Enhancement discovery and existing codebase analysis"
+    elicit: false  # Discovery uses natural questions, not elicitation menu
+    tasks:
+      - "Check existing CODEX project context (.codex/docs/*.md)"
+      - "Load previous workflow history from state"
+      - "Ask enhancement-specific questions"
+      - "Capture enhancement requirements"
+      - "Document integration points"
+    deliverables:
+      - "Enhancement discovery context"
+      - "Existing codebase summary"
+    outputs:
+      - "enhancement_discovery"
+      - "existing_context"
+    handoff:
+      to: "analyst"
+      passes_context: true
+      validation: "Discovery Complete"
+
+  - name: "Analysis"
+    id: "analysis"
     agent: "analyst"
     elicit: true
     elicitation_checkpoint: true
+    requires:
+      - "discovery.completed"
+    inputs:
+      - "enhancement_discovery"
+      - "existing_context"
     validation:
       level: 0  # Elicitation validation first
       checks:
-        - "Verify elicitation_completed[discovery] == true"
-        - "Check existing codebase understanding documented"
+        - "Verify elicitation_completed[analyst] == true"
+        - "Check enhancement requirements documented"
     tasks:
       - "Analyze existing codebase structure"
       - "Identify integration points"
       - "Document current patterns and conventions"
       - "Map dependency relationships"
+      - "Create enhancement analysis document"
     deliverables:
       - "Codebase analysis document"
       - "Integration strategy"

@@ -18,7 +18,7 @@ After outputting a section during document creation:
 
 1. **Section Review**: Ask user to review the drafted section
 2. **Offer Elicitation**: Present 9 carefully selected elicitation methods
-3. **Simple Selection**: User types a number (0-8) to engage method, or 9 to proceed
+3. **Simple Selection**: User types a number (1-9) to engage method, where 1 is to proceed
 4. **Execute & Loop**: Apply selected method, then re-offer choices until user proceeds
 
 ### Scenario 2: General Chat Elicitation
@@ -27,7 +27,7 @@ User can request advanced elicitation on any agent output:
 
 - User says "do advanced elicitation" or similar
 - Agent selects 9 relevant methods for the context
-- Same simple 0-9 selection process
+- Same simple 1-9 selection process
 
 ### Scenario 3: Workflow Phase Transition (CODEX Mandatory)
 
@@ -66,7 +66,7 @@ When workflow state shows elicitation_required for current phase:
    - **Strategic Content**: Red Team vs Blue Team, Hindsight Reflection
    - **PRP/Workflow Content**: Self-Consistency, Chain of Verification, Multi-Agent Debate
 
-3. **Always Include**: "Proceed / No Further Actions" as option 9
+3. **Always Include**: "Proceed / No Further Actions" as option 1
 
 ### 2. Section Context and Review
 
@@ -86,7 +86,7 @@ When invoked after outputting a section:
 
 - Ask the user to review the drafted section
 - In the SAME message, inform them they can suggest direct changes OR select an elicitation method
-- Present 9 intelligently selected methods (0-8) plus "Proceed" (9)
+- Present 9 intelligently selected methods (1-9) where "Proceed" is option 1
 - Keep descriptions short - just the method name
 - Await simple numeric selection
 
@@ -94,10 +94,9 @@ When invoked after outputting a section:
 
 ```text
 **Advanced Elicitation Options**
-Choose a number (0-8) or 9 to proceed:
+Select 1-9 or type your feedback:
 
-0. [Method Name]
-1. [Method Name]
+1. Proceed to next section
 2. [Method Name]
 3. [Method Name]
 4. [Method Name]
@@ -105,13 +104,13 @@ Choose a number (0-8) or 9 to proceed:
 6. [Method Name]
 7. [Method Name]
 8. [Method Name]
-9. Proceed / No Further Actions
+9. [Method Name]
 ```
 
 **Response Handling:**
 
-- **Numbers 0-8**: Execute the selected method, then re-offer the choice
-- **Number 9**: Proceed to next section or continue conversation
+- **Numbers 2-9**: Execute the selected method, then re-offer the choice
+- **Number 1**: Proceed to next section or continue conversation
 - **Direct Feedback**: Apply user's suggested changes and continue
 
 ### 4. Method Execution Framework
@@ -156,7 +155,7 @@ When operating within a CODEX workflow:
 - Create new elicitation methods not in .codex/data/elicitation-methods.md
 
 **✅ ALWAYS:**
-- Use exact 0-8 + 9 format when presenting options
+- Use exact 1-9 format when presenting options
 - Record all elicitation interactions in workflow state
 - Enforce HARD STOPS at phase boundaries when configured
 - Reference methods from .codex/data/elicitation-methods.md only

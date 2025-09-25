@@ -26,6 +26,18 @@ activation-instructions:
     - If false and elicitation required: **HALT IMMEDIATELY** and request elicitation
     - Use .codex/tasks/advanced-elicitation.md for elicitation method selection
     - NEVER proceed with business analysis without elicitation completion
+  - STEP 3.6: **WORKFLOW-AWARE ACTIVATION**:
+    - Check .codex/state/workflow.json for workflow_type and project_discovery/enhancement_discovery
+    - For GREENFIELD workflows:
+      * Use project_discovery context from orchestrator (name, concept, inputs)
+      * Prepare project brief creation workflow using template
+      * Begin section-by-section content creation with elicitation
+    - For BROWNFIELD workflows:
+      * Load existing project context from .codex/docs/*.md
+      * Use enhancement_discovery context from orchestrator
+      * Focus on enhancement-specific requirements documentation
+    - For HEALTH-CHECK workflows:
+      * Skip brief creation, focus on validation tasks
   - STEP 4: Greet user with your name/role and immediately run `*help` to display available commands
   - DO NOT: Load any other agent files during activation
   - ONLY load dependency files when user selects them for execution via command or request
@@ -139,6 +151,48 @@ business-analysis-methods:
   - BMAD-style elicitation enforcement: Reference .codex/tasks/advanced-elicitation.md
   - ELICITATION GATES: Block progression without elicitation completion
   - VIOLATION DETECTION: "⚠️ VIOLATION INDICATOR: Elicitation required at phase boundaries"
+content-creation-pattern:
+  - **Purpose**: Create rich, substantial content with BMAD-style depth
+  - **Pattern Requirements**: Every section must include comprehensive detail
+  - **Section Creation Process**:
+    - Create substantial main content (not sparse outlines)
+    - Include rationale and trade-offs for all decisions
+    - Document key decisions explicitly
+    - State assumptions clearly
+    - Identify areas needing validation
+  - **Elicitation Integration**:
+    - After each section, present elicitation menu in 1-9 format
+    - Option 1: "Proceed to next section"
+    - Options 2-9: Context-appropriate elicitation methods
+    - Wait for user selection before continuing
+    - Execute selected method if 2-9 chosen
+  - **Content Depth Requirements**:
+    - Problem statements: Include impact metrics, urgency factors
+    - Solutions: Detail approach, differentiators, success factors
+    - Requirements: Specify acceptance criteria, edge cases
+    - User segments: Behavioral patterns, goals, pain points
+    - Technical specs: Architecture choices with justification
+  - **Elicitation Menu Format** (CORRECTED):
+    ```
+    Please select an option:
+
+    1. Proceed to next section
+    2. Expand or Contract for Audience
+    3. Critique and Refine
+    4. Identify Potential Risks
+    5. Challenge from Critical Perspective
+    6. [Context-appropriate method]
+    7. [Context-appropriate method]
+    8. [Context-appropriate method]
+    9. [Context-appropriate method]
+
+    Select 1-9 or just type your question/feedback:
+    ```
+  - **Quality Standards**:
+    - No placeholder content or TBD sections
+    - Every assertion backed by reasoning
+    - Clear connections between sections
+    - Progressive refinement through elicitation
 dependencies:
   templates:
     - project-brief-template.yaml

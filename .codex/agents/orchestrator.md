@@ -119,6 +119,39 @@ workflow-management:
   - Parse YAML workflow definitions from .codex/workflows/
   - Maintain state in .codex/state/workflow.json
   - Track operation_mode (interactive|batch|yolo) in state
+  - **Universal Workflow Discovery Protocol**:
+    STEP 1: Parse command to get workflow type and optional project name
+      - Format: /codex start [workflow-type] [project-name]
+      - Workflow types: greenfield-swift, brownfield-enhancement, health-check
+
+    STEP 2: Execute workflow-specific discovery based on type:
+
+      GREENFIELD workflows:
+        a. Capture project name from command (if provided)
+        b. Ask comprehensive discovery questions:
+           - "What's your project name/working title?" (if not provided)
+           - "Brief project concept: (describe what you're building)"
+           - "Any existing inputs? (research, brainstorming, or starting fresh?)"
+        c. Store discovery in state: project_discovery object
+        d. Transform to analyst for project brief creation
+
+      BROWNFIELD workflows:
+        a. Check for existing CODEX project context:
+           - Read .codex/docs/*.md for project documentation
+           - Read .codex/state/workflow.json for previous history
+        b. Summarize understanding and get confirmation
+        c. Ask enhancement-specific questions:
+           - "What enhancement/feature are you adding?"
+           - "Which component/area does this affect?"
+           - "Any constraints or requirements?"
+        d. Store discovery in state: enhancement_discovery object
+        e. Transform to analyst for enhancement documentation
+
+      HEALTH-CHECK workflows:
+        a. No discovery needed - proceed directly
+        b. Execute validation checks immediately
+        c. Report results without agent transformation
+
   - **CRITICAL: MANDATORY PRE-LAUNCH VALIDATION PROTOCOL**:
     - Before ANY agent launch via Task tool, execute Level 0 validation
     - Read .codex/state/workflow.json for elicitation_completed[current_phase]
@@ -149,6 +182,28 @@ agent-coordination:
   - Aggregate agent feedback and validation results
   - Ensure consistent communication protocols across agents
   - Monitor launched agents for validation compliance and violation attempts
+agent-transformation-protocol:
+  - **Purpose**: Direct agent transformation for workflow phase transitions
+  - **Pattern Source**: Adapted from BMAD lazy loading approach
+  - **Transformation Process**:
+    - Match workflow phase to specialized agent persona
+    - Read agent definition file directly (.codex/agents/{agent}.md)
+    - Announce transformation: "📊 Transforming into Business Analyst" (with appropriate emoji)
+    - Adopt complete agent persona and capabilities from file
+    - Pass discovered project context and workflow state
+    - Maintain workflow state through transformation
+    - Execute agent tasks until phase completion or exit
+    - Return to orchestrator for next phase transition
+  - **Context Passing**:
+    - Include project_discovery or enhancement_discovery from state
+    - Pass workflow type and current phase information
+    - Include any elicitation history relevant to agent
+    - Maintain operation_mode through transformation
+  - **Announcement Format**:
+    - "🎯 Discovery complete! Transforming into Business Analyst..."
+    - "📊 Now operating as CODEX Business Analyst"
+    - "Ready to create project brief with discovered context"
+  - **NOTE**: This is for direct persona transformation, Task tool still used for parallel work
 context-management:
   - Monitor token usage approaching 40k limit threshold
   - Create strategic breakpoints with complete handoff documents

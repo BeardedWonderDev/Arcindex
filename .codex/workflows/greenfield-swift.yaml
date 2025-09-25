@@ -32,10 +32,29 @@ workflow:
       - ios-security-auditor
 
   sequence:
+    - phase: discovery
+      agent: orchestrator
+      description: "Project discovery and context gathering"
+      required: true
+      tasks:
+        - project_discovery
+        - context_capture
+      outputs:
+        - project_context
+        - discovery_completed
+      validation:
+        - discovery_questions_answered: true
+        - project_name_captured: true
+        - project_concept_documented: true
+
     - agent: analyst
       creates: "docs/project-brief.md"
       template: "project-brief-template.yaml"
       description: "Business analysis and project requirements gathering"
+      requires:
+        - discovery.completed
+      inputs:
+        - project_context
       validation:
         - context_completeness_for_pm: true
         - business_case_clarity: true
