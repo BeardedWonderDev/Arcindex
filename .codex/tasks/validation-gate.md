@@ -489,42 +489,75 @@ level_4_execution:
       - user_experience_review: true
 ```
 
-### Language Agent Coordination
+## Level 4: Command-Based Domain Validation
+
+### Purpose: Swift Tooling Validation
+
+Leverage Swift development tools for domain-specific validation without agent coordination complexity.
+
+### Execution Strategy
 
 ```yaml
-# Swift Language Agents Coordination
-swift_language_agents:
-  swift-performance-reviewer:
-    task: "performance_analysis"
-    input: "implementation_files + performance_requirements"
-    output: "performance_assessment_with_recommendations"
-    timeout: 300
+level_4_execution:
+  trigger: "after_all_previous_levels_pass"
+  timeout: 600  # seconds (10 minutes)
+  required: true
+  coordination_method: "command_based"  # No agent coordination
 
-  ios-security-auditor:
-    task: "security_validation"
-    input: "implementation_files + security_requirements"
-    output: "security_assessment_with_compliance_report"
-    timeout: 300
-    mandatory: true
+  validation_sequence:
+    1_release_build_validation:
+      - purpose: "Verify release configuration builds successfully"
+      - blocking: true
 
-  swift-architecture-reviewer:
-    task: "architecture_compliance"
-    input: "implementation_files + architecture_document"
-    output: "architecture_compliance_report"
-    timeout: 300
+    2_comprehensive_testing:
+      - purpose: "Run all tests with coverage in release mode"
+      - coverage_threshold: 80
+      - blocking: true
 
-  swift-testing-reviewer:
-    task: "test_strategy_validation"
-    input: "test_files + coverage_reports"
-    output: "test_quality_assessment"
-    timeout: 300
+    3_style_enforcement:
+      - purpose: "Strict style and formatting compliance"
+      - auto_fix: false
+      - blocking: true
 
-coordination_execution:
-  # Launch all agents in parallel via Task tool
-  - launch_parallel_agents: true
-  - collect_feedback: true
-  - aggregate_results: true
-  - generate_unified_report: true
+    4_swift_package_validation:
+      - purpose: "Validate package structure and dependencies"
+      - blocking: true
+```
+
+### Command-Based Validation
+
+```bash
+# Swift Release Build Validation
+swift build --configuration Release -v 2>&1 | tee .codex/state/release-build.log
+if [ ${PIPESTATUS[0]} -ne 0 ]; then
+    echo "❌ Level 4 FAILED: Release build failed"
+    grep -A 5 -B 5 "error:" .codex/state/release-build.log
+    exit 1
+fi
+
+# Comprehensive Test Suite with Coverage
+swift test --configuration Release --enable-code-coverage --parallel 2>&1 | tee .codex/state/release-tests.log
+if [ ${PIPESTATUS[0]} -ne 0 ]; then
+    echo "❌ Level 4 FAILED: Release tests failed"
+    exit 1
+fi
+
+# Strict Style Enforcement
+swiftlint --strict --reporter json --config .swiftlint.yml > .codex/state/strict-lint.json
+if [ $(cat .codex/state/strict-lint.json | jq 'length') -gt 0 ]; then
+    echo "❌ Level 4 FAILED: Strict linting violations"
+    cat .codex/state/strict-lint.json | jq -r '.[] | "VIOLATION: \(.rule) at \(.file):\(.line) - \(.reason)"'
+    exit 1
+fi
+
+# Swift Package Validation
+swift package resolve 2>&1 | tee .codex/state/package-resolve.log
+if [ ${PIPESTATUS[0]} -ne 0 ]; then
+    echo "❌ Level 4 FAILED: Package resolution failed"
+    exit 1
+fi
+
+echo "✅ Level 4 PASSED: Command-based domain validation complete"
 ```
 
 ### Domain-Specific Validation Commands

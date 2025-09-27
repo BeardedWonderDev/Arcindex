@@ -2,7 +2,7 @@
 
 ## Overview
 
-CODEX (Context Oriented Development and Engineering Experience) Protocol is a complete replacement for BMAD that integrates the proven PRP (Product Requirements Prompt) methodology with enhanced workflow orchestration, zero prior knowledge context management, and seamless coordination with language-specific agents.
+CODEX (Context Oriented Development and Engineering Experience) Protocol is a complete replacement for BMAD that integrates the proven PRP (Product Requirements Prompt) methodology with enhanced workflow orchestration, zero prior knowledge context management, and command-based validation with language-specific tooling.
 
 ## Core Architecture Principles
 
@@ -24,11 +24,11 @@ CODEX (Context Oriented Development and Engineering Experience) Protocol is a co
 - Automatic integration of research findings from workflow agents
 - 4-level validation system (syntax/style, unit tests, integration, creative) built into execution
 
-### 4. Language-Specific Agent Coordination
-- Global language agents (`~/.claude/agents/`) coordinate with workflow agents
-- Standardized communication protocols for agent handoffs
-- Parallel execution capabilities for independent enhancement tasks
-- Quality feedback loops between language agents and PRP validation
+### 4. Language-Specific Command-Based Validation
+- Direct execution of language tooling (swift build, swift test, swiftlint, etc.)
+- Standardized command execution protocols for validation
+- Efficient execution capabilities for independent validation tasks
+- Quality feedback loops between tooling validation and PRP execution
 
 ## Directory Structure
 

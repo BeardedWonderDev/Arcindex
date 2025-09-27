@@ -1,0 +1,141 @@
+# CODEX Generic Workflow Template
+# Language-agnostic development workflow for any programming language
+# Customize validation commands and language-specific settings per project
+
+workflow_id: "greenfield-generic"
+version: "1.0"
+description: "Generic development workflow supporting any programming language"
+language_agnostic: true
+
+# Language Configuration - Customize per project
+language_support:
+  primary: "{{LANGUAGE}}"  # Set to: javascript, python, go, rust, etc.
+  framework: "{{FRAMEWORK}}"  # Set to: react, django, gin, actix, etc.
+  validation_method: "command_based"
+
+  # Customize these commands for your language/framework
+  tooling:
+    - "{{BUILD_COMMAND}}"     # e.g., npm run build, cargo build, go build
+    - "{{TEST_COMMAND}}"      # e.g., npm test, cargo test, go test
+    - "{{LINT_COMMAND}}"      # e.g., eslint, clippy, golangci-lint
+    - "{{FORMAT_COMMAND}}"    # e.g., prettier, rustfmt, gofmt
+
+# Project Discovery Phase
+phases:
+  - phase: project_discovery
+    agent: discovery
+    description: "Analyze existing codebase and identify enhancement requirements"
+    outputs: ["project-analysis.md", "enhancement-requirements.md"]
+
+  - phase: requirements_analysis
+    agent: analyst
+    description: "Create detailed requirements and technical constraints"
+    outputs: ["technical-requirements.md", "integration-analysis.md"]
+
+  - phase: product_management
+    agent: pm
+    description: "Create PRD with user stories and acceptance criteria"
+    outputs: ["prd.md", "user-stories.md"]
+
+  - phase: architecture_design
+    agent: architect
+    description: "Design system architecture and integration approach"
+    outputs: ["architecture.md", "implementation-plan.md"]
+
+  - phase: prp_creation
+    agent: prp-creator
+    description: "Generate enhanced PRP for implementation"
+    outputs: ["enhanced-prp.md"]
+
+  - phase: implementation
+    agent: dev
+    description: "Execute implementation following PRP specifications"
+    coordination_method: "direct_execution"
+
+# Validation Gates - Customize commands per language
+validation_gates:
+  level_1:
+    name: "Syntax and Basic Validation"
+    commands:
+      - "{{SYNTAX_CHECK}}"      # e.g., node --check, python -m py_compile
+    required: true
+    timeout: 60
+
+  level_2:
+    name: "Unit Testing"
+    commands:
+      - "{{UNIT_TEST_COMMAND}}"  # e.g., npm run test:unit, cargo test --lib
+    required: true
+    timeout: 300
+
+  level_3:
+    name: "Integration Testing"
+    commands:
+      - "{{INTEGRATION_TEST}}"   # e.g., npm run test:integration
+    required: true
+    timeout: 600
+
+  level_4:
+    name: "Language-Specific Domain Validation"
+    commands:
+      - "{{BUILD_RELEASE}}"      # e.g., npm run build:prod, cargo build --release
+      - "{{FULL_TEST_SUITE}}"    # e.g., npm run test:all, cargo test --all
+      - "{{STRICT_LINT}}"        # e.g., eslint --max-warnings 0
+      - "{{FORMAT_CHECK}}"       # e.g., prettier --check, rustfmt --check
+    required: true
+    timeout: 900
+
+# Language-Specific Customization Examples
+customization_examples:
+  javascript:
+    language: "javascript"
+    framework: "react"
+    commands:
+      build: "npm run build"
+      test: "npm test"
+      lint: "eslint src/"
+      format: "prettier --check src/"
+
+  python:
+    language: "python"
+    framework: "django"
+    commands:
+      build: "python -m py_compile ."
+      test: "python -m pytest"
+      lint: "flake8 ."
+      format: "black --check ."
+
+  go:
+    language: "go"
+    framework: "gin"
+    commands:
+      build: "go build ./..."
+      test: "go test ./..."
+      lint: "golangci-lint run"
+      format: "gofmt -d ."
+
+  rust:
+    language: "rust"
+    framework: "actix"
+    commands:
+      build: "cargo build --release"
+      test: "cargo test"
+      lint: "cargo clippy -- -D warnings"
+      format: "cargo fmt -- --check"
+
+# Documentation Requirements
+documentation:
+  required_files:
+    - "README.md"
+    - "docs/architecture.md"
+    - "docs/api-documentation.md"
+  optional_files:
+    - "docs/deployment.md"
+    - "docs/contributing.md"
+
+# Quality Gates
+quality_requirements:
+  code_coverage: 80  # Minimum percentage
+  performance_budget: "{{PERFORMANCE_THRESHOLD}}"  # Language-specific
+  security_scan: true
+  dependency_audit: true

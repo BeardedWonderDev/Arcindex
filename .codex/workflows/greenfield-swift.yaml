@@ -22,14 +22,14 @@ workflow:
 
   language_support:
     primary: "swift"
-    agents:
-      - swift-feature-developer
-      - swift-syntax-reviewer
-      - swift-architecture-reviewer
-      - swift-performance-reviewer
-      - swift-testing-reviewer
-      - swift-refactor
-      - ios-security-auditor
+    # agents: []  # DISABLED - temporarily removed for development simplification
+    # Swift agents will be re-integrated in future release
+    validation_method: "command_based"
+    tooling:
+      - swift build
+      - swift test
+      - swiftlint
+      - swift-format
 
   sequence:
     - phase: discovery
@@ -135,13 +135,8 @@ workflow:
 
     - phase: implementation_coordination
       primary_agent: dev
-      description: "Coordinated implementation with language-specific agent enhancement"
-      language_agents:
-        - swift-feature-developer
-        - swift-syntax-reviewer
-        - swift-architecture-reviewer
-        - swift-performance-reviewer
-        - ios-security-auditor
+      description: "Direct implementation without language agent coordination"
+      # language_agents: []  # DISABLED - direct implementation only
 
       coordination:
         - agent: dev
@@ -149,36 +144,17 @@ workflow:
           description: "Prepare enhanced PRP for implementation"
           validates: ["prp_context_completeness", "referenced_files_exist", "validation_commands_tested"]
 
-        - agents: [dev, swift-feature-developer]
-          action: parallel_implementation
-          description: "Core feature implementation with Swift best practices"
+        - agent: dev
+          action: direct_implementation
+          description: "Direct feature implementation following Swift best practices"
           tasks: ["core_feature_implementation", "test_generation", "documentation_creation"]
-          coordination_method: "parallel_task_execution"
-
-        - agents: [swift-syntax-reviewer, swift-architecture-reviewer]
-          action: quality_enhancement
-          description: "Code quality and architecture compliance review"
-          input: "implementation_files"
-          output: "enhanced_implementation"
-          coordination_method: "sequential_review_process"
-
-        - agent: swift-performance-reviewer
-          action: performance_optimization
-          description: "Performance analysis and optimization recommendations"
-          condition: "performance_requirements_in_prd"
-          coordination_method: "conditional_execution"
-
-        - agent: ios-security-auditor
-          action: security_validation
-          description: "OWASP Mobile Top 10 and App Store compliance validation"
-          mandatory: true
-          coordination_method: "mandatory_validation"
+          coordination_method: "direct_execution"
 
         - agent: dev
           action: validation_orchestration
-          description: "Execute all 4 validation levels with agent coordination"
+          description: "Execute all 4 validation levels with command-based validation"
           executes: ["level_1_validation", "level_2_validation", "level_3_validation", "level_4_validation"]
-          requires: "all_language_agents_complete"
+          requires: "implementation_complete"
 
       validation_gates:
         level_1:
@@ -209,9 +185,14 @@ workflow:
           timeout: 1200
 
         level_4:
-          name: "Creative & Domain-Specific Validation"
-          agents: ["swift-performance-reviewer", "ios-security-auditor", "swift-testing-reviewer"]
-          custom_validation: true
+          name: "Command-Based Domain Validation"
+          commands:
+            - "swift build --configuration Release"
+            - "swift test --parallel --enable-code-coverage"
+            - "swiftlint --strict --reporter json"
+            - "swift-format --lint --recursive Sources/"
+          # agents: []  # DISABLED - using command-based validation
+          custom_validation: false
           required: true
           timeout: 900
 

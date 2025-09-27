@@ -48,16 +48,16 @@ git_integration:
   branch_pattern: "codex/{workflow-type}/{feature-name}"
   commit_message_pattern: "CODEX: {phase} {status} - {feature}"
 
-language_agents:
-  global_agents_directory: "~/.claude/agents/"
-  swift_agents:
-    - swift-feature-developer
-    - swift-syntax-reviewer
-    - swift-architecture-reviewer
-    - swift-performance-reviewer
-    - swift-testing-reviewer
-    - swift-refactor
-    - ios-security-auditor
+# language_agents:  # DISABLED - Swift agents removed for development simplification
+#   global_agents_directory: "~/.claude/agents/"
+#   swift_agents:  # Causing development conflicts - temporarily removed
+#     - swift-feature-developer
+#     - swift-syntax-reviewer
+#     - swift-architecture-reviewer
+#     - swift-performance-reviewer
+#     - swift-testing-reviewer
+#     - swift-refactor
+#     - ios-security-auditor
 
 documentation:
   templates_directory: ".codex/templates/"

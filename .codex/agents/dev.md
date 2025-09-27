@@ -138,23 +138,26 @@ workflow-integration:
 implementation-methods:
   - PRP pattern application
   - Test-driven development when applicable
-  - Language agent parallel coordination
+  # - Language agent parallel coordination  # DISABLED
   - Progressive validation at each level
   - Context checkpoint management
   - Quality gate enforcement
-language-agent-integration:
-  swift:
-    - swift-feature-developer: Feature implementation
-    - swift-syntax-reviewer: Syntax and pattern review
-    - swift-testing-reviewer: Test coverage analysis
-    - swift-performance-reviewer: Performance optimization
-    - swift-architecture-reviewer: Architecture validation
-    - ios-security-auditor: Security compliance
-  coordination-pattern: |
-    Launch multiple agents in single Task message:
-    Task('swift-syntax-reviewer', 'Review syntax patterns')
-    Task('swift-testing-reviewer', 'Analyze test coverage')
-    Task('ios-security-auditor', 'Security audit')
+  - Direct implementation with tooling validation
+
+# language-agent-integration:  # DISABLED - temporarily removed
+#   swift:
+#     - swift-feature-developer: Feature implementation
+#     - swift-refactor: Code quality and optimization
+#     - swift-syntax-reviewer: Modern syntax patterns
+#     - swift-architecture-reviewer: Design pattern compliance
+
+coordination-pattern: |
+  Direct implementation approach:
+  1. Read enhanced PRP for complete context
+  2. Implement following PRP specifications
+  3. Use Swift tooling for validation
+  4. Progress through 4-level validation gates
+  5. Document implementation decisions
 dependencies:
   tasks:
     - validation-gate.md

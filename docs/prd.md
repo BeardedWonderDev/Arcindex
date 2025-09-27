@@ -29,7 +29,7 @@ CODEX addresses the critical fragmentation in current AI-assisted development wo
 
 **FR3:** The system shall integrate enhanced PRP creation that automatically incorporates research findings, codebase patterns, and architecture decisions from workflow phases
 
-**FR4:** The system shall coordinate execution with language-specific agents (Swift suite initially) for feature development, code review, testing, security audit, and refactoring
+**FR4:** The system shall execute command-based validation with language-specific tooling (Swift tooling initially) for feature development, code review, testing, security audit, and refactoring
 
 **FR5:** The system shall implement a 4-level progressive validation system (syntax/style, unit tests, integration, creative/domain-specific) with automated quality gates
 
@@ -37,7 +37,7 @@ CODEX addresses the critical fragmentation in current AI-assisted development wo
 
 **FR7:** The system shall execute the "No Prior Knowledge" validation test on all generated PRPs to ensure fresh Claude instances can successfully implement without additional context
 
-**FR8:** The system shall support parallel execution of independent language-specific agents for performance optimization
+**FR8:** The system shall support efficient execution of language-specific validation commands for performance optimization
 
 **FR9:** The system shall maintain workflow state persistence enabling resumption from any breakpoint after interruption
 
@@ -61,7 +61,7 @@ CODEX addresses the critical fragmentation in current AI-assisted development wo
 
 **NFR3:** The system shall execute within Claude Code's existing token limits without requiring external API calls or cloud infrastructure
 
-**NFR4:** The system shall maintain backward compatibility with existing global language-specific agents in `~/.claude/agents/`
+**NFR4:** The system shall support language-specific workflow customization through command-based validation templates
 
 **NFR5:** The system shall provide error recovery mechanisms allowing workflow resumption from last successful checkpoint with 95% success rate
 
@@ -100,7 +100,7 @@ CODEX provides a seamless, conversational development experience where developer
 ### Core Screens and Views
 - **Workflow Initialization Screen:** Project type selection, configuration options, git state verification
 - **Phase Progress Dashboard:** Current phase status, completed artifacts, next steps visualization
-- **Agent Coordination View:** Parallel agent execution status with real-time updates
+- **Validation Status View:** Command-based validation execution status with real-time updates
 - **Validation Results Display:** Progressive validation gate results with actionable feedback
 - **Context Breakpoint Notification:** Clear indication when context is being refreshed with state summary
 - **Error Recovery Interface:** Guided recovery options with rollback points and retry mechanisms
@@ -129,7 +129,7 @@ CODEX provides a seamless, conversational development experience where developer
 CODEX configuration files, agent definitions, templates, and workflows will exist in a single project's `.codex/` directory, with global agents potentially stored in `~/.claude/agents/` for reuse across projects.
 
 ### Service Architecture
-**CRITICAL DECISION - Agent-Based Orchestration within Claude Code**: CODEX implements a pure agent-based architecture where specialized Claude Code agents (written in natural language with YAML configuration) coordinate through the Task tool. Each agent operates independently using Claude's native tools (Read, Write, Edit, Bash, etc.) and MCP tools when available. No external code execution required - everything runs within Claude Code's existing infrastructure.
+**CRITICAL DECISION - Command-Based Orchestration within Claude Code**: CODEX implements a simplified orchestration architecture where workflow phases coordinate through direct implementation with command-based validation. The system uses Claude's native tools (Read, Write, Edit, Bash, etc.) and MCP tools when available for validation through language-specific tooling. No external code execution required - everything runs within Claude Code's existing infrastructure.
 
 ### Testing Requirements
 **CRITICAL DECISION - Validation Through Agent Execution**:

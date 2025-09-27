@@ -2,9 +2,9 @@
 
 ## Executive Summary
 
-CODEX (Context Oriented Development and Engineering Experience) Protocol is a unified AI-assisted software development workflow that orchestrates multiple methodologies and specialized language-specific agents to achieve context-aware, high-quality code generation with built-in validation. By combining the BMAD Method's command-based workflows for documentation creation, the PRP (Product Requirements Prompt) method for precise implementation guidance, and language-specific sub-agents for feature development, code review, and refactoring, CODEX transforms the current fragmented approach into a seamless, interactive development experience.
+CODEX (Context Oriented Development and Engineering Experience) Protocol is a unified AI-assisted software development workflow that orchestrates multiple methodologies and command-based validation tooling to achieve context-aware, high-quality code generation with built-in validation. By combining the BMAD Method's command-based workflows for documentation creation, the PRP (Product Requirements Prompt) method for precise implementation guidance, and language-specific tooling for development validation, code quality, and testing, CODEX transforms the current fragmented approach into a seamless, interactive development experience.
 
-**Primary Problem:** Developers using Claude Code for AI-assisted development currently must manually coordinate between multiple disconnected methods (BMAD for documentation, PRP for implementation prompts) and lack automated quality assurance through specialized code agents, resulting in context loss, inefficient workflows, and inconsistent code quality.
+**Primary Problem:** Developers using Claude Code for AI-assisted development currently must manually coordinate between multiple disconnected methods (BMAD for documentation, PRP for implementation prompts) and lack automated quality assurance through integrated development tooling, resulting in context loss, inefficient workflows, and inconsistent code quality.
 
 **Target Market:** Professional developers and development teams using Claude Code for AI-assisted software development who need comprehensive context management and quality assurance in their agentic coding workflows.
 
