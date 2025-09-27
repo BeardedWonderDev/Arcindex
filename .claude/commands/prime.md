@@ -2,22 +2,23 @@
 
 # Prime Context for Claude Code
 
-Use 7 parralel sub-agents to complete each of the following simultanulously
-
 Use the command `tree` to get an understanding of the project structure.
 
-Start with reading the CLAUDE.md file if it exists to get an understanding of the project.
+The use 6 parralel sub-agents to complete each of the following simultanulously:
 
-Read the README.md file if it exists to get an understanding of the project.
+- Start with reading the CLAUDE.md file if it exists to get an understanding of the project.
 
-Read the main project PRP located at PRPs/AgCore-v2-GNSS-Platform-Integration.md to get and an understanding of the project goals and current status
+- Read the README.md file if it exists to get an understanding of the project.
 
-Read key files in the following directories:
-backend - MUST USE go-project-analyzer agent
-infrastructure/
-web/
+- Read any PRP documents in the PRPs/ directory and their referenced files to get and an understanding of the project goals and current status
 
-Explain back to me:
+- Read any project documents in the docs/ directory and their referenced files to get and an understanding of the project goals and current status
+
+- Read the files in .bmad-core to understand the BMAD side of what our project is trying to replicate/integrate
+
+- Read the files in .codex/ to understand what we have implemented so far and think hard to get a complete understanding of how the codex project works.
+
+Consolidate your findings from all the sub-agents and explain back to me:
 - Project structure
 - Project purpose and goals
 - Key files and their purposes
