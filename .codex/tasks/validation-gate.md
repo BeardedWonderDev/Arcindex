@@ -59,41 +59,46 @@ This level validates that all required elicitation has been completed for the cu
 
 ### Validation Checks
 
-1. **Check Operation Mode**:
-   - Read `.codex/state/workflow.json` for `operation_mode`
-   - If mode is `yolo`, skip elicitation validation (but log)
-   - If mode is `batch` or `interactive`, continue validation
+**PRIMARY VALIDATION**: Use `.codex/tasks/validate-phase.md` for comprehensive elicitation enforcement
 
-2. **Check Phase Requirements**:
-   - Read `.codex/config/codex-config.yaml` for `elicitation.phase_requirements`
-   - Determine if current phase requires elicitation
-   - If not required, pass validation
+1. **Execute Phase Validation Task**:
+   - Invoke validate-phase.md for current phase
+   - Receive validation_passed: true/false result
+   - If validation_passed: false, **HALT WORKFLOW IMMEDIATELY**
 
-3. **Check Completion Status**:
-   - Read `.codex/state/workflow.json` for `elicitation_completed[current_phase]`
-   - If `false` and elicitation required: **HALT WORKFLOW**
-   - Display: "⚠️ VIOLATION INDICATOR: Elicitation required for [phase] phase before proceeding"
+2. **State File Validation**:
+   - validate-phase.md checks for `.codex/state/runtime/workflow.json`
+   - Creates from template if missing using state-manager.md
+   - Validates JSON integrity and recovers if corrupted
 
-4. **Check Elicitation History**:
-   - Verify `elicitation_history` contains entry for current phase
-   - Validate method selected and user response recorded
-   - If missing: **HALT WORKFLOW**
+3. **Operation Mode Enforcement**:
+   - validate-phase.md reads `operation_mode` from state
+   - YOLO mode allows bypass (with violation logging)
+   - Interactive/batch modes enforce elicitation requirements
+
+4. **Elicitation Completion Verification**:
+   - validate-phase.md checks `elicitation_completed[current_phase]`
+   - Validates `elicitation_history` contains proper phase entry
+   - Confirms user interaction actually occurred
 
 ### Failure Protocol
 
 When Level 0 fails:
 1. **HARD STOP** - Do not proceed to Level 1
-2. Log violation to `.codex/debug-log.md`
-3. Present elicitation options using `.codex/tasks/advanced-elicitation.md`
-4. Update state when elicitation completed
-5. Re-run Level 0 validation
+2. validate-phase.md automatically logs violation to state violation_log
+3. validate-phase.md presents detailed violation notice with remediation steps
+4. validate-phase.md provides elicitation options using `.codex/tasks/advanced-elicitation.md`
+5. User completes elicitation, state updates via state-manager.md
+6. Re-run Level 0 validation via validate-phase.md
 
 ### Success Criteria
 
+- validate-phase.md returns validation_passed: true
 - Operation mode checked and appropriate action taken
-- Elicitation requirements for phase verified
-- Completion status confirmed as `true` if required
-- History contains valid entry for phase
+- Elicitation requirements verified through state validation
+- Completion status confirmed via elicitation_completed[phase] check
+- Elicitation history validated for proper user interaction
+- State integrity verified and runtime state maintained
 - Proceed to Level 1
 
 ## Level 1: Syntax & Style Validation

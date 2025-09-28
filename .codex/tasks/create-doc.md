@@ -29,11 +29,11 @@ If a YAML Template has not been provided, list all templates from .codex/templat
 
 1. Present section content
 2. Provide detailed rationale (explain trade-offs, assumptions, decisions made)
-3. **STOP and present numbered options 0-8 + 9 using advanced-elicitation.md:**
-   - **Options 0-8:** Select 9 methods from .codex/data/elicitation-methods.md
-   - **Option 9:** Always "Proceed / No Further Actions"
+3. **STOP and present numbered options 1-9 using advanced-elicitation.md:**
+   - **Option 1:** Always "Proceed to next section"
+   - **Options 2-9:** Select 8 methods from .codex/data/elicitation-methods.md
    - Use .codex/tasks/advanced-elicitation.md for intelligent method selection
-   - End with: "Choose a number (0-8) or 9 to proceed:"
+   - End with: "Select 1-9 or just type your question/feedback:"
 4. **WAIT FOR USER RESPONSE** - Do not proceed until user selects option or provides feedback
 
 **⚠️ VIOLATION INDICATOR:** Creating content for elicit=true sections without user interaction violates this workflow. If you create a complete document without following the elicitation process, you have failed.
@@ -64,7 +64,7 @@ When presenting section content, ALWAYS include rationale that explains:
 
 ## Elicitation Results Flow
 
-After user selects elicitation method (0-8):
+After user selects elicitation method (2-9):
 
 1. Execute method from .codex/data/elicitation-methods.md via advanced-elicitation.md
 2. Present results with insights
@@ -100,11 +100,11 @@ User can type `#yolo` to toggle to YOLO mode (process all sections at once).
 
 **✅ ALWAYS:**
 
-- Use exact 0-8 + 9 format when elicit: true
-- Select options 0-8 from .codex/data/elicitation-methods.md only (9 methods total)
+- Use exact 1-9 format when elicit: true
+- Select options 2-9 from .codex/data/elicitation-methods.md only (8 methods total)
 - Use .codex/tasks/advanced-elicitation.md for intelligent method selection
 - Provide detailed rationale explaining decisions
-- End with "Choose a number (0-8) or 9 to proceed:"
+- End with "Select 1-9 or just type your question/feedback:"
 
 ## CODEX Integration Notes
 
