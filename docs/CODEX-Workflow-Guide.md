@@ -18,6 +18,7 @@ Or without a project name (you'll be prompted):
 ### Available Workflows
 
 - **greenfield-swift**: New Swift/iOS application from scratch
+- **greenfield-generic**: Language-agnostic workflow for any programming language
 - **brownfield-enhancement**: Add features to existing projects
 - **health-check**: Validate project health and quality
 
@@ -307,9 +308,9 @@ Documents are saved to `docs/` directory:
 - `architecture.md`
 - `prp.md`
 
-## 🎓 Example Workflow Walkthrough
+## 🎓 Example Workflow Walkthroughs
 
-### Starting a New iOS App
+### Starting a New iOS App (greenfield-swift)
 
 1. **Initiate Workflow**:
    ```bash
@@ -340,6 +341,40 @@ Documents are saved to `docs/` directory:
    - PRP document contains complete blueprint
    - All decisions documented
    - Ready for development
+
+### Starting a Generic Language Project (greenfield-generic)
+
+The greenfield-generic workflow supports any programming language (JavaScript, Python, Go, Rust, etc.).
+
+1. **Initiate Workflow**:
+   ```bash
+   /codex start greenfield-generic "MyPythonAPI"
+   ```
+
+2. **Language Configuration**:
+   During discovery, you'll specify:
+   - Primary language (e.g., "python")
+   - Framework (e.g., "django", "flask")
+   - Build commands for your toolchain
+   - Test commands for your environment
+
+3. **Custom Validation**:
+   The workflow adapts to your language:
+   - JavaScript: `npm test`, `eslint`, `prettier`
+   - Python: `pytest`, `flake8`, `black`
+   - Go: `go test`, `golangci-lint`, `gofmt`
+   - Rust: `cargo test`, `cargo clippy`, `rustfmt`
+
+4. **Same Phases, Different Tools**:
+   - Discovery → Business Analysis → PM → Architecture → PRP
+   - Each phase works identically to greenfield-swift
+   - Validation commands adapt to your language
+
+5. **Example Language Configurations**:
+   - **Python/Django**: pytest, flake8, black, mypy
+   - **JavaScript/React**: jest, eslint, prettier, npm build
+   - **Go/Gin**: go test, golangci-lint, go build
+   - **Rust/Actix**: cargo test, clippy, rustfmt
 
 ## 🔄 Resuming Work
 
