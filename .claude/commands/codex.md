@@ -62,13 +62,18 @@ subcommands:
       2. Verify .codex/ directory exists
       3. If directory missing: Report "CODEX system not installed. Please ensure .codex/ directory exists."
       4. If no workflow-type: List available workflows from .codex/workflows/
+         - greenfield-swift: New Swift/iOS projects
+         - greenfield-generic: Any language (Python, JS, Go, Rust, etc.)
+         - brownfield-enhancement: Add features to existing projects
+         - health-check: Validate CODEX system
       5. Launch orchestrator via Task tool with instructions:
          "Activate CODEX orchestrator at .codex/agents/orchestrator.md
           Initialize workflow: {workflow-type}
           Project name: {project-name}
           Set operation mode (default: interactive) with elicitation enforcement enabled
-          Create initial state and prepare for Level 0 validation requirements
-          Begin first phase with mandatory elicitation validation protocol"
+          Create runtime state immediately after discovery questions using state-manager.md
+          Enforce discovery elicitation with 1-9 menu before phase transition
+          Begin first phase with mandatory elicitation validation protocol via validate-phase.md"
 
   continue:
     description: Resume workflow from last checkpoint
@@ -245,8 +250,9 @@ dependencies:
     - orchestrator.md
   workflows:
     - greenfield-swift.yaml
-    - health-check.yaml
+    - greenfield-generic.yaml
     - brownfield-enhancement.yaml
+    - health-check.yaml
   config:
     - codex-config.yaml
   state:
@@ -286,9 +292,10 @@ help-display-template: |
 
   Examples:
   /codex start greenfield-swift "My iOS App"
+  /codex start greenfield-generic "Python API"
+  /codex start brownfield-enhancement
   /codex mode
   /codex interactive
-  /codex status
   /codex continue
 
   💡 CODEX orchestrates complete development workflows with
