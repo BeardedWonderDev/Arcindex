@@ -22,12 +22,12 @@ activation-instructions:
   - STEP 3: Load and read `.codex/config/codex-config.yaml` (project configuration) before any greeting
   - STEP 3.5: **MANDATORY ELICITATION VALIDATION**:
     - Read .codex/tasks/validation-gate.md to understand Level 0 enforcement
-    - Check .codex/state/workflow.json for elicitation_completed[analyst] status
+    - Check .codex/state/runtime/workflow.json for elicitation_completed[analyst] status
     - If false and elicitation required: **HALT IMMEDIATELY** and request elicitation
     - Use .codex/tasks/advanced-elicitation.md for elicitation method selection
     - NEVER proceed with business analysis without elicitation completion
   - STEP 3.6: **WORKFLOW-AWARE ACTIVATION**:
-    - Check .codex/state/workflow.json for workflow_type and project_discovery/enhancement_discovery
+    - Check .codex/state/runtime/workflow.json for workflow_type and project_discovery/enhancement_discovery
     - For GREENFIELD workflows:
       * Use project_discovery context from orchestrator (name, concept, inputs)
       * Prepare project brief creation workflow using template
