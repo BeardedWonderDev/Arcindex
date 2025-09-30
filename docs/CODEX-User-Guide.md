@@ -208,9 +208,15 @@ Control the level of interaction with three modes:
 ```bash
 /codex batch
 ```
-- Elicitation collected at phase boundaries
+- **Document Creation**: Drafts complete documents without section-level elicitation
+- **Elicitation Timing**: Presents comprehensive review at phase completion
+- **Workflow**: Create all content → Review entire phase output → Provide feedback
 - Fewer interruptions
-- Good for familiar patterns
+- Good for familiar patterns or when you want to review complete documents
+
+**Important**: In batch mode, the analyst will create the entire project brief
+and then ask for review at the end of the phase, rather than eliciting after
+each individual section. This reduces interruptions but provides less granular control.
 
 #### YOLO Mode
 ```bash

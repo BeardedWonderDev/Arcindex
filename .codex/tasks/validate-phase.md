@@ -53,7 +53,8 @@ check_elicitation_status:
   state_reading:
     - Use Read tool: ".codex/state/runtime/workflow.json"
     - Extract current_phase value
-    - Extract operation_mode value
+    - Extract operation_mode value (critical for mode-aware validation)
+    - Extract phase_boundary flag (for batch mode phase transition detection)
     - Extract elicitation_required[current_phase]
     - Extract elicitation_completed[current_phase]
 
@@ -65,20 +66,33 @@ check_elicitation_status:
       - If elicitation_required[current_phase] == false: PASS
 
     completion_check:
-      - If elicitation_completed[current_phase] == true: PASS
-      - If elicitation_completed[current_phase] == false: FAIL
+      - If operation_mode == "yolo": PASS (elicitation not required)
+      - If operation_mode == "batch":
+          * During phase execution: PASS (elicitation happens at phase end)
+          * At phase boundary: Check elicitation_completed[phase]
+          * If false at phase boundary: FAIL with violation notice
+      - If operation_mode == "interactive":
+          * Check elicitation_completed[phase]
+          * If false: FAIL with violation notice
+          * Note: Interactive mode tracks section-level completion
+      - Default: If elicitation_completed[current_phase] == true: PASS
+      - Default: If elicitation_completed[current_phase] == false: FAIL
 
   result_actions:
     PASS:
-      - Log successful validation
+      - Log successful validation with mode context
       - Allow workflow progression
       - Return validation_passed: true
+      - Note: In batch mode during execution, PASS allows continuation
+      - Note: In yolo mode, PASS is automatic regardless of elicitation
 
     FAIL:
-      - Log validation failure
-      - Present violation notice
+      - Log validation failure with mode and phase context
+      - Present mode-appropriate violation notice
       - Block workflow progression
       - Return validation_passed: false
+      - Note: Batch mode only FAILs at phase boundaries
+      - Note: Interactive mode FAILs at section-level elicitation points
 ```
 
 #### Phase Transition Validation
@@ -108,7 +122,7 @@ phase_transition_validation:
 
 ### Violation Notice Implementation
 
-**Violation Display Format**:
+**Violation Display Format** (Mode-Aware):
 ```markdown
 ⚠️ VIOLATION INDICATOR: Elicitation required for {current_phase} phase before proceeding
 
@@ -117,9 +131,23 @@ WORKFLOW VIOLATION DETECTED
 Current State:
 - Phase: {current_phase}
 - Operation Mode: {operation_mode}
+- Phase Boundary: {phase_boundary} (relevant for batch mode)
 - Elicitation Required: {elicitation_required[current_phase]}
 - Elicitation Completed: {elicitation_completed[current_phase]}
 - Last Updated: {last_updated}
+
+Mode-Specific Context:
+{if operation_mode == "batch"}
+- BATCH MODE: Validation triggered at phase boundary
+- Elicitation must be completed before moving to next phase
+- All work in current phase has been completed
+{endif}
+
+{if operation_mode == "interactive"}
+- INTERACTIVE MODE: Validation triggered at section level
+- Elicitation required before processing this section
+- User input needed to continue
+{endif}
 
 Required Actions:
 1. Complete elicitation for current phase using advanced-elicitation.md

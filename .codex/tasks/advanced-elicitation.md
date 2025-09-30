@@ -38,6 +38,30 @@ When workflow state shows elicitation_required for current phase:
 - Record selection in workflow.json elicitation_history
 - Update elicitation_completed[phase] = true
 
+### Mode-Based Elicitation Behavior
+
+**Before Presenting Elicitation:**
+
+1. **Read Operation Mode**: Check `.codex/state/runtime/workflow.json` operation_mode
+2. **Mode-Specific Behavior**:
+
+   **Interactive Mode**:
+   - Present 1-9 elicitation menu after EACH section
+   - Wait for user response before continuing
+   - This is the DEFAULT and RECOMMENDED mode
+
+   **Batch Mode**:
+   - Skip section-level elicitation
+   - Accumulate for end-of-phase review
+   - Present comprehensive review at phase completion
+
+   **YOLO Mode**:
+   - Skip ALL elicitation
+   - Log decisions for audit trail
+   - Continue processing without user interaction
+
+3. **Mode Validation**: Ensure elicitation timing matches operation_mode
+
 ## Task Instructions
 
 ### 1. Intelligent Method Selection

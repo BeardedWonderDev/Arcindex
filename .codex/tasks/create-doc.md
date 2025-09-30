@@ -40,18 +40,62 @@ If a YAML Template has not been provided, list all templates from .codex/templat
 
 **NEVER ask yes/no questions or use any other format.**
 
+## Mode-Aware Processing
+
+**CRITICAL: Check operation_mode BEFORE beginning section processing**
+
+1. Read `.codex/state/runtime/workflow.json`
+2. Extract `operation_mode` value
+3. Select processing pattern based on mode:
+
+### Interactive Mode (operation_mode == "interactive")
+**REQUIRED PATTERN: Section-by-section with elicitation after EACH section**
+
+For each section with elicit: true:
+  1. Draft ONLY this section (not future sections)
+  2. Present content + detailed rationale
+  3. HALT and present 1-9 numbered elicitation options
+  4. WAIT for user response
+  5. Process user selection
+  6. If user selects 1: Save section, move to next
+  7. If user selects 2-9: Execute method, return to step 3
+
+**VIOLATION**: Drafting multiple sections before presenting elicitation in interactive mode
+
+### Batch Mode (operation_mode == "batch")
+**ALLOWED PATTERN: Draft all sections, elicit at phase boundary**
+
+Process all sections:
+  1. Draft ALL sections (no intermediate elicitation)
+  2. Save complete document
+  3. At phase completion, present comprehensive review elicitation
+  4. User reviews entire document and provides feedback
+  5. Apply changes if needed
+
+**Note**: Batch mode elicitation happens at phase boundaries, not section boundaries
+
+### YOLO Mode (operation_mode == "yolo")
+**ALLOWED PATTERN: Skip all elicitation**
+
+Process all sections:
+  1. Draft ALL sections without elicitation
+  2. Save complete document immediately
+  3. No user interaction required
+  4. Log decisions for audit trail
+
+**Note**: YOLO mode bypasses all elicitation requirements
+
 ## Processing Flow
 
 1. **Parse YAML template** - Load template metadata and sections
-2. **Set preferences** - Show current mode (Interactive), confirm output file
-3. **Process each section:**
-   - Skip if condition unmet
-   - Check agent permissions (owner/editors) - note if section is restricted to specific agents
-   - Draft content using section instruction
-   - Present content + detailed rationale
-   - **IF elicit: true** → MANDATORY 1-9 options format
-   - Save to file if possible
-4. **Continue until complete**
+2. **Set preferences** - Show current mode, confirm output file
+3. **Detect Operation Mode** - Read workflow.json operation_mode
+4. **Select Processing Pattern**:
+   - If interactive: Use section-by-section pattern
+   - If batch: Use complete-document-then-review pattern
+   - If yolo: Use no-elicitation pattern
+5. **Execute Selected Pattern** - Follow mode-specific instructions above
+6. **Continue until complete**
 
 ## Detailed Rationale Requirements
 
