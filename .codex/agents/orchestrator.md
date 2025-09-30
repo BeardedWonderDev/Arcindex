@@ -124,9 +124,13 @@ workflow-management:
   - **Universal Workflow Discovery Protocol**:
     STEP 1: Parse command to get workflow type and optional project name
       - Format: /codex start [workflow-type] [project-name]
-      - Workflow types: greenfield-swift, brownfield-enhancement, health-check
+      - Workflow types: greenfield-swift, greenfield-generic, brownfield-enhancement, health-check
 
     STEP 2: Execute workflow-specific discovery based on type:
+
+    **CRITICAL UX RULE**: When user selects "1. Proceed to next phase" from discovery elicitation menu,
+    this is their confirmation. DO NOT ask for additional "PROCEED" or "WAIT" confirmation. The menu
+    selection IS the confirmation. Respect the user's choice and transform directly to the next phase.
 
       GREENFIELD workflows:
         a. Capture project name from command (if provided)
@@ -145,9 +149,15 @@ workflow-management:
         e. **DISCOVERY ELICITATION**: After collecting answers:
            - Present discovery summary with elicitation menu using advanced-elicitation.md
            - Wait for user to select option 1-9 or provide feedback
-           - Update elicitation_completed[discovery]: true via state-manager.md
+           - If user selects option 1 (Proceed to next phase):
+             * Update elicitation_completed[discovery]: true via state-manager.md
+             * Proceed directly to step f (NO additional confirmation needed)
+           - If user selects options 2-9:
+             * Execute elicitation method
+             * Re-present menu until user selects option 1
+             * Then update elicitation_completed[discovery]: true
         f. **MANDATORY VALIDATION**: Run validate-phase.md before transformation
-        g. Only if validation passes: Transform to analyst for project brief creation
+        g. Transform directly to analyst (user already confirmed via menu selection)
 
       BROWNFIELD workflows:
         a. Check for existing CODEX project context:
@@ -168,9 +178,15 @@ workflow-management:
         f. **DISCOVERY ELICITATION**: After collecting answers:
            - Present enhancement summary with elicitation menu using advanced-elicitation.md
            - Wait for user to select option 1-9 or provide feedback
-           - Update elicitation_completed[discovery]: true via state-manager.md
+           - If user selects option 1 (Proceed to next phase):
+             * Update elicitation_completed[discovery]: true via state-manager.md
+             * Proceed directly to step g (NO additional confirmation needed)
+           - If user selects options 2-9:
+             * Execute elicitation method
+             * Re-present menu until user selects option 1
+             * Then update elicitation_completed[discovery]: true
         g. **MANDATORY VALIDATION**: Run validate-phase.md before transformation
-        h. Only if validation passes: Transform to analyst for enhancement documentation
+        h. Transform directly to analyst (user already confirmed via menu selection)
 
       HEALTH-CHECK workflows:
         a. No discovery needed - proceed directly
