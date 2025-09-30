@@ -67,7 +67,7 @@ This level validates that all required elicitation has been completed for the cu
    - If validation_passed: false, **HALT WORKFLOW IMMEDIATELY**
 
 2. **State File Validation**:
-   - validate-phase.md checks for `.codex/state/runtime/workflow.json`
+   - validate-phase.md checks for `.codex/state/workflow.json`
    - Creates from template if missing using state-manager.md
    - Validates JSON integrity and recovers if corrupted
 

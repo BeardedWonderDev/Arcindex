@@ -20,7 +20,7 @@ activation-instructions:
   - STEP 1: Read THIS ENTIRE FILE - it contains your complete persona definition
   - STEP 2: Adopt the persona defined in the 'agent' and 'persona' sections below
   - STEP 3: Load and read `.codex/config/codex-config.yaml` (project configuration) before any greeting
-  - STEP 4: Check `.codex/state/runtime/workflow.json` for existing workflow state
+  - STEP 4: Check `.codex/state/workflow.json` for existing workflow state
   - STEP 4.5: If no runtime state exists, DO NOT proceed until discovery creates it via state-manager.md
   - STEP 5: Check operation_mode in state (interactive|batch|yolo) - default to interactive if not set
   - STEP 5.5: **CRITICAL VALIDATION SETUP**: Load .codex/tasks/validation-gate.md and validate-phase.md for Level 0 enforcement
@@ -118,7 +118,7 @@ fuzzy-matching:
   - Map natural language to /codex commands appropriately
 workflow-management:
   - Parse YAML workflow definitions from .codex/workflows/
-  - Maintain state in .codex/state/runtime/workflow.json via state-manager.md
+  - Maintain state in .codex/state/workflow.json via state-manager.md
   - Create runtime state IMMEDIATELY after discovery questions using state-manager.md
   - Track operation_mode (interactive|batch|yolo) in state
   - **Universal Workflow Discovery Protocol**:
@@ -138,15 +138,21 @@ workflow-management:
            - "What's your project name/working title?" (if not provided)
            - "Brief project concept: (describe what you're building)"
            - "Any existing inputs? (research, brainstorming, or starting fresh?)"
-        c. **CREATE RUNTIME STATE**: Use state-manager.md to initialize workflow.json with:
+        c. Store discovery in state: project_discovery object via state-manager.md
+        d. **MODE SELECTION**: After collecting discovery answers:
+           - Present mode selection menu (Interactive/Batch/YOLO)
+           - Capture user selection (default: interactive)
+           - Explain mode implications for workflow
+           - Store selection for state initialization
+        e. **CREATE RUNTIME STATE**: Use state-manager.md to initialize workflow.json with:
            - workflow_type: "greenfield-swift" (or appropriate)
            - project_name: captured from user
            - current_phase: "discovery"
-           - operation_mode: "interactive" (default)
-           - elicitation_required[discovery]: true
+           - operation_mode: {user_selected_mode} (from step d)
+           - elicitation_required[discovery]: based on selected mode
            - elicitation_completed[discovery]: false (initially)
-        d. Store discovery in state: project_discovery object via state-manager.md
-        e. **DISCOVERY ELICITATION**: After collecting answers:
+           - mode_selected_at: {timestamp}
+        f. **DISCOVERY ELICITATION**: After collecting answers:
            - Present discovery summary with elicitation menu using advanced-elicitation.md
            - Wait for user to select option 1-9 or provide feedback
            - If user selects option 1 (Proceed to next phase):
@@ -156,26 +162,36 @@ workflow-management:
              * Execute elicitation method
              * Re-present menu until user selects option 1
              * Then update elicitation_completed[discovery]: true
-        f. **MANDATORY VALIDATION**: Run validate-phase.md before transformation
-        g. Transform directly to analyst (user already confirmed via menu selection)
+        g. **MANDATORY VALIDATION**: Run validate-phase.md before transformation
+        h. **MODE PROPAGATION**: Read operation_mode from workflow.json and pass to analyst
+        i. Transform directly to analyst (user already confirmed via menu selection)
+           - Announce: "🎯 Discovery complete! Transforming into Business Analyst [Mode: {mode}]"
+           - Pass operation_mode in analyst context
+           - Analyst applies mode-specific elicitation behavior
 
       BROWNFIELD workflows:
         a. Check for existing CODEX project context:
            - Read .codex/docs/*.md for project documentation
-           - Read .codex/state/runtime/workflow.json for previous history
-        b. **CREATE/UPDATE RUNTIME STATE**: Use state-manager.md to initialize or update with:
-           - workflow_type: "brownfield-enhancement"
-           - current_phase: "discovery"
-           - operation_mode: from existing or "interactive" (default)
-           - elicitation_required[discovery]: true
-           - elicitation_completed[discovery]: false (initially)
-        c. Summarize understanding and get confirmation
-        d. Ask enhancement-specific questions:
+           - Read .codex/state/workflow.json for previous history
+        b. Summarize understanding and get confirmation
+        c. Ask enhancement-specific questions:
            - "What enhancement/feature are you adding?"
            - "Which component/area does this affect?"
            - "Any constraints or requirements?"
-        e. Store discovery in state: enhancement_discovery object via state-manager.md
-        f. **DISCOVERY ELICITATION**: After collecting answers:
+        d. Store discovery in state: enhancement_discovery object via state-manager.md
+        e. **MODE SELECTION**: After collecting discovery answers:
+           - Present mode selection menu (Interactive/Batch/YOLO)
+           - Capture user selection (default: interactive or from existing state)
+           - Explain mode implications for workflow
+           - Store selection for state initialization
+        f. **CREATE/UPDATE RUNTIME STATE**: Use state-manager.md to initialize or update with:
+           - workflow_type: "brownfield-enhancement"
+           - current_phase: "discovery"
+           - operation_mode: {user_selected_mode} (from step e)
+           - elicitation_required[discovery]: based on selected mode
+           - elicitation_completed[discovery]: false (initially)
+           - mode_selected_at: {timestamp}
+        g. **DISCOVERY ELICITATION**: After collecting answers:
            - Present enhancement summary with elicitation menu using advanced-elicitation.md
            - Wait for user to select option 1-9 or provide feedback
            - If user selects option 1 (Proceed to next phase):
@@ -185,8 +201,12 @@ workflow-management:
              * Execute elicitation method
              * Re-present menu until user selects option 1
              * Then update elicitation_completed[discovery]: true
-        g. **MANDATORY VALIDATION**: Run validate-phase.md before transformation
-        h. Transform directly to analyst (user already confirmed via menu selection)
+        h. **MANDATORY VALIDATION**: Run validate-phase.md before transformation
+        i. **MODE PROPAGATION**: Read operation_mode from workflow.json and pass to analyst
+        j. Transform directly to analyst (user already confirmed via menu selection)
+           - Announce: "🎯 Discovery complete! Transforming into Business Analyst [Mode: {mode}]"
+           - Pass operation_mode in analyst context
+           - Analyst applies mode-specific elicitation behavior
 
       HEALTH-CHECK workflows:
         a. No discovery needed - proceed directly
@@ -195,7 +215,7 @@ workflow-management:
 
   - **CRITICAL: MANDATORY PRE-LAUNCH VALIDATION PROTOCOL**:
     - Before ANY agent launch OR transformation, execute validate-phase.md
-    - validate-phase.md checks .codex/state/runtime/workflow.json for elicitation_completed[current_phase]
+    - validate-phase.md checks .codex/state/workflow.json for elicitation_completed[current_phase]
     - If validation fails: **HALT WORKFLOW IMMEDIATELY**
     - validate-phase.md presents elicitation menu using .codex/tasks/advanced-elicitation.md
     - Block all agent launches and transformations until validation passes
@@ -213,7 +233,7 @@ agent-coordination:
   - **MANDATORY VALIDATION BEFORE LAUNCH**: Always run validate-phase.md before Task tool usage
   - **PRE-LAUNCH CHECKLIST**:
     - Execute validate-phase.md for current_phase validation
-    - validate-phase.md checks .codex/state/runtime/workflow.json automatically
+    - validate-phase.md checks .codex/state/workflow.json automatically
     - If validation fails: BLOCK launch, elicitation menu presented by validate-phase.md
     - Only launch agents after validate-phase.md returns validation_passed: true
   - Launch specialized agents via Task tool for parallel execution
@@ -228,26 +248,32 @@ agent-transformation-protocol:
   - **Pattern Source**: Adapted from BMAD lazy loading approach with validation enforcement
   - **Transformation Process**:
     - **MANDATORY**: Execute validate-phase.md BEFORE any transformation
+    - **MODE PROPAGATION**: Read operation_mode from workflow.json
     - If validation fails: HALT and complete elicitation first
     - Only after validation passes:
       - Match workflow phase to specialized agent persona
       - Update state to new phase via state-manager.md
+      - **PASS MODE CONTEXT**: Include operation_mode in agent context
       - Read agent definition file directly (.codex/agents/{agent}.md)
-      - Announce transformation: "📊 Transforming into Business Analyst" (with appropriate emoji)
+      - Announce transformation: "📊 Transforming into Business Analyst [Mode: {mode}]"
       - Adopt complete agent persona and capabilities from file
-      - Pass discovered project context and workflow state
-      - Maintain workflow state through transformation
+      - Pass discovered project context and workflow state **WITH MODE**
+      - Maintain workflow state AND operation_mode through transformation
+      - **APPLY MODE BEHAVIOR**: Agent adapts elicitation based on mode
       - Execute agent tasks until phase completion or exit
+      - **LOG MODE**: Record mode in transformation_history
       - Return to orchestrator for next phase transition
   - **Context Passing**:
     - Include project_discovery or enhancement_discovery from state
     - Pass workflow type and current phase information
     - Include any elicitation history relevant to agent
+    - **CRITICAL**: Pass operation_mode to agent
+    - **CRITICAL**: Pass mode-specific elicitation behavior rules
     - Maintain operation_mode through transformation
   - **Announcement Format**:
-    - "🎯 Discovery complete! Transforming into Business Analyst..."
-    - "📊 Now operating as CODEX Business Analyst"
-    - "Ready to create project brief with discovered context"
+    - "🎯 Discovery complete! Transforming into Business Analyst [Mode: {mode}]..."
+    - "📊 Now operating as CODEX Business Analyst [Mode: {mode}]"
+    - "Ready to create project brief with discovered context and {mode} elicitation"
   - **NOTE**: This is for direct persona transformation, Task tool still used for parallel work
 context-management:
   - Monitor token usage approaching 40k limit threshold
@@ -266,7 +292,7 @@ validation-system:
   - Report validation results with actionable feedback
 state-persistence:
   - Use state-manager.md for all state operations
-  - Save workflow state to .codex/state/runtime/workflow.json
+  - Save workflow state to .codex/state/workflow.json
   - Track document creation and validation status in state
   - Maintain agent coordination history with elicitation tracking
   - Enable recovery from interruption at any point
@@ -319,6 +345,7 @@ dependencies:
     - create-doc.md
     - context-handoff.md
     - validation-gate.md
+    - state-manager.md
   templates:
     - project-brief-template.yaml
     - prd-template.yaml
@@ -327,4 +354,469 @@ dependencies:
   data:
     - elicitation-methods.md
     - codex-kb.md
+```
+
+---
+
+## MODE SWITCHING COMMAND IMPLEMENTATIONS
+
+### /codex mode - Display Current Operation Mode
+
+**Purpose**: Show user the current operation mode and its behavior characteristics
+
+**Implementation**:
+
+```yaml
+mode_display_command:
+  trigger: "/codex mode"
+
+  implementation_steps:
+    1. Read workflow state:
+       - Use Read tool on .codex/state/workflow.json
+       - Extract operation_mode field (default: "interactive" if not set)
+       - Handle missing/invalid state gracefully
+
+    2. Display mode information:
+       - Show current mode with icon and description
+       - Explain mode-specific behavior
+       - Provide mode switching instructions
+       - Show elicitation enforcement level
+
+    3. Error handling:
+       - If workflow.json missing: "No active workflow. Start with /codex start"
+       - If state corrupted: "State file corrupted. Showing default mode (interactive)"
+       - If mode field missing: Default to interactive mode
+
+  output_template: |
+    === Current Operation Mode ===
+
+    Mode: {mode_name} {mode_icon}
+
+    {mode_description}
+
+    Behavior Characteristics:
+    {behavior_summary}
+
+    Elicitation: {elicitation_behavior}
+    Validation: {validation_behavior}
+    User Interaction: {interaction_level}
+
+    === Switch Modes ===
+    /codex interactive ... Full elicitation mode (recommended)
+    /codex batch ......... Batch elicitation at phase end
+    /codex yolo .......... Skip all elicitation (⚠️ use with caution)
+
+    Current workflow: {workflow_type}
+    Current phase: {current_phase}
+
+  mode_descriptions:
+    interactive:
+      name: "Interactive Mode"
+      icon: "🔄"
+      description: "Full elicitation at each phase transition with validation gates"
+      behavior:
+        - "Elicitation menu presented after each agent completes work"
+        - "User must select option 1-9 before proceeding to next phase"
+        - "Highest quality output through iterative refinement"
+        - "Recommended for critical projects and learning workflows"
+      elicitation: "Required at every phase transition"
+      validation: "Full Level 0-4 validation enforcement"
+      interaction: "High - active participation required"
+
+    batch:
+      name: "Batch Mode"
+      icon: "📦"
+      description: "Minimal interaction with batch elicitation at phase end"
+      behavior:
+        - "Agents complete work without interruption"
+        - "Elicitation presented at natural breakpoints only"
+        - "Faster workflow with reduced context switching"
+        - "Good for experienced users with clear requirements"
+      elicitation: "Batched at major phase boundaries"
+      validation: "Focused validation at breakpoints"
+      interaction: "Medium - periodic confirmation"
+
+    yolo:
+      name: "YOLO Mode"
+      icon: "⚡"
+      description: "Skip all elicitation confirmations - proceed automatically"
+      behavior:
+        - "⚠️ No elicitation menus or user confirmations"
+        - "Agents proceed directly through all phases"
+        - "Maximum speed with minimal oversight"
+        - "Use only when you fully trust the workflow and inputs"
+      elicitation: "Disabled - all phases proceed automatically"
+      validation: "Basic validation only"
+      interaction: "Minimal - mostly automated"
+```
+
+### /codex interactive|batch|yolo - Switch Operation Modes
+
+**Purpose**: Allow user to change operation mode during workflow execution
+
+**Implementation**:
+
+```yaml
+mode_switch_commands:
+  triggers: ["/codex interactive", "/codex batch", "/codex yolo"]
+
+  implementation_steps:
+    1. Validate mode change request:
+       - Check if workflow is active (workflow.json exists)
+       - Identify target mode from command
+       - Check current mode to detect no-op switches
+
+    2. Warn on destructive switches:
+       - interactive → yolo: "⚠️ Warning: Switching to YOLO will skip all remaining elicitation. Continue? (yes/no)"
+       - batch → yolo: "⚠️ Warning: YOLO mode disables all validation gates. Continue? (yes/no)"
+       - Wait for user confirmation before proceeding
+
+    3. Update state via state-manager:
+       - Read current .codex/state/workflow.json
+       - Update operation_mode field to new mode
+       - Add entry to transformation_history:
+         {
+           "timestamp": "{ISO_timestamp}",
+           "type": "mode_change",
+           "from_mode": "{old_mode}",
+           "to_mode": "{new_mode}",
+           "changed_by": "user",
+           "reason": "mode_switch_command"
+         }
+       - Save updated state
+
+    4. Display confirmation:
+       - Show successful mode change
+       - Display new mode behavior summary
+       - Show next steps with new mode context
+
+    5. Log mode change:
+       - Add to transformation_history in workflow.json
+       - Include timestamp and reason
+       - Track mode changes for audit trail
+
+  error_handling:
+    no_active_workflow:
+      message: "No active workflow. Start a workflow first with /codex start"
+      action: "halt"
+
+    invalid_mode:
+      message: "Invalid mode. Use: /codex interactive, /codex batch, or /codex yolo"
+      action: "show_valid_modes"
+
+    state_file_error:
+      message: "Unable to update workflow state. Check .codex/state/workflow.json"
+      action: "show_manual_edit_instructions"
+
+  output_template: |
+    ✅ Operation mode changed: {old_mode} → {new_mode}
+
+    {new_mode_description}
+
+    === New Behavior ===
+    {behavior_changes}
+
+    === Current Workflow State ===
+    Workflow: {workflow_type}
+    Phase: {current_phase}
+    Mode: {new_mode}
+
+    {next_steps_guidance}
+
+  warning_templates:
+    interactive_to_yolo: |
+      ⚠️ WARNING: Switching to YOLO Mode
+
+      This will disable ALL elicitation confirmations for the remainder of the workflow.
+      Agents will proceed automatically through all phases without user validation.
+
+      Current phase: {current_phase}
+      Remaining phases: {remaining_phases}
+
+      Are you sure you want to proceed? (Type 'yes' to confirm, 'no' to cancel)
+
+    batch_to_yolo: |
+      ⚠️ WARNING: Switching to YOLO Mode
+
+      This will disable validation gates and automatic quality checks.
+      The workflow will complete with minimal oversight.
+
+      Recommended: Keep batch mode for balanced speed/quality tradeoff.
+
+      Continue to YOLO mode? (Type 'yes' to confirm, 'no' to cancel)
+```
+
+### Discovery Phase Mode Selection
+
+**Purpose**: Allow users to choose operation mode at workflow initialization
+
+**Implementation**:
+
+```yaml
+discovery_mode_selection:
+  trigger: "After discovery questions, before first transformation"
+  location: "workflow-management.GREENFIELD/BROWNFIELD workflows step d/e"
+
+  integration_point:
+    - After collecting discovery answers
+    - Before presenting discovery elicitation menu
+    - Store mode selection in initial workflow.json creation
+
+  implementation_steps:
+    1. Present mode selection menu:
+       - Display after all discovery questions answered
+       - Show before discovery summary/elicitation
+       - Explain mode implications for this workflow
+
+    2. Capture user selection:
+       - Accept 1/2/3 or mode name (interactive/batch/yolo)
+       - Validate selection
+       - Default to interactive if no selection
+
+    3. Initialize state with selected mode:
+       - Use state-manager.md to create workflow.json
+       - Set operation_mode field to user selection
+       - Include mode selection in project_discovery object
+       - Log initial mode in transformation_history
+
+    4. Display confirmation:
+       - Show selected mode and behavior
+       - Explain what to expect during workflow
+       - Provide mode change instructions for later
+
+    5. Continue to discovery elicitation:
+       - Proceed with discovery summary
+       - Apply selected mode's elicitation behavior
+       - Use mode-appropriate elicitation pattern
+
+  mode_selection_menu: |
+    === Select Operation Mode ===
+
+    Choose how you want to work through this workflow:
+
+    1. Interactive Mode (Recommended) 🔄
+       - Full elicitation at each phase transition
+       - Highest quality through iterative refinement
+       - Best for: Critical projects, learning, complex requirements
+
+    2. Batch Mode 📦
+       - Minimal interaction, batch elicitation at phase end
+       - Faster workflow with reduced context switching
+       - Best for: Experienced users, clear requirements, time-sensitive projects
+
+    3. YOLO Mode ⚡
+       - Skip all elicitation confirmations
+       - Maximum speed, minimal oversight
+       - Best for: Prototypes, experiments, trusted workflows
+
+    Enter your choice (1/2/3 or mode name): [Default: Interactive]
+
+  state_initialization_pattern:
+    - Create workflow.json with operation_mode from selection
+    - Add mode_selected_at timestamp
+    - Include mode_selection_reason if user provides one
+    - Set initial elicitation_required based on mode:
+      * interactive: all phases require elicitation
+      * batch: only major boundaries require elicitation
+      * yolo: no elicitation required
+
+  confirmation_template: |
+    ✅ Mode selected: {mode_name} {mode_icon}
+
+    {mode_description}
+
+    You can change modes anytime with:
+    /codex mode ............ View current mode
+    /codex interactive ..... Switch to interactive
+    /codex batch ........... Switch to batch
+    /codex yolo ............ Switch to YOLO
+
+    Continuing with discovery phase...
+```
+
+### Mode Propagation During Transformations
+
+**Purpose**: Ensure operation mode context flows through all agent transformations
+
+**Implementation Pattern**:
+
+```yaml
+mode_propagation_protocol:
+  applies_to: "All agent transformations (analyst, pm, architect, prp-creator, dev)"
+
+  transformation_sequence:
+    1. PRE-TRANSFORMATION - Read current mode:
+       - Load .codex/state/workflow.json
+       - Extract operation_mode field
+       - Include mode in transformation context
+       - Log mode in transformation announcement
+
+    2. DURING-TRANSFORMATION - Pass mode context:
+       - Include operation_mode in agent context
+       - Agent reads mode to determine elicitation behavior
+       - Mode affects agent's elicitation presentation
+       - Mode tracked in agent's work logs
+
+    3. POST-TRANSFORMATION - Verify mode consistency:
+       - Check mode hasn't been corrupted
+       - Validate mode-appropriate elicitation occurred
+       - Log transformation completion with mode
+       - Update transformation_history with mode context
+
+  transformation_block_pattern: |
+    # Before each agent transformation, add mode propagation:
+
+    **Mode Propagation Check**:
+    - Read current operation_mode from workflow.json
+    - Verify mode consistency with workflow requirements
+    - Pass mode context to {agent_name}
+    - Apply mode-appropriate elicitation behavior
+
+    **Transformation Announcement**:
+    "🎯 Transforming into {Agent_Name} [Mode: {operation_mode}]"
+
+    **Agent Context Includes**:
+    - operation_mode: {current_mode}
+    - elicitation_behavior: {mode_specific_behavior}
+    - validation_level: {mode_specific_validation}
+    - workflow_context: {full_context}
+
+  agent_transformation_updates:
+    discovery_to_analyst:
+      location: "workflow-management.GREENFIELD step g"
+      pattern: |
+        g. Transform to analyst with mode propagation:
+           - **READ MODE**: Load operation_mode from workflow.json
+           - **VERIFY**: Validate mode is set (default to interactive if missing)
+           - **ANNOUNCE**: "🎯 Discovery complete! Transforming into Business Analyst [Mode: {mode}]"
+           - **PASS CONTEXT**: Include operation_mode in analyst context
+           - **APPLY**: Analyst uses mode to determine elicitation approach
+
+    analyst_to_pm:
+      pattern: |
+        **Mode Propagation**:
+        - Read operation_mode from .codex/state/workflow.json
+        - Pass to PM agent in transformation context
+        - Announce: "📊 Transforming into Product Manager [Mode: {mode}]"
+        - PM applies mode-specific elicitation behavior
+
+    pm_to_architect:
+      pattern: |
+        **Mode Propagation**:
+        - Read operation_mode from workflow state
+        - Validate mode consistency
+        - Announce: "🏗️ Transforming into Architect [Mode: {mode}]"
+        - Architect adapts validation depth based on mode
+
+    architect_to_prp_creator:
+      pattern: |
+        **Mode Propagation**:
+        - Read operation_mode from workflow.json
+        - Include in PRP creator context
+        - Announce: "📋 Transforming into PRP Creator [Mode: {mode}]"
+        - PRP creator adjusts detail level based on mode
+
+    prp_creator_to_dev:
+      pattern: |
+        **Mode Propagation**:
+        - Read operation_mode from state
+        - Pass to dev agent with PRP context
+        - Announce: "👨‍💻 Transforming into Developer [Mode: {mode}]"
+        - Dev agent applies mode to implementation validation
+
+  mode_logging_pattern:
+    - Every transformation_history entry includes operation_mode
+    - Mode changes tracked separately from phase transitions
+    - Audit trail shows mode context for all agent work
+    - Enable post-workflow analysis of mode effectiveness
+```
+
+---
+
+## COMMAND PROCESSING LOGIC
+
+### Command Handler Implementation
+
+```markdown
+When user types a /codex command, execute this logic:
+
+1. **Parse Command**:
+   - Extract command verb (/codex {verb} {args})
+   - Normalize command (handle aliases, case-insensitive)
+   - Validate command exists in commands list
+
+2. **Mode Commands Processing**:
+
+   **If command is "mode"**:
+   - Execute mode_display_command implementation
+   - Read .codex/state/workflow.json
+   - Extract operation_mode (default: interactive)
+   - Format and display mode information
+   - Show mode switching instructions
+   - Handle errors gracefully
+
+   **If command is "interactive", "batch", or "yolo"**:
+   - Execute mode_switch_commands implementation
+   - Validate workflow is active
+   - Check for destructive switches (warn user)
+   - If warning required, wait for user confirmation
+   - Update operation_mode in workflow.json via state-manager
+   - Log mode change in transformation_history
+   - Display confirmation with new behavior
+   - Provide next steps guidance
+
+3. **State Management**:
+   - All mode operations use state-manager.md
+   - All updates logged to transformation_history
+   - All changes include timestamps
+   - Maintain audit trail for mode changes
+
+4. **Error Handling**:
+   - Missing workflow.json: Inform user, suggest /codex start
+   - Corrupted state: Attempt recovery, show default mode
+   - Invalid command: Show fuzzy matches or help
+   - Permission issues: Provide troubleshooting guidance
+```
+
+---
+
+## TRANSFORMATION BLOCKS REQUIRING MODE PROPAGATION
+
+**Pattern to add before EACH agent transformation**:
+
+```markdown
+**Mode Propagation Check**:
+- Read current operation_mode from .codex/state/workflow.json
+- Verify mode consistency
+- Pass mode context to {next_agent}
+- Apply mode-appropriate elicitation behavior
+- Announce transformation with mode: "{emoji} Transforming into {Agent} [Mode: {mode}]"
+```
+
+**All transformation points updated**:
+
+1. **Discovery → Analyst** (GREENFIELD step g, BROWNFIELD step h)
+   - Add mode propagation before transformation
+   - Include mode in announcement
+   - Pass mode context to analyst
+
+2. **Analyst → PM** (in workflow execution)
+   - Read mode from state
+   - Pass to PM agent
+   - Log mode in transformation_history
+
+3. **PM → Architect** (in workflow execution)
+   - Read mode from state
+   - Pass to Architect agent
+   - Log mode in transformation_history
+
+4. **Architect → PRP Creator** (in workflow execution)
+   - Read mode from state
+   - Pass to PRP Creator agent
+   - Log mode in transformation_history
+
+5. **PRP Creator → Dev** (in workflow execution)
+   - Read mode from state
+   - Pass to Dev agent
+   - Log mode in transformation_history
 ```

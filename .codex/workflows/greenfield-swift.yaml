@@ -14,6 +14,20 @@ workflow:
     - tvos-app
     - visionos-app
 
+  metadata:
+    default_operation_mode: interactive
+    mode_behavior:
+      interactive: "Section-by-section elicitation with 1-9 menu"
+      batch: "Draft all sections, elicit at phase completion"
+      yolo: "Skip all elicitation (logged violations)"
+    mode_requirements:
+      analyst: true
+      pm: true
+      architect: true
+      prp_creator: false
+      dev: false
+      qa: false
+
   context_management:
     breakpoint_strategy: "document_driven"
     validation_required: "zero_knowledge_test"
@@ -62,6 +76,10 @@ workflow:
         - success_metrics_defined: true
         - elicit: true
         - elicitation_checkpoint: true
+      mode_behavior: |
+        Interactive mode: Elicit after this section
+        Batch mode: Include in phase-end elicitation
+        YOLO mode: Skip (logged)
       workflow_tasks:
         - stakeholder_analysis
         - market_research
@@ -80,6 +98,10 @@ workflow:
         - user_stories_detailed: true
         - elicit: true
         - elicitation_checkpoint: true
+      mode_behavior: |
+        Interactive mode: Elicit after this section
+        Batch mode: Include in phase-end elicitation
+        YOLO mode: Skip (logged)
       workflow_tasks:
         - feature_prioritization
         - user_story_creation
@@ -103,6 +125,10 @@ workflow:
         - integration_patterns_documented: true
         - elicit: true
         - elicitation_checkpoint: true
+      mode_behavior: |
+        Interactive mode: Elicit after this section
+        Batch mode: Include in phase-end elicitation
+        YOLO mode: Skip (logged)
       workflow_tasks:
         - system_architecture_design
         - swift_patterns_selection
@@ -127,6 +153,10 @@ workflow:
         - context_completeness_verification: true
         - elicit: true
         - elicitation_checkpoint: true
+      mode_behavior: |
+        Interactive mode: Elicit after this section
+        Batch mode: Include in phase-end elicitation
+        YOLO mode: Skip (logged)
       workflow_tasks:
         - context_synthesis
         - documentation_research

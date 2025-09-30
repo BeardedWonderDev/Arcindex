@@ -31,7 +31,7 @@ When this task is invoked:
 initialize_state:
   action: "create_runtime_state"
   source: ".codex/state/workflow.json.template"
-  destination: ".codex/state/runtime/workflow.json"
+  destination: ".codex/state/workflow.json"
 
   workflow_detection:
     - Check for existing runtime state
@@ -50,7 +50,7 @@ initialize_state:
 **State Initialization Process**:
 
 1. **Check for Existing State**:
-   - Use Read tool to check for `.codex/state/runtime/workflow.json`
+   - Use Read tool to check for `.codex/state/workflow.json`
    - If exists, validate and continue with existing state
    - If corrupted, backup and recreate from template
 
@@ -225,6 +225,250 @@ workflow_status:
     - status (active|paused|completed|failed)
 ```
 
+### Mode Management Operations
+
+**Purpose**: Manage operation mode transitions and enforce mode-aware workflow behavior
+
+**Mode Operations**:
+
+1. **Update Operation Mode**:
+```yaml
+update_operation_mode:
+  action: "set_operation_mode"
+  parameters:
+    - new_mode: "interactive" | "batch" | "yolo"
+    - reason: string (optional)
+  validation_required: true
+
+  pre_update_checks:
+    - Validate new_mode is one of allowed values
+    - Check current workflow phase for mode change restrictions
+    - Verify no blocking tasks are in progress
+    - Read current mode from workflow.json
+
+  mode_validation:
+    allowed_modes:
+      - "interactive": User interaction required at elicitation points
+      - "batch": Minimal interaction, auto-proceed where possible
+      - "yolo": Skip all elicitation, auto-generate content
+
+    blocked_transitions:
+      - Cannot change mode during active create-doc task
+      - Cannot change mode during validation gate processing
+      - Cannot change mode during elicitation interaction
+      - Cannot change from yolo during critical document generation
+
+  update_process:
+    - Read current workflow.json state
+    - Store previous mode for mode_changes tracking
+    - Update operation_mode field to new_mode
+    - Add mode change entry to mode_changes array
+    - Add entry to transformation_history with mode context
+    - Update last_updated timestamp
+    - Save updated state to workflow.json
+
+  mode_change_tracking:
+    - timestamp: ISO 8601 format
+    - from_mode: previous operation mode
+    - to_mode: new operation mode
+    - phase: current workflow phase at time of change
+    - reason: user-provided or system-generated reason
+    - initiated_by: "user" | "system"
+
+  return:
+    success: true
+    previous_mode: string
+    current_mode: string
+    message: "Operation mode updated from [previous] to [current]"
+```
+
+2. **Get Operation Mode**:
+```yaml
+get_operation_mode:
+  action: "query_operation_mode"
+  blocking: false
+
+  query_process:
+    - Read .codex/state/workflow.json
+    - Extract operation_mode field
+    - Read mode_changes array for history
+    - Get last mode change timestamp
+    - Determine mode change count
+
+  default_handling:
+    - If operation_mode field missing, default to "interactive"
+    - Log missing field warning to violation_log
+    - Update state with default mode
+    - Continue with interactive mode
+
+  return:
+    current_mode: "interactive" | "batch" | "yolo"
+    mode_metadata:
+      - set_at: timestamp of current mode activation
+      - set_by: who initiated current mode
+      - previous_mode: mode before current
+      - change_count: total mode changes this session
+      - mode_duration: time in current mode (calculated)
+```
+
+3. **Mode Validation Rules**:
+```yaml
+mode_validation_rules:
+  action: "validate_mode_transition"
+  enforcement: "blocking"
+
+  allowed_transitions:
+    from_interactive:
+      - to_batch: allowed (reduces interaction)
+      - to_yolo: allowed with user confirmation
+
+    from_batch:
+      - to_interactive: allowed (increases safety)
+      - to_yolo: allowed with user confirmation
+
+    from_yolo:
+      - to_interactive: allowed (increases safety)
+      - to_batch: allowed (increases safety)
+
+  blocked_during_phases:
+    create_doc_active:
+      - Cannot switch from yolo to interactive
+      - Cannot switch from yolo to batch
+      - Reason: "Document generation in progress, mode locked"
+
+    validation_gate_active:
+      - Cannot switch to yolo
+      - Can switch between interactive and batch
+      - Reason: "Validation requires user oversight"
+
+    elicitation_in_progress:
+      - All mode changes blocked
+      - Reason: "Complete current elicitation before changing mode"
+
+  phase_restrictions:
+    discovery:
+      - All transitions allowed
+      - No restrictions during initial phase
+
+    requirements:
+      - Cannot switch to yolo during requirement elicitation
+      - Can switch to batch for bulk requirement entry
+
+    design:
+      - Cannot switch to yolo during architecture decisions
+      - Batch mode allowed for template population
+
+    validation:
+      - Yolo mode not allowed
+      - Only interactive or batch permitted
+
+  validation_implementation:
+    check_sequence:
+      1. Read current phase from workflow.json
+      2. Read current active tasks from agent context
+      3. Check if elicitation is in progress
+      4. Verify from_mode -> to_mode is allowed
+      5. Check phase-specific restrictions
+      6. Validate no blocking conditions exist
+
+    failure_handling:
+      - Return error with specific reason
+      - Display blocked transition message to user
+      - Suggest when mode change will be allowed
+      - Log attempted invalid transition
+```
+
+4. **Mode Change Tracking Schema**:
+```yaml
+mode_change_tracking:
+  action: "track_mode_changes"
+  purpose: "Maintain audit trail of mode transitions"
+
+  state_schema_addition:
+    mode_changes:
+      type: array
+      description: "Complete history of operation mode changes"
+      items:
+        - timestamp: ISO 8601 string
+        - from_mode: "interactive" | "batch" | "yolo"
+        - to_mode: "interactive" | "batch" | "yolo"
+        - phase: current workflow phase
+        - reason: string (user provided or system generated)
+        - initiated_by: "user" | "system"
+        - context:
+            - active_agent: which agent was active
+            - active_task: task being performed
+            - documents_in_progress: array of document names
+
+  transformation_history_updates:
+    mode_context_addition:
+      - Add operation_mode field to each transformation entry
+      - Track mode at time of each workflow transformation
+      - Enable correlation between mode and workflow actions
+      - Support mode-aware workflow analysis
+
+  tracking_implementation:
+    on_mode_change:
+      - Create new mode_changes entry
+      - Append to mode_changes array
+      - Update transformation_history with mode context
+      - Calculate mode usage statistics
+      - Update last_updated timestamp
+
+    mode_statistics:
+      - time_in_interactive: total duration in interactive mode
+      - time_in_batch: total duration in batch mode
+      - time_in_yolo: total duration in yolo mode
+      - mode_change_frequency: changes per hour
+      - most_used_mode: mode with longest duration
+
+  query_support:
+    get_mode_history:
+      action: "query_mode_history"
+      parameters:
+        - limit: number (optional, default 10)
+        - phase: string (optional filter)
+      returns:
+        - Array of mode_changes entries
+        - Mode usage statistics
+        - Current mode metadata
+
+    get_mode_statistics:
+      action: "query_mode_statistics"
+      returns:
+        - mode_usage_breakdown: percentage by mode
+        - average_mode_duration: average time per mode
+        - mode_change_patterns: common transition sequences
+        - phase_mode_correlation: modes used per phase
+```
+
+### Mode-Aware State Operations
+
+**Purpose**: Ensure all state operations respect current operation mode
+
+**Mode Integration**:
+
+```yaml
+mode_aware_validation:
+  elicitation_gate_check:
+    - Read current operation_mode from state
+    - If mode = "yolo", bypass elicitation requirements
+    - If mode = "batch", use minimal interaction elicitation
+    - If mode = "interactive", enforce full elicitation workflow
+
+  phase_transition_check:
+    - Read current operation_mode
+    - Apply mode-specific transition rules
+    - Log mode context in transformation_history
+    - Track mode at time of phase completion
+
+  document_creation_check:
+    - Read current operation_mode
+    - Set document.auto_generated = true if yolo mode
+    - Set document.elicitation_required based on mode
+    - Track mode in document metadata
+```
+
 ## Integration with CODEX Components
 
 ### Agent Integration
@@ -233,7 +477,7 @@ workflow_status:
 ```yaml
 agent_activation_requirements:
   - MANDATORY: Check state before any document creation
-  - Read .codex/state/runtime/workflow.json
+  - Read .codex/state/workflow.json
   - Validate elicitation requirements for current phase
   - HALT if elicitation_completed[phase] = false and required
 
@@ -316,7 +560,7 @@ violation_logging:
 ```markdown
 Action: Use Read tool to load .codex/state/workflow.json.template
 Process: Replace template placeholders with actual values
-Save: Use Write tool to create .codex/state/runtime/workflow.json
+Save: Use Write tool to create .codex/state/workflow.json
 ```
 
 **Update State**:
@@ -324,7 +568,7 @@ Save: Use Write tool to create .codex/state/runtime/workflow.json
 Action: Use Read tool to load current runtime state
 Process: Apply updates to specific fields
 Validate: Verify JSON structure integrity
-Save: Use Edit tool to update .codex/state/runtime/workflow.json
+Save: Use Edit tool to update .codex/state/workflow.json
 ```
 
 **Query State**:

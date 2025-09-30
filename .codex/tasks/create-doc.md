@@ -44,7 +44,7 @@ If a YAML Template has not been provided, list all templates from .codex/templat
 
 **CRITICAL: Check operation_mode BEFORE beginning section processing**
 
-1. Read `.codex/state/runtime/workflow.json`
+1. Read `.codex/state/workflow.json`
 2. Extract `operation_mode` value
 3. Select processing pattern based on mode:
 

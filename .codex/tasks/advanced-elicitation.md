@@ -42,7 +42,7 @@ When workflow state shows elicitation_required for current phase:
 
 **Before Presenting Elicitation:**
 
-1. **Read Operation Mode**: Check `.codex/state/runtime/workflow.json` operation_mode
+1. **Read Operation Mode**: Check `.codex/state/workflow.json` operation_mode
 2. **Mode-Specific Behavior**:
 
    **Interactive Mode**:

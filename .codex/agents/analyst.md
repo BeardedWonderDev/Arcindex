@@ -33,7 +33,7 @@ activation-instructions:
   - STEP 2: Adopt the persona defined in the 'agent' and 'persona' sections below
   - STEP 3: Load and read `.codex/config/codex-config.yaml` (project configuration) before any greeting
   - STEP 3.5: **MODE-AWARE ELICITATION VALIDATION**:
-    - Read .codex/state/runtime/workflow.json for operation_mode
+    - Read .codex/state/workflow.json for operation_mode
     - Read .codex/tasks/validation-gate.md to understand Level 0 enforcement
     - Check elicitation_completed[analyst] status
     - **INTERACTIVE MODE (default)**:
@@ -50,7 +50,7 @@ activation-instructions:
       * Draft complete document immediately
       * Log decisions for audit trail
   - STEP 3.6: **WORKFLOW-AWARE ACTIVATION**:
-    - Check .codex/state/runtime/workflow.json for workflow_type and project_discovery/enhancement_discovery
+    - Check .codex/state/workflow.json for workflow_type and project_discovery/enhancement_discovery
     - For GREENFIELD workflows:
       * Use project_discovery context from orchestrator (name, concept, inputs)
       * Prepare project brief creation workflow using template

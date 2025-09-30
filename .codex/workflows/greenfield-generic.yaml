@@ -7,6 +7,20 @@ version: "1.0"
 description: "Generic development workflow supporting any programming language"
 language_agnostic: true
 
+metadata:
+  default_operation_mode: interactive
+  mode_behavior:
+    interactive: "Section-by-section elicitation with 1-9 menu"
+    batch: "Draft all sections, elicit at phase completion"
+    yolo: "Skip all elicitation (logged violations)"
+  mode_requirements:
+    analyst: true
+    pm: true
+    architect: true
+    prp_creator: false
+    dev: false
+    qa: false
+
 # Language Configuration - Customize per project
 language_support:
   primary: "{{LANGUAGE}}"  # Set to: javascript, python, go, rust, etc.

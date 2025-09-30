@@ -3,7 +3,21 @@ name: "Brownfield Enhancement"
 id: "brownfield-enhancement"
 description: "Enhance existing codebase with new features using mandatory elicitation gates"
 version: "1.0.0"
-elicitation_mode: "interactive"  # Default mode, can be overridden
+operation_mode: "interactive"  # Default mode, can be overridden
+
+metadata:
+  default_operation_mode: interactive
+  mode_behavior:
+    interactive: "Section-by-section elicitation with 1-9 menu"
+    batch: "Draft all sections, elicit at phase completion"
+    yolo: "Skip all elicitation (logged violations)"
+  mode_requirements:
+    analyst: true
+    pm: true
+    architect: true
+    prp_creator: true
+    dev: false
+    qa: false
 
 phases:
   - name: "Discovery"
@@ -33,6 +47,10 @@ phases:
     agent: "analyst"
     elicit: true
     elicitation_checkpoint: true
+    mode_behavior: |
+      Interactive mode: Elicit after this section
+      Batch mode: Include in phase-end elicitation
+      YOLO mode: Skip (logged)
     requires:
       - "discovery.completed"
     inputs:
@@ -62,6 +80,10 @@ phases:
     agent: "pm"
     elicit: true
     elicitation_checkpoint: true
+    mode_behavior: |
+      Interactive mode: Elicit after this section
+      Batch mode: Include in phase-end elicitation
+      YOLO mode: Skip (logged)
     validation:
       level: 0  # Elicitation validation first
       checks:
@@ -85,6 +107,10 @@ phases:
     agent: "architect"
     elicit: true
     elicitation_checkpoint: true
+    mode_behavior: |
+      Interactive mode: Elicit after this section
+      Batch mode: Include in phase-end elicitation
+      YOLO mode: Skip (logged)
     validation:
       level: 0  # Elicitation validation first
       checks:
@@ -109,6 +135,10 @@ phases:
     agent: "prp-creator"
     elicit: true
     elicitation_checkpoint: true
+    mode_behavior: |
+      Interactive mode: Elicit after this section
+      Batch mode: Include in phase-end elicitation
+      YOLO mode: Skip (logged)
     validation:
       level: 0  # Elicitation validation first
       checks:

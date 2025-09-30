@@ -70,16 +70,17 @@ subcommands:
          "Activate CODEX orchestrator at .codex/agents/orchestrator.md
           Initialize workflow: {workflow-type}
           Project name: {project-name}
-          Set operation mode (default: interactive) with elicitation enforcement enabled
-          Create runtime state immediately after discovery questions using state-manager.md
+          Prompt user to select operation mode (interactive/batch/yolo) during discovery phase
+          Create runtime state immediately after mode selection using state-manager.md
           Enforce discovery elicitation with 1-9 menu before phase transition
+          Propagate operation_mode to all agent transformations throughout workflow
           Begin first phase with mandatory elicitation validation protocol via validate-phase.md"
 
   continue:
     description: Resume workflow from last checkpoint
     arguments: none
     routing: |
-      1. Check if .codex/state/runtime/workflow.json exists
+      1. Check if .codex/state/workflow.json exists
       2. If missing: Report "No active workflow found. Use 'start' to begin."
       3. Launch orchestrator via Task tool with instructions:
          "Activate CODEX orchestrator at .codex/agents/orchestrator.md
@@ -104,12 +105,12 @@ subcommands:
     description: Run validation gates for current phase
     arguments: none
     routing: |
-      1. Check if .codex/state/runtime/workflow.json exists
+      1. Check if .codex/state/workflow.json exists
       2. If missing: Report "No active workflow to validate."
       3. Launch orchestrator via Task tool with instructions:
          "Activate CODEX orchestrator at .codex/agents/orchestrator.md
           Execute 5-level validation gate system for current phase
-          PRIORITY: Use validate-phase.md for Level 0 elicitation validation before other levels
+          PRIORITY: Use validate-phase.md for Level 0 mode-aware elicitation validation before other levels
           Use .codex/tasks/validation-gate.md for complete validation protocol
           Report any elicitation violations and block progression until resolved"
 
@@ -118,47 +119,56 @@ subcommands:
     description: Show current operation mode (interactive|batch|yolo)
     arguments: none
     routing: |
-      1. Check if .codex/state/runtime/workflow.json exists
-      2. If missing: Report "No active workflow to check mode."
+      1. Check if .codex/state/workflow.json exists
+      2. If missing: Report "No active workflow. System default: interactive mode."
       3. Launch orchestrator via Task tool with instructions:
          "Activate CODEX orchestrator at .codex/agents/orchestrator.md
-          Display current operation mode and explain mode options using state-manager.md"
+          Execute mode_display_command implementation
+          Use state-manager.md get_operation_mode query to retrieve current mode
+          Display mode with detailed behavior descriptions and switching instructions"
 
   interactive:
-    description: Return to interactive mode (default, full elicitation)
+    description: Switch to interactive mode (section-by-section elicitation)
     arguments: none
     routing: |
-      1. Check if .codex/state/runtime/workflow.json exists
+      1. Check if .codex/state/workflow.json exists
       2. If missing: Report "No active workflow to set mode."
       3. Launch orchestrator via Task tool with instructions:
          "Activate CODEX orchestrator at .codex/agents/orchestrator.md
-          Set operation mode to 'interactive' and update workflow state using state-manager.md
-          Enable full elicitation enforcement at all phase transitions
-          Activate validate-phase.md Level 0 validation requirements for all agents"
+          Execute mode_switch_command for 'interactive' mode
+          Use state-manager.md set_operation_mode action
+          Update workflow state and log mode change to transformation_history
+          Enable section-by-section elicitation enforcement in all agents
+          Display confirmation with new mode behavior"
 
   batch:
-    description: Toggle batch mode (minimal interaction, batch elicitation)
+    description: Switch to batch mode (phase-end elicitation)
     arguments: none
     routing: |
-      1. Check if .codex/state/runtime/workflow.json exists
+      1. Check if .codex/state/workflow.json exists
       2. If missing: Report "No active workflow to set mode."
       3. Launch orchestrator via Task tool with instructions:
          "Activate CODEX orchestrator at .codex/agents/orchestrator.md
-          Set operation mode to 'batch' and update workflow state using state-manager.md
-          Enable batch elicitation collection at phase boundaries
-          Maintain validate-phase.md Level 0 validation enforcement with batch processing"
+          Execute mode_switch_command for 'batch' mode
+          Use state-manager.md set_operation_mode action
+          Update workflow state and log mode change to transformation_history
+          Enable batch elicitation at phase boundaries
+          Display confirmation with new mode behavior"
 
   yolo:
-    description: Toggle YOLO mode (skip elicitation confirmations)
+    description: Switch to YOLO mode (skip all elicitation)
     arguments: none
     routing: |
-      1. Check if .codex/state/runtime/workflow.json exists
+      1. Check if .codex/state/workflow.json exists
       2. If missing: Report "No active workflow to set mode."
       3. Launch orchestrator via Task tool with instructions:
          "Activate CODEX orchestrator at .codex/agents/orchestrator.md
-          Set operation mode to 'yolo' and update workflow state using state-manager.md
-          Skip elicitation prompts but maintain decision logging
-          WARNING: Reduced quality assurance in YOLO mode"
+          Execute mode_switch_command for 'yolo' mode with destructive warning
+          Use state-manager.md set_operation_mode action
+          Require user confirmation before switching to YOLO
+          Update workflow state and log mode change to transformation_history
+          Skip all elicitation but maintain decision logging
+          WARNING: Display reduced quality assurance notice"
 
   chat-mode:
     description: Start conversational mode with relaxed elicitation timing
@@ -173,7 +183,7 @@ subcommands:
     description: Revert to previous checkpoint (if git integration available)
     arguments: none
     routing: |
-      1. Check if .codex/state/runtime/workflow.json exists
+      1. Check if .codex/state/workflow.json exists
       2. If missing: Report "No active workflow to rollback."
       3. Launch orchestrator via Task tool with instructions:
          "Activate CODEX orchestrator at .codex/agents/orchestrator.md
@@ -207,11 +217,11 @@ subcommands:
     description: Display detailed workflow state information
     arguments: none
     routing: |
-      1. Check if .codex/state/runtime/workflow.json exists
+      1. Check if .codex/state/workflow.json exists
       2. If missing: Report "No workflow state to display."
       3. Launch orchestrator via Task tool with instructions:
          "Activate CODEX orchestrator at .codex/agents/orchestrator.md
-          Display detailed workflow state including elicitation tracking using state-manager.md"
+          Display detailed workflow state including operation mode and elicitation tracking using state-manager.md"
 
   help:
     description: Display available commands and workflows
@@ -257,7 +267,6 @@ dependencies:
     - codex-config.yaml
   state:
     - workflow.json
-    - runtime/workflow.json
   tasks:
     - advanced-elicitation.md
     - state-manager.md

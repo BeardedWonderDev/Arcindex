@@ -24,7 +24,7 @@ When this task is invoked:
 **Execution Process**:
 
 1. **State File Detection**:
-   - Use Read tool to check for `.codex/state/runtime/workflow.json`
+   - Use Read tool to check for `.codex/state/workflow.json`
    - If missing, create from template using state-manager.md
    - If corrupted, attempt recovery or recreation
 
@@ -51,7 +51,7 @@ check_elicitation_status:
   action: "validate_current_phase_elicitation"
 
   state_reading:
-    - Use Read tool: ".codex/state/runtime/workflow.json"
+    - Use Read tool: ".codex/state/workflow.json"
     - Extract current_phase value
     - Extract operation_mode value (critical for mode-aware validation)
     - Extract phase_boundary flag (for batch mode phase transition detection)
