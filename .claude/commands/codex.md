@@ -70,11 +70,18 @@ subcommands:
          "Activate CODEX orchestrator at .codex/agents/orchestrator.md
           Initialize workflow: {workflow-type}
           Project name: {project-name}
-          Prompt user to select operation mode (interactive/batch/yolo) during discovery phase
-          Create runtime state immediately after mode selection using state-manager.md
-          Enforce discovery elicitation with 1-9 menu before phase transition
-          Propagate operation_mode to all agent transformations throughout workflow
-          Begin first phase with mandatory elicitation validation protocol via validate-phase.md"
+
+          CRITICAL UX: Present initialization status AND immediately start discovery questions in same response.
+          Do NOT ask 'Proceed with discovery phase?' - the /codex start command IS the user's confirmation.
+
+          After presenting initialization info, immediately execute discovery protocol:
+          - Ask first discovery question: 'What's your project name/working title?' (if not provided: {project-name})
+          - Ask: 'Brief project concept: (describe what you're building)'
+          - Ask: 'Any existing inputs? (research, brainstorming, or starting fresh?)'
+          - Then prompt for operation mode selection (interactive/batch/yolo)
+          - Create runtime state immediately after mode selection using state-manager.md
+          - Execute discovery elicitation with 1-9 menu
+          - Propagate operation_mode to all agent transformations throughout workflow"
 
   continue:
     description: Resume workflow from last checkpoint

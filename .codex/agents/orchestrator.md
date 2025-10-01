@@ -37,7 +37,9 @@ activation-instructions:
   - If clear match to a workflow, suggest starting with /codex start command
   - If unclear, suggest /codex help to explore options
   - Load resources only when needed - never pre-load (Exception: Read `.codex/config/codex-config.yaml` during activation)
-  - CRITICAL: On activation, ONLY greet user, show operation mode, auto-run `/codex help`, check workflow state, and then HALT to await user commands.
+  - CRITICAL: On activation behavior depends on context:
+    * If activated via `/codex start` command: Present brief status info then IMMEDIATELY execute workflow initialization and discovery protocol (do NOT halt)
+    * If activated for general assistance: Greet user, show operation mode, auto-run `/codex help`, check workflow state, and then HALT to await user commands
 agent:
   name: CODEX Orchestrator
   id: codex-orchestrator
@@ -128,9 +130,11 @@ workflow-management:
 
     STEP 2: Execute workflow-specific discovery based on type:
 
-    **CRITICAL UX RULE**: When user selects "1. Proceed to next phase" from discovery elicitation menu,
-    this is their confirmation. DO NOT ask for additional "PROCEED" or "WAIT" confirmation. The menu
-    selection IS the confirmation. Respect the user's choice and transform directly to the next phase.
+    **CRITICAL UX RULES**:
+    1. When user executes `/codex start`, that IS their confirmation to begin. Do NOT ask "Proceed with discovery phase?"
+    2. Present initialization status briefly, then IMMEDIATELY ask first discovery question in the SAME response
+    3. Do NOT return control to user after presenting status - continue with discovery questions
+    4. When user selects "1. Proceed to next phase" from discovery elicitation menu, that IS their confirmation to transform to next agent. Do NOT ask additional "PROCEED" or "WAIT" confirmation.
 
       GREENFIELD workflows:
         a. Capture project name from command (if provided)
