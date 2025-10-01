@@ -2,13 +2,21 @@
 
 ## CRITICAL: Option 1 Must Be "Proceed"
 
-**HARD RULE**: Option 1 MUST ALWAYS be one of these:
+**HARD RULE**: Option 1 MUST ALWAYS be "Proceed":
+
+**Universal Format (All Agents)**:
+- **Analyst Agent**: Option 1 = "Proceed to next section"
+- **PM Agent**: Option 1 = "Proceed to next section"
+- **Architect Agent**: Option 1 = "Proceed to next section"
+
+**Proceed Options (use appropriate variant)**:
 - "Proceed to next section"
 - "Proceed to next phase"
 - "Proceed / No Further Actions"
 
 **NEVER**:
-- Use option 8, 9, 10, or any other number for "Proceed"
+- Use option 8, 9, or 10 for "Proceed" (wrong position)
+- Use option 0 for "Proceed"
 - Create grouped categories within the menu
 - Change the 1-9 numbering scheme
 
