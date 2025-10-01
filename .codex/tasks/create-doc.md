@@ -27,14 +27,61 @@ If a YAML Template has not been provided, list all templates from .codex/templat
 
 **YOU MUST:**
 
-1. Present section content
-2. Provide detailed rationale (explain trade-offs, assumptions, decisions made)
-3. **STOP and present numbered options 1-9 using advanced-elicitation.md:**
-   - **Option 1:** Always "Proceed to next section"
-   - **Options 2-9:** Select 8 methods from .codex/data/elicitation-methods.md
-   - Use .codex/tasks/advanced-elicitation.md for intelligent method selection
+1. **Draft FULL section content**
+   - Create the COMPLETE markdown/text for this section
+   - This is the actual content that will be saved to the file
+   - NOT a summary, NOT a description, the ACTUAL content
+
+2. **Present FULL content to user**
+   - Show the ENTIRE drafted section
+   - User should see exactly what will be in the file
+   - Include all text, formatting, structure
+
+   **EXAMPLE OF CORRECT PRESENTATION**:
+   ```
+   I've drafted Section 2: User Roles. Here's the complete content:
+
+   ---
+   ## User Roles & Permissions
+
+   ### Dealer Admin
+
+   **Responsibilities:**
+   - System configuration and settings management
+   - User account creation across all locations
+   - Role and permission customization
+   - Global inventory oversight and reporting
+
+   **System Access:**
+   - Full CRUD permissions on all resources
+   - Can create custom roles and modify permission matrices
+   - Access to all locations and equipment records
+   ...
+
+   [COMPLETE SECTION CONTENT - ALL TEXT]
+   ---
+
+   **Rationale:** I structured roles hierarchically starting with highest privilege...
+
+   [ELICITATION MENU]
+   ```
+
+   **WRONG - VIOLATION EXAMPLES**:
+   ❌ "Section 2 includes: Role definitions, Personas, Workflows"
+   ❌ "What's Included: 2.1 Dealer Admin role, 2.2 Store Manager role..."
+   ❌ "Key Insights: 6 roles defined with CRUD permissions"
+
+3. **Provide detailed rationale** - AFTER showing full content
+4. **Add 1-2 sentence context note** - What to review
+5. **STOP and present numbered options 1-9:**
+   - **MANDATORY**: Use `.codex/tasks/advanced-elicitation.md` to generate the menu
+   - **NEVER** create custom elicitation menus
+   - **VALIDATION**: Option 1 MUST ALWAYS be "Proceed to next section"
+   - **VALIDATION**: Options 2-9 MUST be methods from `.codex/data/elicitation-methods.md`
+   - **ENFORCEMENT**: Any menu where option 9 = "Proceed" is a VIOLATION
+   - **ENFORCEMENT**: Any menu where option 8 = "Proceed" is a VIOLATION
    - End with: "Select 1-9 or just type your question/feedback:"
-4. **WAIT FOR USER RESPONSE** - Do not proceed until user selects option or provides feedback
+6. **WAIT FOR USER RESPONSE** - Do not proceed until user selects option or provides feedback
 
 **⚠️ VIOLATION INDICATOR:** Creating content for elicit=true sections without user interaction violates this workflow. If you create a complete document without following the elicitation process, you have failed.
 
@@ -88,14 +135,22 @@ Process all sections:
 ## Processing Flow
 
 1. **Parse YAML template** - Load template metadata and sections
-2. **Set preferences** - Show current mode, confirm output file
-3. **Detect Operation Mode** - Read workflow.json operation_mode
-4. **Select Processing Pattern**:
-   - If interactive: Use section-by-section pattern
-   - If batch: Use complete-document-then-review pattern
-   - If yolo: Use no-elicitation pattern
-5. **Execute Selected Pattern** - Follow mode-specific instructions above
-6. **Continue until complete**
+2. **CRITICAL: Extract output_file path** - Get the SINGLE output file from template
+   - Template specifies output_file: "docs/project-brief.md"
+   - This is the ONLY file that will be created
+   - ALL sections save to this ONE file
+3. **Initialize output file** - Create empty file at output_file path
+4. **Confirm with user** - "Creating document at: {output_file}"
+5. **Detect Operation Mode** - Read workflow.json operation_mode
+6. **Select Processing Pattern** - Based on mode (interactive/batch/yolo)
+7. **For EACH section**:
+   - Draft section content
+   - Present content + rationale
+   - IF elicit: true → Present 1-9 menu via advanced-elicitation.md
+   - **MANDATORY: Append section to output_file** (not a new file!)
+   - Verify save succeeded
+8. **Continue until complete**
+9. **Final verification** - Read output_file to confirm all sections present
 
 ## Detailed Rationale Requirements
 
@@ -105,6 +160,31 @@ When presenting section content, ALWAYS include rationale that explains:
 - Key assumptions made during drafting
 - Interesting or questionable decisions that need user attention
 - Areas that might need validation
+
+## CRITICAL: Single File Output Enforcement
+
+**RULE**: The template specifies ONE output_file. ALL sections MUST save to this file.
+
+**Process**:
+1. **First section**: Use Write tool to CREATE file with section content
+2. **All subsequent sections**: Use Edit tool to APPEND to existing file
+3. **After EVERY section**:
+   - Verify Write/Edit tool reported success
+   - Log: "✅ Section '{section_name}' appended to {output_file}"
+4. **NEVER**:
+   - Create separate files for each section (e.g., section-1.md, section-2.md)
+   - Save to different locations than output_file specifies
+   - Skip file operations
+
+**VIOLATION INDICATORS**:
+- ❌ Creating files like: docs/section-1.md, docs/section-2.md, docs/section-3.md
+- ❌ Saying "I'll save this section" without actually using Write/Edit tool
+- ✅ CORRECT: All sections in docs/project-brief.md (single file)
+
+**ENFORCEMENT**:
+- Before moving to next section, you MUST have used Write or Edit tool
+- The tool call must have succeeded
+- The content must be in the output_file specified in template
 
 ## Elicitation Results Flow
 
@@ -116,6 +196,38 @@ After user selects elicitation method (2-9):
    - **1. Apply changes and update section**
    - **2. Return to elicitation menu**
    - **3. Ask any questions or engage further with this elicitation**
+
+## Section Completion Checkpoint (MANDATORY)
+
+**Before proceeding to next section, verify ALL steps completed:**
+
+**Checklist:**
+- [ ] Section content drafted
+- [ ] Full content presented to user (not summary)
+- [ ] Rationale provided
+- [ ] Elicitation menu shown (if elicit: true)
+- [ ] User selected option 1 (Proceed) or provided feedback
+- [ ] **FILE SAVED**: Used Write or Edit tool to save section
+- [ ] **SAVE VERIFIED**: Tool confirmed success
+- [ ] **CONTENT IN FILE**: Section now exists in output_file
+
+**MANDATORY QUESTIONS** (answer YES to all):
+1. Did I draft the complete section content?
+2. Did I present the FULL content to user (not "What's Included" summary)?
+3. Did I use Write (first section) or Edit (subsequent) tool?
+4. Did the tool report successful save?
+5. Is this section now in the output_file?
+
+**IF ANY ANSWER IS NO**: HALT - Complete missing step
+
+**ENFORCEMENT**:
+- Cannot say "Moving to Section 2..." without having saved Section 1
+- Cannot proceed without file operation completing
+- Must use actual Write/Edit tools, not just mention saving
+
+**VIOLATION EXAMPLE**:
+❌ "Section 1 complete. Proceeding to Section 2..." (without having called Write/Edit tool)
+✅ CORRECT: "Section 1 drafted. [Uses Write tool] ✅ Saved to docs/project-brief.md. Proceeding to Section 2..."
 
 ## Agent Permissions
 

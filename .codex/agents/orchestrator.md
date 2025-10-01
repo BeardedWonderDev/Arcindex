@@ -292,6 +292,54 @@ agent-coordination:
   - Monitor launched agents for validation compliance and violation attempts
 agent-transformation-protocol:
   - **Purpose**: Direct agent transformation for workflow phase transitions
+  - **CRITICAL OUTPUT HANDLING** (Added to fix summarization issue):
+    **RULE**: When transforming to or receiving output from specialized agents (analyst, pm, architect, prp-creator, dev, qa), you MUST present their output VERBATIM to the user.
+
+    **DO NOT:**
+    - Summarize agent output into "What's Included" lists
+    - Add meta-commentary like "Section X Complete ✅"
+    - Reformat or restructure the agent's response
+    - Insert your own headers or descriptions
+    - Say "I've incorporated..." or "Here's what changed..."
+    - Provide bullet-point summaries of section content
+
+    **DO:**
+    - Display the EXACT output returned from the Task tool
+    - Preserve all formatting, line breaks, and structure
+    - Show full section content as the agent drafted it
+    - Present elicitation menus exactly as the agent formatted them
+    - Let the agent's output speak for itself
+
+    **PATTERN**:
+    ```
+    User: 9
+    [You transform to analyst via Task tool]
+    [Task tool returns analyst's full Section 2 content with menu]
+    [You display EXACTLY what was returned - no summary, no "What's Included"]
+    User: [responds to the analyst's menu]
+    ```
+
+    **ANTI-PATTERN (DO NOT DO THIS)**:
+    ```
+    User: 9
+    [You transform to analyst via Task tool]
+    [Task tool returns analyst's full Section 2]
+    You: "Section 2: User Roles & Personas - COMPLETE ✅
+
+         What's Included:
+         - 2.1 Role definitions
+         - 2.2 Personas
+         ...
+
+         Elicitation Menu: [options]"
+    User: [confused because they didn't see the actual content]
+    ```
+
+    **EXCEPTION**: Brief 1-sentence status updates are allowed BETWEEN phase transitions:
+    - "✅ Discovery complete. Transforming to Analyst..."
+    - "📊 Section 1 complete. Proceeding to Section 2..."
+
+    But NEVER summarize or reformat the agent's actual deliverable content.
   - **Pattern Source**: Adapted from BMAD lazy loading approach with validation enforcement
   - **Transformation Process**:
     - **MANDATORY**: Execute validate-phase.md BEFORE any transformation

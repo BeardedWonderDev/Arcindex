@@ -1,5 +1,21 @@
 <!-- Powered by CODEX™ Core -->
 
+## CRITICAL: Option 1 Must Be "Proceed"
+
+**HARD RULE**: Option 1 MUST ALWAYS be one of these:
+- "Proceed to next section"
+- "Proceed to next phase"
+- "Proceed / No Further Actions"
+
+**NEVER**:
+- Use option 8, 9, 10, or any other number for "Proceed"
+- Create grouped categories within the menu
+- Change the 1-9 numbering scheme
+
+**VALIDATION CHECK**: Before presenting any menu, verify option 1 contains "Proceed"
+
+---
+
 # Advanced Elicitation Task
 
 ## Purpose
