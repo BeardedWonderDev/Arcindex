@@ -91,6 +91,24 @@ Check that all information is specific and actionable:
 - ✅ Explicit naming: `Create UserAuthenticationService class`
 - ✅ Concrete validation: `Run 'swift test --filter UserAuthTests'`
 
+#### Gold Standard Examples (from /prp-create)
+
+**URLs with section anchors**:
+- ❌ `https://docs.fastapi.com`
+- ✅ `https://docs.fastapi.com/tutorial/dependencies/#dependencies-with-yield`
+
+**File references with patterns**:
+- ❌ "Follow similar pattern in services folder"
+- ✅ "FOLLOW pattern: src/services/database_service.py (service structure, error handling on lines 45-89)"
+
+**Task specifications**:
+- ❌ "Create the models"
+- ✅ "CREATE src/models/auth_models.py - IMPLEMENT: LoginRequest, LoginResponse Pydantic models - NAMING: CamelCase for classes, snake_case for fields"
+
+**Validation commands**:
+- ❌ "Run tests"
+- ✅ `uv run pytest src/services/tests/test_auth_service.py -v`
+
 ### Step 4: Implementation Task Quality
 
 Evaluate each implementation task for:
