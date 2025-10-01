@@ -132,30 +132,72 @@ workflow-management:
 
     **CRITICAL UX RULES**:
     1. When user executes `/codex start`, that IS their confirmation to begin. Do NOT ask "Proceed with discovery phase?"
-    2. Present initialization status briefly, then IMMEDIATELY ask first discovery question in the SAME response
+    2. Present FULL initialization display (see format below) then IMMEDIATELY ask first discovery question in the SAME response
     3. Do NOT return control to user after presenting status - continue with discovery questions
     4. When user selects "1. Proceed to next phase" from discovery elicitation menu, that IS their confirmation to transform to next agent. Do NOT ask additional "PROCEED" or "WAIT" confirmation.
 
+    **Initialization Display Format**:
+      ```
+      🎯 CODEX Orchestrator Activated
+
+      ---
+      Workflow Initialization
+
+      - Project: {project_name} [if provided, otherwise "To be determined"]
+      - Workflow Type: {workflow_type}
+      - Operation Mode: Interactive (full elicitation)
+
+      ---
+      Available CODEX Commands
+
+      Workflow Management:
+      - /codex help - Show guide and system status
+      - /codex continue - Resume from checkpoint
+      - /codex status - Show workflow state
+      - /codex validate - Run validation gates
+      - /codex rollback - Revert to checkpoint
+
+      Operation Modes:
+      - /codex mode - Show current mode
+      - /codex interactive - Full elicitation (default)
+      - /codex batch - Batch elicitation
+      - /codex yolo - Skip confirmations
+
+      ---
+      Current Status
+
+      State: Ready to begin discovery phase
+      Next Step: Discovery elicitation
+
+      ---
+      Let's begin with discovery questions:
+      ```
+
+      NOTE: If project name was provided in command, include it in question #1 for context:
+      "1. Brief Project Concept\n\nWhat are you building with {project_name}?"
+
       GREENFIELD workflows:
-        a. Capture project name from command (if provided)
-        b. Ask comprehensive discovery questions:
-           - "What's your project name/working title?" (if not provided)
-           - "Brief project concept: (describe what you're building)"
-           - "Any existing inputs? (research, brainstorming, or starting fresh?)"
+        a. Display complete initialization info (using format above)
+           - If project name provided in command, show it as confirmed in Workflow Initialization section
+        b. Immediately after status, begin asking discovery questions (DO NOT wait for user confirmation):
+           - [CONDITIONAL] "What's your project name/working title?" (ONLY if NOT provided in command)
+           - "Brief Project Concept: What are you building with {project-name}? (1-3 sentences covering the problem, users, and core functionality)"
+           - "Existing Inputs: Do you have any existing materials (research, designs, technical requirements), or are we starting fresh?"
+           - "Development Context: Any technical considerations like target platform, technology preferences, or integration requirements?"
         c. Store discovery in state: project_discovery object via state-manager.md
-        d. **MODE SELECTION**: After collecting discovery answers:
-           - Present mode selection menu (Interactive/Batch/YOLO)
-           - Capture user selection (default: interactive)
-           - Explain mode implications for workflow
-           - Store selection for state initialization
+        d. **DEFAULT MODE**: Automatically set operation mode (DO NOT prompt user):
+           - Default to "interactive" mode
+           - Read codex-config.yaml for default_mode override if present
+           - User can change mode anytime with /codex interactive|batch|yolo commands
+           - DO NOT ask user to select mode during discovery
         e. **CREATE RUNTIME STATE**: Use state-manager.md to initialize workflow.json with:
            - workflow_type: "greenfield-swift" (or appropriate)
            - project_name: captured from user
            - current_phase: "discovery"
-           - operation_mode: {user_selected_mode} (from step d)
-           - elicitation_required[discovery]: based on selected mode
+           - operation_mode: "interactive" (or config default)
+           - elicitation_required[discovery]: true (for interactive mode)
            - elicitation_completed[discovery]: false (initially)
-           - mode_selected_at: {timestamp}
+           - mode_initialized_at: {timestamp}
         f. **DISCOVERY ELICITATION**: After collecting answers:
            - Present discovery summary with elicitation menu using advanced-elicitation.md
            - Wait for user to select option 1-9 or provide feedback
@@ -183,18 +225,19 @@ workflow-management:
            - "Which component/area does this affect?"
            - "Any constraints or requirements?"
         d. Store discovery in state: enhancement_discovery object via state-manager.md
-        e. **MODE SELECTION**: After collecting discovery answers:
-           - Present mode selection menu (Interactive/Batch/YOLO)
-           - Capture user selection (default: interactive or from existing state)
-           - Explain mode implications for workflow
-           - Store selection for state initialization
+        e. **DEFAULT MODE**: Automatically set operation mode (DO NOT prompt user):
+           - Check for existing workflow.json and preserve operation_mode if present
+           - If new workflow, default to "interactive" mode
+           - Read codex-config.yaml for default_mode override if present
+           - User can change mode anytime with /codex interactive|batch|yolo commands
+           - DO NOT ask user to select mode during discovery
         f. **CREATE/UPDATE RUNTIME STATE**: Use state-manager.md to initialize or update with:
            - workflow_type: "brownfield-enhancement"
            - current_phase: "discovery"
-           - operation_mode: {user_selected_mode} (from step e)
-           - elicitation_required[discovery]: based on selected mode
+           - operation_mode: "interactive" (or config default, or preserved from existing state)
+           - elicitation_required[discovery]: true (for interactive mode)
            - elicitation_completed[discovery]: false (initially)
-           - mode_selected_at: {timestamp}
+           - mode_initialized_at: {timestamp}
         g. **DISCOVERY ELICITATION**: After collecting answers:
            - Present enhancement summary with elicitation menu using advanced-elicitation.md
            - Wait for user to select option 1-9 or provide feedback

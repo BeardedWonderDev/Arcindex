@@ -32,9 +32,13 @@ command-processing-instructions:
   - STEP 2: Match subcommand to command-routing rules below
   - STEP 3: For each subcommand, follow the specific routing instructions
   - STEP 4: Delegate complex logic to orchestrator agent via Task tool
+  - STEP 5: When Task tool returns, display the EXACT agent response to user without modification
   - DO NOT: Execute implementation logic directly in this command
+  - DO NOT: Summarize, reformat, or paraphrase the orchestrator's output
+  - DO NOT: Add your own commentary or wrap the output in additional text
   - ONLY: Route to appropriate agent or display information
   - CRITICAL: All workflow management happens in orchestrator agent
+  - CRITICAL: Show orchestrator output verbatim to preserve formatting and UX
 
 command:
   name: CODEX Router
@@ -66,20 +70,49 @@ subcommands:
          - greenfield-generic: Any language (Python, JS, Go, Rust, etc.)
          - brownfield-enhancement: Add features to existing projects
          - health-check: Validate CODEX system
-      5. Launch orchestrator via Task tool with instructions:
+      5. Launch orchestrator via Task tool with instructions (see below)
+      6. CRITICAL: When Task tool returns, display the orchestrator's EXACT response to user
+         - DO NOT add "The CODEX orchestrator has been initialized..." or similar commentary
+         - DO NOT reformat or summarize the orchestrator's questions
+         - DO NOT add your own introduction or explanation
+         - The orchestrator's output is complete and should be shown verbatim
+         - Simply pass through the agent response without modification
+
+      Task tool instructions:
          "Activate CODEX orchestrator at .codex/agents/orchestrator.md
           Initialize workflow: {workflow-type}
           Project name: {project-name}
 
-          CRITICAL UX: Present initialization status AND immediately start discovery questions in same response.
-          Do NOT ask 'Proceed with discovery phase?' - the /codex start command IS the user's confirmation.
+          CRITICAL UX: Present complete initialization status (project info, available commands, current status)
+          THEN immediately transition into discovery questions WITHOUT asking 'Proceed with discovery phase?'
 
-          After presenting initialization info, immediately execute discovery protocol:
-          - Ask first discovery question: 'What's your project name/working title?' (if not provided: {project-name})
-          - Ask: 'Brief project concept: (describe what you're building)'
-          - Ask: 'Any existing inputs? (research, brainstorming, or starting fresh?)'
-          - Then prompt for operation mode selection (interactive/batch/yolo)
-          - Create runtime state immediately after mode selection using state-manager.md
+          The /codex start command IS the user's confirmation to begin.
+
+          Initialization display should include:
+          - Workflow Initialization section (project name, workflow type, operation mode)
+          - Available CODEX Commands section (workflow management, operation modes, system management)
+          - Current Status section (state, next step)
+
+          Then immediately continue with:
+          'Let's begin with discovery questions:'
+
+          CRITICAL: Smart question handling based on provided arguments
+          - If {project-name} provided: Skip name question, show as confirmed in init display
+          - If {project-name} NOT provided: Ask for name as first question
+
+          Discovery questions to ask:
+          - [CONDITIONAL] 'What's your project name/working title?' (ONLY if not provided in command)
+          - 'Brief Project Concept: What are you building? (1-3 sentences covering problem, users, core functionality)'
+          - 'Existing Inputs: Do you have any existing materials (research, designs, technical requirements), or starting fresh?'
+          - 'Development Context: Any technical considerations like target platform, technology preferences, or integration requirements?'
+
+          CRITICAL: DO NOT prompt user to select operation mode during discovery
+          - Default to 'interactive' mode automatically
+          - Read codex-config.yaml for default_mode if present
+          - User can change mode anytime with /codex interactive|batch|yolo commands
+
+          After discovery questions:
+          - Create runtime state with default operation_mode using state-manager.md
           - Execute discovery elicitation with 1-9 menu
           - Propagate operation_mode to all agent transformations throughout workflow"
 
