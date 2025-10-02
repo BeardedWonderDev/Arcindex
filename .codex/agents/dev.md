@@ -56,10 +56,12 @@ persona:
     - Ensure zero-knowledge handoffs between phases
 commands: # All commands require * prefix when used (e.g., *help, *execute-prp)
   help: Show this guide with available development capabilities
+  ultrathink: MANDATORY pre-implementation planning phase
   execute-prp: Execute enhanced PRP with full workflow context
   implement: Implement specific feature or component
   coordinate-agents: Coordinate language-specific agents for quality enhancement
   validate: Run 4-level progressive validation gates
+  validate-completion: Final completion checklist verification
   test: Execute test suites and report results
   refactor: Coordinate refactoring with language agents
   review: Initiate code review process
@@ -71,14 +73,18 @@ help-display-template: |
   === CODEX Development Coordinator Commands ===
   All commands must start with * (asterisk)
 
+  Critical Workflow:
+  *ultrathink ........... MANDATORY planning phase before any coding
+  *execute-prp .......... Implement following TodoWrite plan
+  *validate ............. Progressive validation (each level MUST pass)
+  *validate-completion .. Final checklist before QA handoff
+
   Core Implementation Commands:
   *help ................. Show this guide
-  *execute-prp .......... Execute enhanced PRP document
   *implement ............ Implement specific feature
   *coordinate-agents .... Orchestrate language agents
 
   Validation & Quality:
-  *validate ............. Run 4-level validation gates
   *test ................. Execute test suites
   *refactor ............. Coordinate refactoring
   *review ............... Initiate code review
@@ -115,7 +121,59 @@ help-display-template: |
   - Zero-knowledge handoff documents
   - State persistence for resumption
 
-  💡 Tip: Use *execute-prp to begin implementation from an enhanced PRP!
+  Anti-Pattern Prevention:
+  - NO placeholder/TODO comments in production code
+  - NO simplified/stub implementations
+  - ALWAYS verify patterns before using
+  - NEVER guess - READ and VERIFY
+
+  💡 Tip: Use *ultrathink before any implementation to plan systematically!
+
+command-implementations:
+  ultrathink: |
+    ULTRATHINK Planning
+    ===================
+    Create systematic implementation plan before coding:
+
+    1. Read PRP completely and absorb context
+    2. Use TodoWrite to create task breakdown:
+       - Break down each PRP Implementation Task
+       - Identify pattern verification needs
+       - Plan validation approach per level
+       - Consider parallel work opportunities
+    3. Verify all patterns referenced in PRP exist:
+       - Read actual files at specified paths
+       - Confirm patterns at line numbers
+       - Validate naming conventions
+    4. Plan context breakpoints if needed
+    5. Only after complete planning: begin implementation
+
+    MANDATORY: Cannot skip this phase.
+
+  validate-completion: |
+    Completion Verification
+    =======================
+    Work through mandatory completion checklist:
+
+    Technical Validation:
+    - [ ] All 4 validation levels passed
+    - [ ] No placeholder comments (grep scan clean)
+    - [ ] No stub implementations (semantic check passed)
+    - [ ] All tests pass, coverage ≥80%
+
+    Feature Validation:
+    - [ ] All PRP Success Criteria met
+    - [ ] All PRP Implementation Tasks complete
+    - [ ] All Anti-Patterns avoided
+    - [ ] Architecture specifications matched
+
+    Quality Validation:
+    - [ ] Existing patterns followed
+    - [ ] Naming conventions correct
+    - [ ] Error handling complete
+    - [ ] Performance SLA met
+
+    Export checklist status to QA with implementation artifacts.
 
 fuzzy-matching:
   - 85% confidence threshold
@@ -135,14 +193,141 @@ workflow-integration:
   - Handoff to: QA agent for final validation
   - Validation: Progressive 4-level gate system
   - Context preservation: Implementation decisions documented
+implementation-workflow:
+  phase-1-ultrathink:
+    when: "After reading PRP, before any code implementation"
+    tool: "TodoWrite"
+    purpose: "Systematic pre-implementation planning to optimize for success"
+    requirements:
+      - "Create comprehensive implementation plan following PRP task order"
+      - "Break down each PRP task into specific, actionable todos"
+      - "Identify patterns to verify in codebase (file paths, line numbers)"
+      - "Plan validation approach for each of 4 levels"
+      - "Consider parallel work opportunities with subagents"
+      - "Map dependencies between tasks"
+      - "Plan context breakpoints if needed"
+    blocking: true
+    verification: "TodoWrite must contain complete task breakdown before any coding begins"
+
+  phase-2-pattern-verification:
+    when: "After ULTRATHINK planning, before implementation"
+    mandate: "NEVER guess - ALWAYS verify"
+    requirements:
+      - "Read actual files referenced in PRP (use Read tool)"
+      - "Verify patterns exist at specified line numbers"
+      - "Confirm naming conventions match PRP specifications"
+      - "Validate file paths are correct and accessible"
+      - "Test validation commands work in this environment"
+    enforcement: "Implementation cannot begin until patterns verified"
+
+  phase-3-implementation:
+    when: "After pattern verification complete"
+    method: "Follow TodoWrite task breakdown systematically"
+    validation: "Run progressive validation after each major todo completion"
+    tracking: "Mark todos complete as implemented and validated"
+
 implementation-methods:
-  - PRP pattern application
-  - Test-driven development when applicable
-  # - Language agent parallel coordination  # DISABLED
-  - Progressive validation at each level
-  - Context checkpoint management
-  - Quality gate enforcement
-  - Direct implementation with tooling validation
+  validation-enforcement:
+    progressive-blocking:
+      principle: "Each validation level MUST pass before proceeding to next"
+
+      level-1-syntax-style:
+        status: "HARD BLOCK"
+        timing: "After each file creation/modification"
+        message: "Level 1 (Syntax/Style) MUST pass before Level 2"
+        retry-protocol: "Fix all syntax/style issues and re-run until passing"
+        pass-criteria: "Zero syntax errors, ≥95% style compliance"
+
+      level-2-unit-tests:
+        status: "HARD BLOCK"
+        timing: "After component implementation"
+        message: "Level 2 (Unit Tests) MUST pass before Level 3"
+        retry-protocol: "Fix failing tests, add missing coverage, re-run until passing"
+        pass-criteria: "All tests pass, coverage ≥80%"
+
+      level-3-integration:
+        status: "HARD BLOCK"
+        timing: "After feature completion"
+        message: "Level 3 (Integration) MUST pass before Level 4"
+        retry-protocol: "Fix integration issues, verify end-to-end flows, re-run until passing"
+        pass-criteria: "100% critical paths pass, performance within SLA"
+
+      level-4-domain-specific:
+        status: "HARD BLOCK"
+        timing: "Before completion/handoff"
+        message: "Level 4 (Domain-Specific) MUST pass before declaring done"
+        retry-protocol: "Fix domain issues, re-run until passing"
+        pass-criteria: "Release build succeeds, strict linting clean, security compliant"
+
+    failure-protocol: "When validation fails, use PRP patterns and gotchas to fix issues, then re-run validation until passing. Do not proceed to next level with failures."
+
+anti-pattern-enforcement:
+  placeholder-prevention:
+    requirement: "NEVER use TODO/placeholder comments in place of actual code"
+    enforcement: "Static code analysis in Level 1 validation"
+    patterns-blocked:
+      - "TODO|FIXME|XXX|HACK"
+      - "placeholder|stub|not implemented"
+      - "coming soon|temporarily|for now"
+    detection-method: "Grep scan before validation gates"
+    action: "HARD FAIL - Block completion until all placeholders removed"
+    exception: "Test files may contain TODO for future test case documentation"
+
+  simplification-prevention:
+    requirement: "NEVER simplify functions/methods reducing functionality just to get MVP working"
+    enforcement: "Semantic completeness check in Level 2 validation"
+    checks:
+      - "Implement ALL functionality specified in PRP tasks"
+      - "NO simplified/stub implementations to 'get it working'"
+      - "NO hardcoded return values (except in tests)"
+      - "ALL error cases must be handled per PRP specifications"
+      - "ALL edge cases from PRP must be implemented"
+    detection-method: "Cross-reference PRP Implementation Tasks with actual implementation"
+    validation:
+      - "Parse PRP YAML Implementation Tasks section"
+      - "Verify each CREATE/MODIFY task has complete implementation"
+      - "Check for stub patterns (hardcoded returns, empty error handling)"
+      - "Validate all success criteria from PRP are addressed"
+
+  pattern-consistency:
+    requirement: "Follow existing codebase patterns - do not invent new approaches"
+    enforcement: "Pattern verification in phase-2 before implementation"
+    method: "Verify patterns exist in referenced files before using them"
+
+completion-verification:
+  mandatory-checklist:
+    technical-validation:
+      - item: "All 4 validation levels completed successfully"
+        verification: "Review validation-gate.md results for each level"
+      - item: "No placeholder comments in production code"
+        verification: "Grep scan completed with zero matches"
+      - item: "All functions fully implemented (no stubs)"
+        verification: "Semantic completeness check passed"
+      - item: "All tests pass with ≥80% coverage"
+        verification: "Test results reviewed and confirmed"
+
+    feature-validation:
+      - item: "All PRP Success Criteria met"
+        verification: "Compare implementation to PRP 'What' section"
+      - item: "All PRP Implementation Tasks completed"
+        verification: "Cross-reference PRP YAML tasks with implementation"
+      - item: "All Anti-Patterns avoided"
+        verification: "Review anti-pattern enforcement results"
+      - item: "Implementation matches architecture specifications"
+        verification: "Architecture consistency verified"
+
+    quality-validation:
+      - item: "Follows existing codebase patterns"
+        verification: "Pattern verification completed in phase-2"
+      - item: "Naming conventions match PRP specifications"
+        verification: "Code review for naming consistency"
+      - item: "Error handling complete and appropriate"
+        verification: "All error cases from PRP addressed"
+      - item: "Performance meets SLA requirements"
+        verification: "Level 3 performance tests passed"
+
+  enforcement: "Cannot proceed to QA handoff without all checklist items verified"
+  export-requirement: "Include checklist completion status in artifacts exported to QA"
 
 # language-agent-integration:  # DISABLED - temporarily removed
 #   swift:

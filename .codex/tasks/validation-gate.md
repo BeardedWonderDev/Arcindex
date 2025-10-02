@@ -160,6 +160,45 @@ fi
 echo "✅ Level 1 PASSED: Syntax and style validation complete"
 ```
 
+### Level 1.5: Placeholder & TODO Detection
+
+**Purpose**: Ensure no placeholder comments or incomplete code stubs in production code.
+
+**New Requirement**: NEVER use TODO/placeholder comments in place of implementing actual code.
+
+**Detection Patterns:**
+```bash
+# Scan for placeholder comments (exclude test files)
+echo "🔍 Scanning for placeholder comments..."
+
+PLACEHOLDER_PATTERNS="TODO|FIXME|XXX|HACK|placeholder|stub|not implemented|coming soon|temporarily"
+
+if find src/ -type f \( -name "*.swift" -o -name "*.py" -o -name "*.js" -o -name "*.ts" -o -name "*.go" -o -name "*.rs" \) -not -path "*/tests/*" -not -path "*/test/*" -exec grep -Hn -E "$PLACEHOLDER_PATTERNS" {} \; | grep -v "^[[:space:]]*//.*test\|^[[:space:]]*#.*test"; then
+    echo "❌ VALIDATION FAILED: Placeholder comments detected in production code"
+    echo ""
+    echo "All code must be fully implemented before validation."
+    echo "Remove all TODO, FIXME, placeholder, and stub comments."
+    echo ""
+    echo "Exception: Test files may contain TODO for future test cases."
+    exit 1
+else
+    echo "✅ No placeholder comments found"
+fi
+```
+
+**Pass Criteria:**
+- Zero placeholder comments in production code (src/, lib/, app/ directories)
+- Test files may contain TODO for future test documentation only
+
+**Failure Action:**
+- HARD FAIL (exit 1)
+- Block progression to Level 2
+- Provide specific file and line number of violations
+
+**Integration:**
+- Runs automatically as part of Level 1 validation
+- Must pass before Level 2 unit tests can run
+
 #### Python Projects
 ```bash
 # Syntax validation with Python AST
@@ -318,6 +357,113 @@ fi
 
 echo "✅ Level 2 PASSED: Unit tests passed with ${coverage_percentage}% coverage"
 ```
+
+### Level 2.5: Semantic Completeness & Stub Detection
+
+**Purpose**: Verify implementation matches PRP specifications - no simplified/stub implementations.
+
+**New Requirement**: NEVER simplify functions/methods reducing functionality just to get the MVP working.
+
+**Validation Method:**
+
+#### Step 1: PRP Task Cross-Reference
+```bash
+echo "🔍 Validating implementation completeness against PRP..."
+
+# Extract PRP Implementation Tasks
+if [ -f "PRPs/*.md" ]; then
+    PRP_FILE=$(ls PRPs/*.md | head -1)
+
+    # Parse YAML tasks section
+    echo "Extracting tasks from $PRP_FILE..."
+
+    # Check each CREATE/MODIFY task has corresponding implementation
+    grep -E "^Task [0-9]+:" "$PRP_FILE" | while read -r task; do
+        echo "Checking: $task"
+        # Extract file path from task
+        FILE_PATH=$(echo "$task" | grep -oP '(?<=CREATE |MODIFY )[^ ]+' || true)
+
+        if [ -n "$FILE_PATH" ] && [ ! -f "$FILE_PATH" ]; then
+            echo "⚠️  WARNING: Task specifies $FILE_PATH but file not found"
+        fi
+    done
+fi
+```
+
+#### Step 2: Stub Implementation Detection
+```bash
+echo "🔍 Scanning for stub/simplified implementations..."
+
+# Common stub patterns (language-specific)
+
+# Swift stubs
+find src/ -name "*.swift" -type f -exec grep -Hn "fatalError(\"Not implemented\")\|return nil // TODO\|return \[\] // stub\|return \"\" // placeholder" {} \; && echo "❌ Swift stubs detected" && exit 1
+
+# Python stubs
+find src/ -name "*.py" -type f -exec grep -Hn "raise NotImplementedError\|pass  # TODO\|return None  # stub\|return \[\]  # placeholder" {} \; && echo "❌ Python stubs detected" && exit 1
+
+# JavaScript/TypeScript stubs
+find src/ -name "*.js" -o -name "*.ts" -type f -exec grep -Hn "throw new Error('Not implemented')\|return null; // TODO\|return \[\]; // stub" {} \; && echo "❌ JS/TS stubs detected" && exit 1
+
+echo "✅ No stub implementations detected"
+```
+
+#### Step 3: Error Handling Completeness
+```bash
+echo "🔍 Checking error handling completeness..."
+
+# Detect empty catch blocks (various languages)
+echo "Scanning for empty error handlers..."
+
+# Swift empty catch
+EMPTY_CATCH_COUNT=$(find src/ -name "*.swift" -exec grep -Pzo "catch \{[[:space:]]*\}" {} \; | grep -c "catch" || echo "0")
+
+# Python bare except
+BARE_EXCEPT_COUNT=$(find src/ -name "*.py" -exec grep -n "except:[[:space:]]*$\|except:[[:space:]]*pass" {} \; | wc -l || echo "0")
+
+# JavaScript empty catch
+JS_EMPTY_CATCH=$(find src/ -name "*.js" -o -name "*.ts" -exec grep -Pzo "catch[[:space:]]*\([^)]+\)[[:space:]]*\{[[:space:]]*\}" {} \; | grep -c "catch" || echo "0")
+
+TOTAL_EMPTY=$((EMPTY_CATCH_COUNT + BARE_EXCEPT_COUNT + JS_EMPTY_CATCH))
+
+if [ "$TOTAL_EMPTY" -gt 0 ]; then
+    echo "⚠️  WARNING: $TOTAL_EMPTY empty error handlers detected"
+    echo "All error cases should have appropriate handling logic"
+    # Warning but not hard fail - could be intentional in some cases
+fi
+```
+
+#### Step 4: Hardcoded Return Detection
+```bash
+echo "🔍 Scanning for hardcoded return values (potential stubs)..."
+
+# This is heuristic - may need tuning per project
+find src/ -type f \( -name "*.swift" -o -name "*.py" -o -name "*.js" -o -name "*.ts" \) -not -path "*/tests/*" | while read -r file; do
+    # Look for functions that ONLY return hardcoded values
+    # This is a simple heuristic - customize as needed
+    if grep -Pzo "func [^\{]+\{[[:space:]]*return (true|false|0|1|\"[^\"]*\"|nil|null)[[:space:]]*\}" "$file" > /dev/null 2>&1; then
+        echo "⚠️  Potential stub in $file: function returns only hardcoded value"
+    fi
+done
+
+echo "✅ Hardcoded return scan complete"
+```
+
+**Pass Criteria:**
+- All PRP Implementation Tasks have corresponding files/implementations
+- Zero stub implementations detected (NotImplementedError, fatalError, etc.)
+- Error handling is complete (no empty catch blocks without rationale)
+- No functions returning only hardcoded values in production code
+
+**Failure Action:**
+- HARD FAIL if stubs detected
+- WARNING for empty error handlers (may be intentional)
+- Block progression to Level 3 until resolved
+
+**Integration:**
+- Runs after unit tests pass
+- Must pass before Level 3 integration tests
+- Results included in validation report
 
 ### Coverage Gap Analysis
 
@@ -625,6 +771,72 @@ fi
 echo "✅ Performance validation passed"
 ```
 
+### Level 4 Extended: Security & Vulnerability Scanning
+
+**Additional Security Validations:**
+
+#### Dependency Vulnerability Scanning
+```bash
+echo "🔒 Scanning dependencies for known vulnerabilities..."
+
+# Python
+if [ -f "requirements.txt" ] || [ -f "pyproject.toml" ]; then
+    pip install safety 2>/dev/null || echo "safety not available"
+    safety check 2>/dev/null || echo "⚠️  Vulnerability scan unavailable"
+fi
+
+# JavaScript/Node
+if [ -f "package.json" ]; then
+    npm audit --audit-level=high || echo "⚠️  High/critical vulnerabilities detected"
+fi
+
+# Swift/iOS
+if [ -f "Package.swift" ]; then
+    # Swift Package Manager doesn't have built-in vuln scanning yet
+    echo "ℹ️  Manual security review recommended for Swift dependencies"
+fi
+```
+
+#### Secret Detection
+```bash
+echo "🔒 Scanning for exposed secrets/credentials..."
+
+# Common secret patterns
+SECRET_PATTERNS="api[_-]?key|password|secret|token|credentials|private[_-]?key"
+
+if find src/ -type f -exec grep -iHn -E "$SECRET_PATTERNS\s*=\s*['\"][^'\"]+['\"]" {} \; | grep -v "\.env\.example\|config\.example"; then
+    echo "⚠️  WARNING: Potential hardcoded secrets detected"
+    echo "Review and move to environment variables or secure config"
+fi
+```
+
+#### API Security Validation
+```bash
+echo "🔒 Checking API security patterns..."
+
+# Check for HTTP (not HTTPS) in API calls
+if find src/ -type f -exec grep -Hn "http://api\|http://.*\.com" {} \; | grep -v "localhost\|127.0.0.1\|example.com"; then
+    echo "⚠️  WARNING: HTTP URLs detected - should use HTTPS for APIs"
+fi
+
+# Check for SQL injection vulnerabilities (basic check)
+if find src/ -type f -exec grep -Hn "execute.*%s\|cursor\.execute.*+" {} \; 2>/dev/null; then
+    echo "⚠️  WARNING: Potential SQL injection vulnerability - use parameterized queries"
+fi
+
+echo "✅ Security scan complete"
+```
+
+**Pass Criteria:**
+- No high/critical dependency vulnerabilities
+- No hardcoded secrets in source code
+- HTTPS used for all external API calls
+- No obvious SQL injection patterns
+
+**Failure Action:**
+- HARD FAIL for critical vulnerabilities
+- WARNING for potential issues requiring manual review
+
 ### Validation Results Aggregation
 
 ```yaml
@@ -811,3 +1023,89 @@ validation_system_metrics:
 ---
 
 **CRITICAL SUCCESS FACTOR**: The 4-level validation system is the final quality gate ensuring CODEX implementations meet production standards. All levels must pass for workflow completion.
+
+## Validation Results Summary
+
+After running all levels, generate a comprehensive validation report:
+
+```bash
+cat > validation-results.json <<EOF
+{
+  "validation_run": "$(date -Iseconds)",
+  "project": "$(basename $(pwd))",
+  "levels_completed": {
+    "level_0": {
+      "name": "Elicitation Validation",
+      "status": "passed|failed",
+      "blocking": true
+    },
+    "level_1": {
+      "name": "Syntax & Style",
+      "status": "passed|failed",
+      "placeholder_scan": "clean|violations_found",
+      "blocking": true
+    },
+    "level_2": {
+      "name": "Unit Tests",
+      "status": "passed|failed",
+      "coverage": "XX%",
+      "semantic_completeness": "passed|failed|warnings",
+      "stub_detection": "clean|stubs_found",
+      "blocking": true
+    },
+    "level_3": {
+      "name": "Integration Tests",
+      "status": "passed|failed",
+      "critical_paths": "all_passed|some_failed",
+      "blocking": true
+    },
+    "level_4": {
+      "name": "Domain-Specific Validation",
+      "status": "passed|failed",
+      "security_scan": "clean|warnings|vulnerabilities",
+      "blocking": true
+    }
+  },
+  "overall_status": "READY_FOR_QA|NEEDS_FIXES|BLOCKED",
+  "blocking_issues": [],
+  "warnings": [],
+  "next_action": "proceed_to_qa|fix_issues|address_warnings"
+}
+EOF
+
+echo "📊 Validation results saved to validation-results.json"
+```
+
+## Progressive Validation Enforcement
+
+**CRITICAL**: Each level MUST pass before the next level can run.
+
+```bash
+# Example enforcement wrapper
+run_validation_level() {
+    level=$1
+    echo "Running Level $level validation..."
+
+    # Run level
+    ./validate_level_${level}.sh
+
+    # Check result
+    if [ $? -ne 0 ]; then
+        echo "❌ Level $level FAILED"
+        echo "Fix issues and re-run validation before proceeding."
+        echo "Cannot run Level $((level+1)) until Level $level passes."
+        exit 1
+    fi
+
+    echo "✅ Level $level PASSED - proceeding to Level $((level+1))"
+}
+
+# Progressive execution
+run_validation_level 0
+run_validation_level 1
+run_validation_level 2
+run_validation_level 3
+run_validation_level 4
+
+echo "🎉 All validation levels passed!"
+```
