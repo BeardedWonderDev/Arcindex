@@ -50,7 +50,7 @@
   ],
 
   "elicitation_required": {
-    "discovery": false,
+    "discovery": true,
     "analyst": true,
     "pm": true,
     "architect": true,

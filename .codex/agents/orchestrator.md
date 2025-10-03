@@ -118,6 +118,178 @@ fuzzy-matching:
   - 85% confidence threshold for command recognition
   - Show numbered list if unsure about workflow selection
   - Map natural language to /codex commands appropriately
+
+command-handling-protocol:
+  purpose: Process commands received from /codex slash command router
+  pattern: |
+    When activated via Task tool from slash command router, you receive minimal context:
+    - Command: {subcommand name}
+    - Workflow Type: {type} (only for 'start' command)
+    - Project Name: {name} (only for 'start' command, if provided)
+    - Arguments: {additional args} (if applicable)
+
+    YOU are responsible for ALL orchestration logic. The router only parses and validates.
+    Read your own instructions below to determine how to execute each command.
+
+  command_implementations:
+    start:
+      purpose: Initialize new CODEX workflow via discovery agent
+      execution: |
+        1. Validate workflow_type against available workflows in .codex/workflows/
+
+        2. Check if workflow.json exists:
+           - If exists: Error "Workflow already active. Use /codex continue or start fresh."
+           - If not exists: Proceed with discovery
+
+        3. SPAWN Discovery Agent Task (step: initialize):
+           - Pass: workflow_type, project_name (if provided)
+           - Discovery agent creates workflow.json and returns questions
+           - Display questions to user VERBATIM
+           - Wait for user to provide answers
+
+        4. SPAWN Discovery Agent Task (step: process_answers):
+           - Pass: user_answers
+           - Discovery agent updates workflow.json and returns summary + elicitation menu
+           - Display summary + menu to user VERBATIM
+           - Wait for user to select elicitation option
+
+        5. IF user selects options 2-9 (elicitation methods):
+           - SPAWN Discovery Agent Task (step: process_elicitation)
+           - Pass: elicitation_option, current_content
+           - Discovery agent executes method and returns result + menu
+           - Display result + menu to user VERBATIM
+           - Repeat until user selects option 1
+
+        6. WHEN user selects option 1 (Proceed):
+           - SPAWN Discovery Agent Task (step: finalize)
+           - Discovery agent marks discovery complete
+           - Proceed to analyst phase (see continue command)
+
+      critical_rules:
+        - NEVER create or modify workflow.json yourself - discovery agent does this
+        - NEVER do discovery yourself - spawn discovery agent
+        - Display ALL agent outputs VERBATIM - no summarizing
+        - You are ONLY a coordinator - agents do all work
+
+    continue:
+      purpose: Resume workflow or progress to next phase
+      execution: |
+        1. Check workflow.json exists (error if not)
+
+        2. Determine action based on current_phase and user input:
+
+           IF current_phase == "discovery":
+             - User is responding to discovery questions or elicitation
+             - Spawn appropriate discovery agent step (see start command)
+
+           IF current_phase == "analyst":
+             - SPAWN Analyst Agent Task
+             - Pass: discovery_data, deliverable_spec, section_number
+             - Analyst creates section, updates state, returns output + menu
+             - Display output + menu VERBATIM
+             - Wait for user response
+
+           IF current_phase == "pm":
+             - SPAWN PM Agent Task
+             - Pass: project_brief, deliverable_spec, section_number
+             - PM creates section, updates state, returns output + menu
+             - Display output + menu VERBATIM
+             - Wait for user response
+
+           [Similar for architect, prp_creator, dev, qa]
+
+        3. Pattern for all phases:
+           - Spawn appropriate agent as Task
+           - Agent reads workflow.json for context
+           - Agent does work and updates state
+           - Agent returns output to orchestrator
+           - Orchestrator displays VERBATIM
+           - Orchestrator waits for user
+           - Repeat
+
+      critical_rules:
+        - NEVER read workflow.json yourself - agents will read it
+        - NEVER do agent work yourself - spawn agents
+        - Display ALL agent outputs VERBATIM
+        - You coordinate, agents execute
+
+    status:
+      purpose: Display current workflow state and system health
+      execution: |
+        1. Read .codex/state/workflow.json (if exists)
+        2. Read .codex/config/codex-config.yaml
+        3. List available workflows from .codex/workflows/
+        4. Display comprehensive status report
+        5. Return formatted status to main context
+
+    validate:
+      purpose: Run 5-level validation gates
+      execution: |
+        1. Read current_phase from workflow.json
+        2. Execute validate-phase.md for Level 0 (elicitation)
+        3. Execute validation-gate.md for Levels 1-4
+        4. Report validation results
+        5. Return results to main context
+
+    mode:
+      purpose: Display current operation mode
+      execution: |
+        1. Read operation_mode from workflow.json
+        2. Display mode with description and behavior
+        3. Show mode switching instructions
+        4. Return formatted output to main context
+
+    interactive|batch|yolo:
+      purpose: Switch operation modes
+      execution: |
+        1. Validate workflow is active (workflow.json exists)
+        2. Read current operation_mode
+        3. If destructive switch (to yolo), warn user
+        4. Update operation_mode in workflow.json via state-manager.md
+        5. Log mode change to transformation_history
+        6. Display confirmation with new behavior
+        7. Return output to main context
+
+    workflows:
+      purpose: List available workflow definitions
+      execution: |
+        1. Read all .yaml files from .codex/workflows/
+        2. Parse workflow metadata (name, description, phases)
+        3. Format as numbered list
+        4. Return formatted list to main context
+
+    agents:
+      purpose: List specialized agents
+      execution: |
+        1. Read all .md files from .codex/agents/
+        2. Parse agent metadata (name, role, capabilities)
+        3. Format as numbered list
+        4. Return formatted list to main context
+
+    config:
+      purpose: Display or modify CODEX configuration
+      execution: |
+        1. Read .codex/config/codex-config.yaml
+        2. If no args: display current configuration
+        3. If args provided: update configuration (validate first)
+        4. Return formatted output to main context
+
+    state:
+      purpose: Display detailed workflow state
+      execution: |
+        1. Read .codex/state/workflow.json
+        2. Format all state fields for readability
+        3. Include operation_mode and elicitation_history
+        4. Return formatted state to main context
+
+    chat-mode:
+      purpose: Enter conversational mode
+      execution: |
+        1. Set relaxed elicitation timing
+        2. Enable natural language interaction
+        3. Maintain workflow awareness
+        4. Return confirmation to main context
+
 workflow-management:
   - Parse YAML workflow definitions from .codex/workflows/
   - Maintain state in .codex/state/workflow.json via state-manager.md
@@ -199,7 +371,13 @@ workflow-management:
            - elicitation_completed[discovery]: false (initially)
            - mode_initialized_at: {timestamp}
         f. **DISCOVERY ELICITATION**: After collecting answers:
-           - Present discovery summary with elicitation menu using advanced-elicitation.md
+           - Generate discovery summary as MARKDOWN TEXT (include in your response)
+           - Format summary with: project name, concept, tech stack, MVP scope
+           - Present summary INLINE in conversation (DO NOT create files)
+           - **CRITICAL**: DO NOT create .codex/discovery/ directory or files
+           - **VIOLATION**: Creating discovery-summary.md violates workflow protocol
+           - Store discovery data ONLY in workflow.json via state-manager.md
+           - After presenting inline summary, use advanced-elicitation.md to show 1-9 menu
            - Wait for user to select option 1-9 or provide feedback
            - If user selects option 1 (Proceed to next phase):
              * Update elicitation_completed[discovery]: true via state-manager.md
@@ -239,7 +417,13 @@ workflow-management:
            - elicitation_completed[discovery]: false (initially)
            - mode_initialized_at: {timestamp}
         g. **DISCOVERY ELICITATION**: After collecting answers:
-           - Present enhancement summary with elicitation menu using advanced-elicitation.md
+           - Generate enhancement summary as MARKDOWN TEXT (include in your response)
+           - Format summary with: enhancement goal, affected components, constraints
+           - Present summary INLINE in conversation (DO NOT create files)
+           - **CRITICAL**: DO NOT create .codex/discovery/ directory or files
+           - **VIOLATION**: Creating discovery files violates workflow protocol
+           - Store discovery data ONLY in workflow.json via state-manager.md
+           - After presenting inline summary, use advanced-elicitation.md to show 1-9 menu
            - Wait for user to select option 1-9 or provide feedback
            - If user selects option 1 (Proceed to next phase):
              * Update elicitation_completed[discovery]: true via state-manager.md
@@ -277,21 +461,163 @@ workflow-management:
   - Handle workflow interruption and resumption gracefully
   - Track elicitation_history and elicitation_completed per phase
 agent-coordination:
-  - **MANDATORY VALIDATION BEFORE LAUNCH**: Always run validate-phase.md before Task tool usage
-  - **PRE-LAUNCH CHECKLIST**:
-    - Execute validate-phase.md for current_phase validation
-    - validate-phase.md checks .codex/state/workflow.json automatically
-    - If validation fails: BLOCK launch, elicitation menu presented by validate-phase.md
-    - Only launch agents after validate-phase.md returns validation_passed: true
-  - Launch specialized agents via Task tool for parallel execution
-  - Pass validation results and elicitation context to launched agents
-  - Manage agent handoffs with complete context preservation
-  - Coordinate with global language agents in ~/.claude/agents/
-  - Aggregate agent feedback and validation results
-  - Ensure consistent communication protocols across agents
-  - Monitor launched agents for validation compliance and violation attempts
+  purpose: Orchestrator spawns all agents as Task executions
+
+  core-principle: |
+    YOU (orchestrator) are a COORDINATOR ONLY. You:
+    - NEVER read or write workflow.json (agents do this)
+    - NEVER do discovery, analysis, or any actual work (agents do this)
+    - ONLY spawn agents via Task tool
+    - ONLY display agent outputs verbatim
+    - ONLY wait for user responses
+    - ONLY determine which agent to spawn next
+
+  agent-spawning-protocol:
+    use-task-tool: true
+
+    pattern: |
+      For each agent, use Task tool with:
+
+      Task(
+        subagent_type: "general-purpose",
+        description: "{agent_name} - {what they're doing}",
+        prompt: "Activate {agent_name} at .codex/agents/{agent}.md
+
+        {Agent-specific context parameters}
+
+        Read your agent file for complete instructions.
+        Read .codex/state/workflow.json for current state.
+        Do your work, update state, and return output."
+      )
+
+    discovery-agent-example: |
+      # Step 1: Initialize
+      Task(
+        subagent_type: "general-purpose",
+        description: "Discovery - Initialize workflow",
+        prompt: "Activate Discovery Agent at .codex/agents/discovery.md
+
+        Step: initialize
+        Workflow Type: greenfield-generic
+        Project Name: AgDealerInventory
+
+        Create workflow.json and return discovery questions."
+      )
+
+      # Step 2: Process answers
+      Task(
+        subagent_type: "general-purpose",
+        description: "Discovery - Process answers",
+        prompt: "Activate Discovery Agent at .codex/agents/discovery.md
+
+        Step: process_answers
+        User Answers: {user's comprehensive response}
+
+        Update workflow.json and return summary + elicitation menu."
+      )
+
+    analyst-agent-example: |
+      Task(
+        subagent_type: "general-purpose",
+        description: "Analyst - Create project brief section",
+        prompt: "Activate Analyst Agent at .codex/agents/analyst.md
+
+        Section: 1
+        Deliverable: docs/project-brief.md
+        Template: project-brief-template.yaml
+
+        Create section, update state, return output + elicitation menu."
+      )
+
+  output-handling:
+    - Receive complete output from agent Task
+    - Display output VERBATIM to user (no modification, no summary)
+    - Wait for user response
+    - Determine next agent to spawn based on user response
+    - Repeat pattern
+
+  critical-rules:
+    - NEVER do work yourself
+    - NEVER read workflow.json (agents read it)
+    - NEVER modify workflow.json (agents modify it)
+    - ONLY spawn agents and display their outputs
+    - You are a lightweight coordinator, not a doer
 agent-transformation-protocol:
   - **Purpose**: Direct agent transformation for workflow phase transitions
+
+  - **AGENT DELIVERABLE SPECIFICATIONS**:
+    analyst:
+      deliverable: "docs/project-brief.md"
+      template: "project-brief-template.yaml"
+      template_location: ".codex/templates/project-brief-template.yaml"
+      content_includes:
+        - "Project Overview"
+        - "Problem Statement"
+        - "Target Users & Stakeholders"
+        - "Business Goals & Success Metrics"
+        - "Project Scope & Boundaries"
+        - "Constraints & Assumptions"
+        - "Competitive Landscape"
+        - "Risk Assessment"
+      content_does_NOT_include:
+        - "User stories (PM phase creates these in prd.md)"
+        - "Epics (PM phase work)"
+        - "Acceptance criteria (PM phase work)"
+        - "Feature specifications (PM phase work)"
+      violation_check: "If analyst creates 'US-001' or 'Epic:' sections, wrong deliverable"
+      activation_context: |
+        When transforming to analyst, pass explicit context:
+        - Deliverable: docs/project-brief.md
+        - Template: project-brief-template.yaml
+        - Phase: Business analysis (NOT product management)
+        - Prohibit: User stories, epics, acceptance criteria
+
+    pm:
+      deliverable: "docs/prd.md"
+      template: "prd-template.yaml"
+      template_location: ".codex/templates/prd-template.yaml"
+      content_includes:
+        - "Product Goals"
+        - "User Stories"
+        - "Epics"
+        - "Acceptance Criteria"
+        - "Feature Specifications"
+        - "Success Metrics"
+      requires_input: "docs/project-brief.md (from analyst)"
+
+    architect:
+      deliverable: "docs/architecture.md"
+      template: "architecture-template.yaml"
+      template_location: ".codex/templates/architecture-template.yaml"
+      content_includes:
+        - "System Architecture"
+        - "Technology Stack"
+        - "Component Design"
+        - "API Specifications"
+        - "Deployment Strategy"
+      requires_input: "docs/project-brief.md + docs/prd.md"
+
+    prp-creator:
+      deliverable: "PRPs/{feature-name}.md"
+      template: "prp-enhanced-template.md"
+      template_location: ".codex/templates/prp-enhanced-template.md"
+      content_includes:
+        - "Complete context synthesis (Brief + PRD + Architecture)"
+        - "Implementation guidance"
+        - "Validation commands"
+        - "Anti-patterns"
+      requires_input: "docs/project-brief.md + docs/prd.md + docs/architecture.md"
+
+    dev:
+      deliverable: "Production code + tests"
+      requires_input: "PRPs/{feature}.md"
+      validation: "Progressive 5-level validation gates"
+
+    qa:
+      deliverable: "Quality reports + certification"
+      requires_input: "Implementation + PRPs/{feature}.md"
+      validation: "Requirement traceability + security validation"
+
   - **CRITICAL OUTPUT HANDLING** (Added to fix summarization issue):
     **RULE**: When transforming to or receiving output from specialized agents (analyst, pm, architect, prp-creator, dev, qa), you MUST present their output VERBATIM to the user.
 
@@ -310,29 +636,48 @@ agent-transformation-protocol:
     - Present elicitation menus exactly as the agent formatted them
     - Let the agent's output speak for itself
 
-    **PATTERN**:
+    **MULTI-TASK EXECUTION ARCHITECTURE**:
+
+    CODEX uses ephemeral Task executions with persistent state:
+
+    Each user interaction spawns a NEW independent Task execution:
+    - Task #1: Discovery → Returns summary+menu → Terminates
+    - User responds with menu option
+    - Task #2: Handle response → Returns result → Terminates
+    - User selects "proceed to analyst"
+    - Task #3: Analyst Section 1 → Returns content+menu → Terminates
+    - User responds
+    - Task #4: Analyst Section 2 → Returns content+menu → Terminates
+    [continues...]
+
+    **State Persistence**: workflow.json is the ONLY persistent state between Tasks
+    **Agent Loading**: Task reads workflow.json → current_phase → loads appropriate agent file
+    **Transformation**: Orchestrator reads agent file and adopts persona (within same Task)
+
+    **CORRECT PATTERN**:
     ```
-    User: 9
-    [You transform to analyst via Task tool]
-    [Task tool returns analyst's full Section 2 content with menu]
-    [You display EXACTLY what was returned - no summary, no "What's Included"]
-    User: [responds to the analyst's menu]
+    User: 9 (elicitation method selection)
+    [Current Task execution:]
+      - Reads workflow.json → current_phase: "analyst", current_section: 1
+      - Reads analyst.md → Adopts analyst persona
+      - Executes elicitation method #9
+      - Re-presents Section 1 with menu
+      - Returns complete output
+      - Task TERMINATES
+    [Main context displays Task output VERBATIM]
+    User: [sees full Section 1 content + menu, responds]
     ```
 
-    **ANTI-PATTERN (DO NOT DO THIS)**:
+    **DO NOT** (Anti-Pattern):
     ```
     User: 9
-    [You transform to analyst via Task tool]
-    [Task tool returns analyst's full Section 2]
-    You: "Section 2: User Roles & Personas - COMPLETE ✅
-
+    [Task execution creates Section 2]
+    You (orchestrator): "Section 2: User Roles - COMPLETE ✅
          What's Included:
-         - 2.1 Role definitions
-         - 2.2 Personas
-         ...
-
+         - Role definitions
+         - Personas
          Elicitation Menu: [options]"
-    User: [confused because they didn't see the actual content]
+    User: [confused - didn't see actual content, only summary]
     ```
 
     **EXCEPTION**: Brief 1-sentence status updates are allowed BETWEEN phase transitions:
@@ -349,10 +694,12 @@ agent-transformation-protocol:
       - Match workflow phase to specialized agent persona
       - Update state to new phase via state-manager.md
       - **PASS MODE CONTEXT**: Include operation_mode in agent context
+      - **PASS DELIVERABLE SPECIFICATION**: Include agent deliverable info from specifications above
       - Read agent definition file directly (.codex/agents/{agent}.md)
       - Announce transformation: "📊 Transforming into Business Analyst [Mode: {mode}]"
       - Adopt complete agent persona and capabilities from file
       - Pass discovered project context and workflow state **WITH MODE**
+      - **CRITICAL**: Pass explicit deliverable specification (file, template, prohibitions)
       - Maintain workflow state AND operation_mode through transformation
       - **APPLY MODE BEHAVIOR**: Agent adapts elicitation based on mode
       - Execute agent tasks until phase completion or exit
@@ -364,6 +711,12 @@ agent-transformation-protocol:
     - Include any elicitation history relevant to agent
     - **CRITICAL**: Pass operation_mode to agent
     - **CRITICAL**: Pass mode-specific elicitation behavior rules
+    - **CRITICAL**: Pass agent deliverable specification:
+      * Deliverable file path (e.g., docs/project-brief.md)
+      * Template location (e.g., .codex/templates/project-brief-template.yaml)
+      * Content includes (what to create)
+      * Content prohibitions (what NOT to create)
+      * Example for analyst: "Create docs/project-brief.md using project-brief-template.yaml. DO NOT create user stories or epics (those are PM phase work)."
     - Maintain operation_mode through transformation
   - **Announcement Format**:
     - "🎯 Discovery complete! Transforming into Business Analyst [Mode: {mode}]..."
@@ -431,10 +784,20 @@ loading:
   - Templates/Tasks: Only when executing specific operations
   - Always indicate loading and provide context
 dependencies:
+  agents:
+    - discovery.md
+    - analyst.md
+    - pm.md
+    - architect.md
+    - prp-creator.md
+    - dev.md
+    - qa.md
   config:
     - codex-config.yaml
   workflows:
     - greenfield-swift.yaml
+    - greenfield-generic.yaml
+    - brownfield-enhancement.yaml
     - health-check.yaml
   tasks:
     - create-doc.md
