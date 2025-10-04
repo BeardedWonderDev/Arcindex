@@ -105,6 +105,47 @@ For complex changes, include a body explaining what and why
       git add CHANGELOG.md
       ```
 
+   g. **Update Development History:**
+      - Determine the week of the commit (ISO week, Monday-Sunday)
+      - Get Monday date of current week: `date -v-Mon +%Y-%m-%d` (or equivalent)
+      - Check if "Week of {monday_date}" section exists in Development History
+      - If week section exists:
+        * Insert new commit at TOP of that week's commit list (reverse chronological)
+        * Regenerate focus line for that week
+      - If week section doesn't exist:
+        * Create new week section at TOP of Development History
+        * Add commit entry
+        * Generate initial focus line
+
+      **Focus Line Generation Algorithm:**
+      1. Get all commits for the week: `git log --since="YYYY-MM-DD" --until="YYYY-MM-DD" --pretty=format:"%s"`
+      2. Extract keywords from commit messages (text after "type:" prefix)
+      3. Weight by commit type:
+         - feat: 3 points
+         - fix: 2 points
+         - refactor: 2 points
+         - docs: 1 point
+         - others: 1 point
+      4. Count weighted keyword frequency across all week's commits
+      5. Select top 2-3 themes (most frequent weighted keywords)
+      6. Format themes as gerunds/noun phrases: "Orchestrator enhancements", "validation improvements"
+      7. Combine: "**Focus:** theme1, theme2, theme3"
+
+      **Week Section Format:**
+      ```
+      ### Week of YYYY-MM-DD (X commits)
+      **Focus:** [auto-generated themes]
+
+      - hash: type: description (YYYY-MM-DD)
+      - hash: type: description (YYYY-MM-DD)
+      ```
+
+      **Implementation Notes:**
+      - Week count updates automatically (count commits in that week section)
+      - Commits within week are reverse chronological (newest first)
+      - Week sections themselves are reverse chronological (newest week first)
+      - Regenerate focus line each time a commit is added to ensure accuracy
+
 ## Phase 4: Create Commit
 
 8. Once approved and changelog updated, create the commit and show me the result.
