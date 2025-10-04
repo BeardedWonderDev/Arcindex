@@ -11,6 +11,7 @@ Current development version (pre-v0.1.0) - Core infrastructure complete, enterin
 
 ### Added
 
+- Comprehensive v0.1.0 gap analysis documentation for analyst, PM, and PRD creation workflows
 - Persistent orchestrator architecture with dedicated discovery agent for improved workflow coordination
 - ULTRATHINK mandatory planning phase for systematic PRP implementation
 - Final validation completion checklist for comprehensive pre-QA verification
@@ -105,9 +106,10 @@ Current development version (pre-v0.1.0) - Core infrastructure complete, enterin
 - fca8e9e: feat: add CODEX project documentation and PRP framework (2025-09-23)
 - 1585c10: claude & bmad files (2025-09-23)
 
-### Week of 2025-09-29 (20 commits)
+### Week of 2025-09-29 (21 commits)
 **Focus:** Orchestrator persistence, validation workflow enhancements, mode-awareness system
 
+- fe8df89: docs: restructure changelog with weekly development history format (2025-10-04)
 - 1e1f186: fix: prevent orchestrator auto-spawning sections and correct template elicit flags (2025-10-03)
 - 168d3cc: feat: implement persistent orchestrator with discovery agent (2025-10-03)
 - 5f15185: readd bmad (2025-10-03)
@@ -133,20 +135,20 @@ Current development version (pre-v0.1.0) - Core infrastructure complete, enterin
 
 ## Statistics
 
-- **Total Commits**: 45
+- **Total Commits**: 47
 - **Total Lines Added**: ~30,000+
 - **Total Lines Deleted**: ~500
 - **Net Change**: +29,500 lines
-- **Date Range**: 2025-09-23 to 2025-10-03
+- **Date Range**: 2025-09-23 to 2025-10-04
 - **Files Created/Modified**: ~200 files
 
 ## Commit Type Distribution
 
-- **Features (feat)**: 14 commits (31.1%)
-- **Fixes (fix)**: 10 commits (22.2%)
-- **Refactoring (refactor)**: 3 commits (6.7%)
-- **Documentation (docs)**: 8 commits (17.8%)
-- **Miscellaneous**: 10 commits (22.2%)
+- **Features (feat)**: 14 commits (29.8%)
+- **Fixes (fix)**: 10 commits (21.3%)
+- **Refactoring (refactor)**: 3 commits (6.4%)
+- **Documentation (docs)**: 9 commits (19.1%)
+- **Miscellaneous**: 11 commits (23.4%)
 
 ## Key Development Themes
 
