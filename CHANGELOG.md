@@ -58,6 +58,8 @@ Current development version (pre-v0.1.0) - Core infrastructure complete, enterin
 
 ### Fixed
 
+- Orchestrator auto-spawning next section without waiting for user input in interactive mode
+- Project brief template elicit flags (sections 6-8 now require elicitation)
 - Analyst agent bypassing elicitation in interactive mode (was using batch processing incorrectly)
 - Redundant PROCEED/WAIT confirmation after discovery elicitation menu selection
 - Multiple file creation instead of enforced single file output from templates
@@ -170,7 +172,7 @@ Current development version (pre-v0.1.0) - Core infrastructure complete, enterin
 
 ## Statistics
 
-- **Total Commits**: 44
+- **Total Commits**: 45
 - **Total Lines Added**: ~30,000+
 - **Total Lines Deleted**: ~500
 - **Net Change**: +29,500 lines
@@ -179,11 +181,11 @@ Current development version (pre-v0.1.0) - Core infrastructure complete, enterin
 
 ## Commit Type Distribution
 
-- **Features (feat)**: 14 commits (31.8%)
-- **Fixes (fix)**: 9 commits (19.1%)
-- **Refactoring (refactor)**: 3 commits (6.4%)
-- **Documentation (docs)**: 8 commits (17.0%)
-- **Miscellaneous**: 14 commits (29.8%)
+- **Features (feat)**: 14 commits (31.1%)
+- **Fixes (fix)**: 10 commits (22.2%)
+- **Refactoring (refactor)**: 3 commits (6.7%)
+- **Documentation (docs)**: 8 commits (17.8%)
+- **Miscellaneous**: 10 commits (22.2%)
 
 ## Key Development Themes
 

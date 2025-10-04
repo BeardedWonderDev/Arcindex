@@ -201,13 +201,6 @@ workflow_settings:
     enabled: true
     default_mode: "interactive"
     enforcement_level: "hard"
-    phase_requirements:
-      discovery: true
-      requirements: true
-      architecture: true
-      prp_creator: true
-      implementation: false
-      testing: false
 
   validation:
     level_0_required: true  # Elicitation validation mandatory

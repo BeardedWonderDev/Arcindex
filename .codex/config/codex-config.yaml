@@ -81,10 +81,3 @@ elicitation:
   violation_log_path: ".codex/debug-log.md"
   recovery_enabled: true
   session_timeout: 1800  # 30 minutes
-  phase_requirements:  # Which phases require elicitation
-    analyst: true
-    pm: true
-    architect: true
-    prp_creator: true
-    dev: false  # Implementation phase typically doesn't need elicitation
-    qa: false  # Testing phase typically doesn't need elicitation

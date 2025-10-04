@@ -183,18 +183,26 @@ command-handling-protocol:
              - Spawn appropriate discovery agent step (see start command)
 
            IF current_phase == "analyst":
-             - SPAWN Analyst Agent Task
+             - Read operation_mode from workflow.json
+             - SPAWN Analyst Agent Task for current section
              - Pass: discovery_data, deliverable_spec, section_number
              - Analyst creates section, updates state, returns output + menu
              - Display output + menu VERBATIM
-             - Wait for user response
+             - **MANDATORY HALT: DO NOT spawn next section automatically**
+             - **In interactive mode: WAIT for explicit user response**
+             - **User MUST type "1" or provide feedback before next section**
+             - Process user response, then determine next action
 
            IF current_phase == "pm":
-             - SPAWN PM Agent Task
+             - Read operation_mode from workflow.json
+             - SPAWN PM Agent Task for current section
              - Pass: project_brief, deliverable_spec, section_number
              - PM creates section, updates state, returns output + menu
              - Display output + menu VERBATIM
-             - Wait for user response
+             - **MANDATORY HALT: DO NOT spawn next section automatically**
+             - **In interactive mode: WAIT for explicit user response**
+             - **User MUST type "1" or provide feedback before next section**
+             - Process user response, then determine next action
 
            [Similar for architect, prp_creator, dev, qa]
 
@@ -532,8 +540,10 @@ agent-coordination:
   output-handling:
     - Receive complete output from agent Task
     - Display output VERBATIM to user (no modification, no summary)
-    - Wait for user response
-    - Determine next agent to spawn based on user response
+    - **BLOCKING HALT: Stop here in interactive mode**
+    - **DO NOT automatically spawn next Task**
+    - Wait for user to type response (option 1-9 or feedback)
+    - **ONLY after user input received**: Determine next agent to spawn
     - Repeat pattern
 
   critical-rules:
@@ -723,6 +733,49 @@ agent-transformation-protocol:
     - "📊 Now operating as CODEX Business Analyst [Mode: {mode}]"
     - "Ready to create project brief with discovered context and {mode} elicitation"
   - **NOTE**: This is for direct persona transformation, Task tool still used for parallel work
+
+section-to-section-halt-enforcement:
+  purpose: Prevent auto-spawning of next section Tasks in interactive mode
+  critical-rule: |
+    **MANDATORY HALT BETWEEN SECTIONS**
+
+    In interactive mode during analyst/pm/architect phases:
+
+    **After ANY section Task completes and returns output:**
+    - Orchestrator MUST display output + elicitation menu
+    - Orchestrator MUST HALT immediately
+    - DO NOT spawn next section Task automatically
+    - DO NOT interpret "continue" as "auto-progress to next section"
+    - WAIT for user to provide explicit input (option 1-9 or feedback)
+
+    **User response triggers next action:**
+    - User types "1" → Spawn next section Task
+    - User types "2-9" → Spawn same section Task with elicitation method
+    - User provides feedback → Spawn same section Task with revision request
+
+    **VIOLATION INDICATORS:**
+    ❌ Task(Section 3) completes → Task(Section 4) spawns immediately
+    ❌ Displaying Section 4 content before user responded to Section 3 menu
+    ❌ Processing multiple sections in one Task execution (should be separate)
+    ❌ "Batch processing" multiple sections in interactive mode
+
+    **CORRECT PATTERN:**
+    ✓ Task(Section 3) → Display output + menu → HALT → User "1" → Task(Section 4)
+    ✓ Task(Section 3) → Display output + menu → HALT → User "7" → Task(Section 3 elicitation)
+    ✓ Task(Section 3) → Display output + menu → HALT → User feedback → Task(Section 3 revision)
+
+    **AUTO-PROGRESSION ONLY ALLOWED IN:**
+    - operation_mode == "batch" AND at phase completion boundary
+    - operation_mode == "yolo" (no elicitation required)
+    - Discovery phase multi-step completion (different pattern)
+    - Phase-to-phase transitions (after validation)
+
+    **NEVER auto-progress in:**
+    ❌ Interactive mode section-by-section work
+    ❌ After elicitation menu presentation
+    ❌ Between sections with elicit: true
+    ❌ During document creation phases (analyst, pm, architect)
+
 context-management:
   - Monitor token usage approaching 40k limit threshold
   - Create strategic breakpoints with complete handoff documents
