@@ -11,6 +11,12 @@ Current development version (pre-v0.1.0) - Core infrastructure complete, enterin
 
 ### Added
 
+- Comprehensive BMAD vs CODEX workflow analysis integrating 6 parallel agent reviews (111K document)
+  - Identified 70+ gaps across analyst, PM, architect, and PRP workflows
+  - Introduced epic-based incremental workflow pattern (architecture & PRPs created per-epic, not all upfront)
+  - Defined v0.1.0 roadmap: 114-156 hours focused on quality foundations with comprehensive quality gates
+  - Deferred brownfield support to v0.2.0 to focus on greenfield MVP excellence
+  - Reorganized gap analysis documents into references-docs/ subfolder for improved navigation
 - Comprehensive v0.1.0 gap analysis documentation for analyst, PM, and PRD creation workflows
 - Persistent orchestrator architecture with dedicated discovery agent for improved workflow coordination
 - ULTRATHINK mandatory planning phase for systematic PRP implementation
@@ -77,6 +83,11 @@ Current development version (pre-v0.1.0) - Core infrastructure complete, enterin
 
 ## Development History
 
+### Week of 2025-10-06 (1 commit)
+**Focus:** v0.1 gap analysis integration, epic-based workflow architecture
+
+- 27031ef: docs: integrate v0.1 gap analysis with epic-based roadmap and reorganize references (2025-10-07)
+
 ### Week of 2025-09-22 (25 commits)
 **Focus:** CODEX orchestration system, elicitation enforcement, Swift agent refactoring
 
@@ -135,20 +146,20 @@ Current development version (pre-v0.1.0) - Core infrastructure complete, enterin
 
 ## Statistics
 
-- **Total Commits**: 47
+- **Total Commits**: 48
 - **Total Lines Added**: ~30,000+
 - **Total Lines Deleted**: ~500
 - **Net Change**: +29,500 lines
-- **Date Range**: 2025-09-23 to 2025-10-04
+- **Date Range**: 2025-09-23 to 2025-10-07
 - **Files Created/Modified**: ~200 files
 
 ## Commit Type Distribution
 
-- **Features (feat)**: 14 commits (29.8%)
-- **Fixes (fix)**: 10 commits (21.3%)
-- **Refactoring (refactor)**: 3 commits (6.4%)
-- **Documentation (docs)**: 9 commits (19.1%)
-- **Miscellaneous**: 11 commits (23.4%)
+- **Features (feat)**: 14 commits (29.2%)
+- **Fixes (fix)**: 10 commits (20.8%)
+- **Refactoring (refactor)**: 3 commits (6.3%)
+- **Documentation (docs)**: 11 commits (22.9%)
+- **Miscellaneous**: 10 commits (20.8%)
 
 ## Key Development Themes
 
