@@ -87,7 +87,7 @@ Current development version (pre-v0.1.0) - Core infrastructure complete, enterin
 ### Week of 2025-10-06 (2 commits)
 **Focus:** v0.1 roadmap refinement, architect workflow transformation
 
-- aaaed4e: docs: add comprehensive architect workflow transformation (Recommendation 6) (2025-10-07)
+- df60b58: docs: add comprehensive architect workflow transformation (Recommendation 6) (2025-10-07)
 - 27031ef: docs: integrate v0.1 gap analysis with epic-based roadmap and reorganize references (2025-10-07)
 
 ### Week of 2025-09-22 (25 commits)
