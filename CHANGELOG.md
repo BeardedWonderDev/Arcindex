@@ -11,6 +11,7 @@ Current development version (pre-v0.1.0) - Core infrastructure complete, enterin
 
 ### Added
 
+- Comprehensive architect workflow transformation (Recommendation 6) with research-driven architecture, 5-phase workflow, validation infrastructure, and ROI analysis to v0.1 roadmap
 - Comprehensive BMAD vs CODEX workflow analysis integrating 6 parallel agent reviews (111K document)
   - Identified 70+ gaps across analyst, PM, architect, and PRP workflows
   - Introduced epic-based incremental workflow pattern (architecture & PRPs created per-epic, not all upfront)
@@ -83,9 +84,10 @@ Current development version (pre-v0.1.0) - Core infrastructure complete, enterin
 
 ## Development History
 
-### Week of 2025-10-06 (1 commit)
-**Focus:** v0.1 gap analysis integration, epic-based workflow architecture
+### Week of 2025-10-06 (2 commits)
+**Focus:** v0.1 roadmap refinement, architect workflow transformation
 
+- aaaed4e: docs: add comprehensive architect workflow transformation (Recommendation 6) (2025-10-07)
 - 27031ef: docs: integrate v0.1 gap analysis with epic-based roadmap and reorganize references (2025-10-07)
 
 ### Week of 2025-09-22 (25 commits)
@@ -146,7 +148,7 @@ Current development version (pre-v0.1.0) - Core infrastructure complete, enterin
 
 ## Statistics
 
-- **Total Commits**: 48
+- **Total Commits**: 49
 - **Total Lines Added**: ~30,000+
 - **Total Lines Deleted**: ~500
 - **Net Change**: +29,500 lines
@@ -155,11 +157,11 @@ Current development version (pre-v0.1.0) - Core infrastructure complete, enterin
 
 ## Commit Type Distribution
 
-- **Features (feat)**: 14 commits (29.2%)
-- **Fixes (fix)**: 10 commits (20.8%)
-- **Refactoring (refactor)**: 3 commits (6.3%)
-- **Documentation (docs)**: 11 commits (22.9%)
-- **Miscellaneous**: 10 commits (20.8%)
+- **Features (feat)**: 14 commits (28.6%)
+- **Fixes (fix)**: 10 commits (20.4%)
+- **Refactoring (refactor)**: 3 commits (6.1%)
+- **Documentation (docs)**: 12 commits (24.5%)
+- **Miscellaneous**: 10 commits (20.4%)
 
 ## Key Development Themes
 

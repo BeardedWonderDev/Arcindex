@@ -2667,16 +2667,763 @@ After PRP execution completes:
 
 ---
 
-### Implementation Roadmap (Revised for v0.1)
+### Recommendation 6: Architect Workflow Transformation - Research-Driven Architecture
 
-**Phase 1: Critical Quality Foundation (Weeks 1-3) - 62-79 hours**
+**Gap Coverage:** All 11 architect gaps (GAP-ARCH-1 through GAP-ARCH-11) + workflow methodology gaps
+
+**Current State:**
+- **Reactive template processing:** Load PRD → Fill template sections → Basic validation (10 items)
+- **Limited research:** Ad-hoc searches without systematic coverage
+- **Minimal validation:** ~6% of BMAD validation depth (10 vs 169+ checkpoints)
+- **Missing sections:** 37% coverage vs BMAD (7 vs 22 major sections)
+- **Incomplete handoffs:** Frontend architecture, testing strategy, validation details missing
+- **No meta-planning:** Direct task execution without research strategy planning
+- **Time:** ~70 minutes (fast but quality-limited)
+
+**Target State:**
+- **Proactive research-driven architecture:** Research → Synthesize → Document → Validate
+- **5-Phase systematic workflow:**
+  - **Phase 0:** Pre-planning with research strategy design (15 min)
+  - **Phase 1:** Parallel research execution (7+ tracks, 60-90 min wall time)
+  - **Phase 2:** ULTRATHINK synthesis & completion planning (20-30 min)
+  - **Phase 3:** Enhanced documentation with information density standards (60-90 min)
+  - **Phase 4:** Multi-layer validation (4 levels: elicitation, zero-knowledge, comprehensive checklist, confidence scoring)
+- **Research infrastructure:** 7+ parallel research tracks with Archon RAG integration
+- **Comprehensive validation:** 100+ checkpoints across 9 categories
+- **Complete template coverage:** Frontend architecture, testing strategy, platform selection, enhanced error handling
+- **Mode-aware implementation:** YOLO (skip research), Batch (simplified), Interactive (full quality)
+- **Total time:** 230 min (interactive mode) with 17.4-21.4 hour downstream savings (ROI: 670-823%)
+
+**Implementation Details:**
+
+#### 6.1: Research Infrastructure (Phase 0-2)
+
+**Phase 0: Pre-Research Planning (15 min)**
+```yaml
+# Create: .codex/tasks/architect-preplanning.md
+
+TodoWrite-based research planning before execution:
+  1. Analyze architectural scope & decision points
+  2. Design research strategy with success criteria
+  3. Create specifications for 7+ parallel research agents
+  4. Define information density requirements
+  5. Plan ULTRATHINK synthesis approach
+
+Effort: 2 hours to build, 15 min per execution
+Priority: CRITICAL
+```
+
+**Phase 1: Parallel Research Execution (60-90 min wall time)**
+```yaml
+# Create: .codex/tasks/architect-research.md
+
+7+ Research Tracks (run in parallel):
+  1. Codebase Pattern Discovery:
+     - Similar patterns in existing code
+     - Naming conventions & file organization
+     - Reusable components & utilities
+
+  2. Technology Stack Research (2025 standards):
+     - Framework best practices
+     - Version compatibility matrices
+     - Performance & security patterns
+
+  3. Security Architecture Patterns:
+     - STRIDE threat modeling
+     - Compliance requirements (GDPR/HIPAA/etc.)
+     - Auth/AuthZ patterns
+
+  4. Testing Strategy Research:
+     - Testing pyramid (70% unit / 20% integration / 10% E2E)
+     - Framework selection & configuration
+     - Coverage targets & tooling
+
+  5. Deployment Pattern Research:
+     - CI/CD best practices
+     - Environment promotion strategies
+     - Rollback & disaster recovery
+
+  6. Scaling Pattern Research:
+     - Caching strategies
+     - Load balancing patterns
+     - Auto-scaling rules
+
+  7. Case Study Research:
+     - Similar systems & architectures
+     - Lessons learned from production
+     - Proven patterns & anti-patterns
+
+Archon RAG Integration:
+  - perform_rag_query() for high-level + low-level + debugging
+  - search_code_examples() for implementation patterns
+  - match_count: 2-5 for focused results
+
+Critical Documentation Curation:
+  - Save essential docs to docs/architecture/references/
+  - Include: URL, WHY critical, key insights, gotchas, patterns
+  - Decision criteria: 2+ of (essential, non-obvious, specific config, critical security/perf)
+
+Effort: 3-4 hours to build, 75 min wall time per execution
+Priority: CRITICAL
+```
+
+**Phase 2: ULTRATHINK Synthesis (20-30 min)**
+```yaml
+# Create: .codex/tasks/architect-synthesis.md
+
+Meta-planning - plan how to use research findings:
+  1. Consolidate findings from all 7+ research agents
+  2. Map research findings to template sections
+  3. Identify gaps requiring additional research
+  4. Create section-by-section completion plan
+  5. Generate research-backed decision matrices
+
+Output: TodoWrite-based synthesis plan for documentation phase
+
+Effort: 2 hours to build, 20-30 min per execution
+Priority: HIGH
+```
+
+**Total Research Infrastructure Effort:** 7-8 hours to build
+
+---
+
+#### 6.2: Template Structural Enhancements (5 New/Enhanced Sections)
+
+**Section 3.5: Frontend Architecture (NEW - CRITICAL)**
+```markdown
+## 3.5 Frontend Architecture
+
+### 3.5.1 Component Organization
+- Atomic design hierarchy (atoms/molecules/organisms/templates/pages)
+- Component composition patterns
+- Shared component library structure
+- Example: src/components/UserProfile/
+
+### 3.5.2 State Management Strategy
+- State management approach (Redux/Zustand/Context/React Query)
+- Global vs local state boundaries
+- State persistence & hydration
+- Research-backed decision with options matrix
+
+### 3.5.3 Routing Architecture
+- Routing library & configuration
+- Protected route patterns
+- Nested routing structure
+- URL structure & parameter handling
+
+### 3.5.4 Frontend-Backend Integration Layer
+- API client setup & configuration
+- Request/response interceptors
+- Authentication token handling
+- Error handling & retry logic
+```
+
+**Effort:** 2-3 hours | **Priority:** HIGH
+
+---
+
+**Section 5.5: Testing Strategy (NEW - CRITICAL)**
+```markdown
+## 5.5 Testing Strategy
+
+### 5.5.1 Testing Philosophy & Pyramid
+- Coverage targets: 70% unit / 20% integration / 10% E2E
+- Testing principles & objectives
+- When to write which type of test
+
+### 5.5.2 Unit Testing Approach
+- Framework selection (Jest/Vitest/etc.)
+- Test file organization & naming
+- Mock strategy & utilities
+- Example test patterns
+
+### 5.5.3 Integration Testing Approach
+- Multi-component flow testing
+- API integration testing
+- Database integration testing
+
+### 5.5.4 E2E Testing Approach
+- Framework selection (Playwright/Cypress/etc.)
+- User journey coverage
+- CI/CD integration
+
+### 5.5.5 Test Data Management
+- Mock data strategy
+- Test fixtures & factories
+- Database seeding for tests
+```
+
+**Effort:** 2-3 hours | **Priority:** HIGH
+
+---
+
+**Section 2.1: Platform Selection Decision (NEW)**
+```markdown
+## 2.1 Platform Selection Decision
+
+### 2.1.1 Platform Options Analysis
+- Research findings from Track 1
+- Options: AWS/Azure/GCP/Vercel/Cloudflare/etc.
+- Multi-factor comparison matrix
+
+### 2.1.2 Recommendation with Rationale
+- Selected platform with research-backed justification
+- Critical configuration requirements
+- Gotchas & constraints
+```
+
+**Effort:** 1 hour | **Priority:** MEDIUM
+
+---
+
+**Section 4.4: Error Handling Strategy (ENHANCED)**
+```markdown
+## 4.4 Error Handling Strategy (Enhanced)
+
+### 4.4.1 Error Flow Diagram
+- Visual representation of error propagation
+- Frontend → Backend → Database error flows
+
+### 4.4.2 Frontend Error Patterns
+- User-facing error messages
+- Error boundary implementation
+- Retry & fallback strategies
+
+### 4.4.3 Backend Error Patterns
+- Service error handling
+- Error propagation rules
+- HTTP status code mapping
+
+### 4.4.4 Logging Integration
+- Error tracking service (Sentry/etc.)
+- Structured logging format
+- Alert thresholds & escalation
+```
+
+**Effort:** 1 hour | **Priority:** MEDIUM
+
+---
+
+**Confidence Scoring Section (NEW - End of Template)**
+```markdown
+## Confidence Scoring
+
+Rate your confidence for this architecture (1-10 scale):
+
+1. Context Completeness (0-2 pts):
+   - 2: All context captured, no assumptions
+   - 1: Minor assumptions documented
+   - 0: Significant context missing
+
+2. Technology Decisions (0-2 pts):
+   - 2: All choices research-backed with rationale
+   - 1: Most choices justified
+   - 0: Technology choices not justified
+
+3. Pattern Documentation (0-2 pts):
+   - 2: All patterns with examples & references
+   - 1: Most patterns documented
+   - 0: Patterns incomplete
+
+4. Implementation Readiness (0-2 pts):
+   - 2: Dev can start immediately, no questions
+   - 1: Minor clarifications needed
+   - 0: Significant gaps remain
+
+5. Research Quality (0-2 pts):
+   - 2: Comprehensive research, critical docs saved
+   - 1: Adequate research
+   - 0: Limited research
+
+**Total Score: ___ / 10**
+
+Confidence Levels:
+- 9-10: Excellent (high one-pass implementation confidence)
+- 7-8: Good (proceed with monitoring)
+- 5-6: Adequate (address gaps before handoff)
+- <5: Insufficient (rework required)
+```
+
+**Effort:** 1 hour | **Priority:** HIGH
+
+**Total Template Enhancement Effort:** 7-9 hours
+
+---
+
+#### 6.3: Validation Infrastructure (3 Major Components)
+
+**Component 1: Comprehensive Validation Checklist**
+```yaml
+# Create: .codex/tasks/architect-validation-checklist.md
+
+9 Categories with 100+ Checkpoints:
+
+1. Requirements Alignment (12 items):
+   - All functional requirements covered
+   - All non-functional requirements addressed
+   - Constraints documented & validated
+   - Success criteria mapped to architecture
+
+2. Architecture Fundamentals (15 items):
+   - Clear system boundaries defined
+   - Component responsibilities explicit
+   - Architectural patterns documented
+   - Separation of concerns validated
+
+3. Technology Stack & Decisions (18 items):
+   - All technology choices justified with research
+   - Exact versions specified (no "latest")
+   - Platform selection documented
+   - Compatibility matrix verified
+
+4. Frontend Architecture (12 items):
+   - Component organization pattern defined
+   - State management strategy documented
+   - Routing architecture specified
+   - API integration layer designed
+
+5. Testing Strategy (14 items):
+   - Testing pyramid defined with targets
+   - Frameworks selected & justified
+   - Test organization specified
+   - Example test patterns provided
+
+6. Security Architecture (16 items):
+   - Threat model completed (STRIDE)
+   - Authentication/authorization designed
+   - Data security patterns defined
+   - API security measures specified
+   - Compliance requirements addressed
+
+7. Implementation Readiness (15 items):
+   - Coding standards AI-optimized
+   - Project structure defined
+   - API specifications complete
+   - Error handling comprehensive
+
+8. Operational Readiness (10 items):
+   - Deployment strategy defined
+   - Monitoring & alerting specified
+   - Disaster recovery planned
+   - Scaling strategy documented
+
+9. AI Implementation Suitability (10 items):
+   - Components appropriately sized
+   - Patterns clearly documented
+   - Implementation guidance specific
+   - Common errors prevented
+
+Scoring System:
+  - PASS: Fully addressed with evidence
+  - PARTIAL: Addressed but incomplete
+  - FAIL: Not addressed or inadequate
+  - N/A: Not applicable to this project
+
+Quality Levels:
+  - Excellent: ≥90% PASS
+  - Good: 70-89% PASS
+  - Adequate: 50-69% PASS
+  - Insufficient: <50% PASS
+```
+
+**Effort:** 4-6 hours | **Priority:** HIGH
+
+---
+
+**Component 2: Zero-Knowledge Test**
+```yaml
+# Add to: validation-gate.md as Level 0.5
+
+10 Test Criteria (10 points each, 100 total):
+
+1. New developer can understand without questions (10 pts)
+2. All technology choices explained with research rationale (10 pts)
+3. All patterns documented with examples (10 pts)
+4. All constraints & gotchas documented (10 pts)
+5. Implementation can start immediately (10 pts)
+6. All URLs include section anchors (not just domains) (10 pts)
+7. All file references include specific patterns (10 pts)
+8. All versions are exact (no "latest") (10 pts)
+9. All integration points explicitly defined (10 pts)
+10. Every decision has research-backed rationale (10 pts)
+
+Pass Threshold: ≥85/100
+
+Validation Levels:
+  Level 0: Elicitation validation (EXISTING)
+  Level 0.5: Zero-Knowledge Test (NEW)
+  Level 1: Comprehensive Checklist (NEW)
+  Level 2: Confidence Scoring (NEW)
+```
+
+**Effort:** 1 hour | **Priority:** HIGH
+
+---
+
+**Component 3: Confidence Scoring System**
+```yaml
+# Add to: validation-gate.md as final check
+
+5 Scoring Criteria (0-2 points each):
+
+1. Context Completeness (2 pts):
+   - All PRD requirements understood
+   - No implicit assumptions
+   - Complete context captured
+
+2. Technology Decisions (2 pts):
+   - Research-backed choices
+   - Exact versions specified
+   - Compatibility verified
+
+3. Pattern Documentation (2 pts):
+   - Examples provided
+   - References included
+   - Gotchas documented
+
+4. Implementation Readiness (2 pts):
+   - Dev can start immediately
+   - All specifications complete
+   - Standards defined
+
+5. Research Quality (2 pts):
+   - Comprehensive research conducted
+   - Critical docs saved locally
+   - Multi-source validation
+
+Pass Threshold: ≥8/10
+
+Actions:
+  - 9-10: APPROVED (excellent quality)
+  - 7-8: APPROVED (good quality, monitor)
+  - 5-6: CONDITIONAL (address gaps first)
+  - <5: REJECTED (rework required)
+```
+
+**Effort:** 1 hour | **Priority:** HIGH
+
+**Total Validation Infrastructure Effort:** 6-8 hours
+
+---
+
+#### 6.4: Information Density Standards
+
+**Transformation Rules for All Sections:**
+
+**Replace Vague with Specific:**
+- ❌ "Use React for frontend"
+- ✅ "React 18.2.0 with TypeScript 5.1.6, PATTERN: src/components/UserProfile/, STATE: Zustand 4.3.8, REFERENCE: [URL with #section-anchor]"
+
+**Replace Generic with Dense:**
+- ❌ "Implement authentication"
+- ✅ "OAuth2 PKCE flow using passport-google-oauth20@2.0.0, FOLLOW: src/auth/github-oauth.ts, GOTCHA: redirect_uri trailing slash matters, SECURITY: httpOnly cookies (15min access/7day refresh)"
+
+**Replace Incomplete with Complete:**
+- ❌ "Use PostgreSQL database"
+- ✅ "PostgreSQL 15.3 on AWS RDS Multi-AZ, CONFIG: max_connections=100, GOTCHA: pool size = ((cores × 2) + spindles), MIGRATION: Flyway 9.16.0, REFERENCE: [postgresql.org/docs/15/runtime-config-connection.html#GUC-MAX-CONNECTIONS]"
+
+**Research-Backed Decision Template:**
+```markdown
+### [Decision Point]
+
+**Research Findings:** (from Track 2, Track 5)
+- Current industry best practices
+- Performance benchmarks
+- Security considerations
+
+**Options Analysis:**
+
+**Option 1: [Technology/Pattern A]**
+- Pros: [specific benefits]
+- Cons: [specific limitations]
+- Source: [research reference]
+- Use Case: [when to use]
+
+**Option 2: [Technology/Pattern B]**
+- Pros: [specific benefits]
+- Cons: [specific limitations]
+- Source: [research reference]
+- Use Case: [when to use]
+
+**Recommendation:** [Selected option]
+
+**Rationale:**
+- [Factor 1]: [reason with research backing]
+- [Factor 2]: [reason with research backing]
+- [Factor 3]: [reason with research backing]
+
+**Critical Configuration:**
+- [Setting 1]: [value] (reason: [why this matters])
+- [Setting 2]: [value] (reason: [why this matters])
+
+**Gotchas:**
+- [Issue 1]: [specific problem] → [mitigation]
+- [Issue 2]: [specific problem] → [mitigation]
+
+**References:**
+- Primary: [URL with section anchor]
+- Implementation Example: [URL with section anchor]
+- Critical Docs: docs/architecture/references/[saved-locally.md]
+```
+
+**Critical Documentation Integration Pattern:**
+```yaml
+references:
+  - url: "https://example.com/docs/feature#section-anchor"
+    section: "Connection Pooling Configuration"
+    why: "Prevents connection exhaustion in production"
+    critical: "Pool size formula: ((cores × 2) + spindles)"
+    gotcha: "Default pool size (10) too small for multi-tenant"
+    saved_locally: "docs/architecture/references/postgresql-connection-pooling.md"
+    applies_to: ["Section 2.3 Database Architecture", "Section 4.4 Error Handling"]
+```
+
+**Effort:** Integrated into documentation phase (no additional time)
+
+---
+
+#### 6.5: Handoff Package Improvements
+
+**Component 1: Architecture Executive Summary**
+```markdown
+# Architecture Executive Summary
+
+**Paragraph 1: System Overview**
+- What: [system description]
+- Scale: [user/data/performance scale]
+- Architectural Style: [microservices/monolith/serverless/etc.]
+
+**Paragraph 2: Critical Decisions**
+- Top 3-5 architectural decisions with rationale
+- Technology stack highlights
+- Security approach
+
+**Paragraph 3: Implementation Readiness**
+- Validation scores (Zero-Knowledge: 90/100, Checklist: 85%, Confidence: 9/10)
+- Known risks & mitigations
+- Next steps for PRP creation
+```
+
+**Component 2: Critical References Package**
+```
+docs/architecture/references/
+  ├── index.md (annotated reference list with why each is critical)
+  ├── postgresql-connection-pooling.md
+  ├── aws-iam-security.md
+  ├── react-state-patterns.md
+  └── [other critical docs saved during research]
+
+Each reference includes:
+  - Why critical
+  - Key insight
+  - Applies to which architecture sections
+```
+
+**Component 3: Validation Commands Reference**
+```markdown
+# Validation Commands
+
+## Build Validation
+Command: `npm run build`
+Expected: Clean build, 0 errors, 0 warnings
+Troubleshooting: [common issues]
+
+## Test Validation
+Commands:
+  - Unit: `npm run test:unit` (expect: >70% coverage)
+  - Integration: `npm run test:integration`
+  - E2E: `npm run test:e2e`
+
+## Security Validation
+Commands:
+  - Audit: `npm audit --audit-level=moderate`
+  - SAST: `npm run lint:security`
+```
+
+**Component 4: Handoff Checklist**
+```yaml
+# Create: .codex/tasks/architect-handoff.md
+
+Documentation Completeness:
+  ☐ All sections completed with research backing
+  ☐ All technology choices justified
+  ☐ All patterns documented with examples
+  ☐ Critical references saved & indexed
+  ☐ Executive summary created
+
+Quality Assurance:
+  ☐ Zero-Knowledge Test: ≥85/100
+  ☐ Comprehensive Checklist: ≥70% PASS
+  ☐ Confidence Score: ≥8/10
+  ☐ Elicitation validation: PASS
+
+Research Completeness:
+  ☐ All 7 research tracks completed
+  ☐ Critical documentation saved locally
+  ☐ Research findings mapped to sections
+  ☐ Options analysis for major decisions
+  ☐ Gotchas & constraints documented
+  ☐ Case studies reviewed
+  ☐ Anti-patterns identified
+
+Known Gaps & Risks:
+  ☐ Gaps documented with mitigation plans
+  ☐ Confidence score rationale provided
+  ☐ Assumptions explicitly stated
+  ☐ Follow-up research items noted
+
+Next Phase Readiness:
+  ☐ PRP creation guidance provided
+  ☐ Implementation priorities clear
+  ☐ Architectural constraints documented
+  ☐ Pattern examples referenced
+  ☐ Validation commands verified
+```
+
+**Component 5: PRP Creation Guidance**
+```markdown
+# PRP Creation Guidance
+
+**Critical Sections for PRPs:**
+- Section 2.3: Database schema & migrations
+- Section 3.5: Frontend component patterns
+- Section 4.2: API endpoint specifications
+- Section 5.5: Test requirements & examples
+
+**Implementation Priorities (Epic-Based):**
+1. [Epic 1 scope with architecture sections]
+2. [Epic 2 scope with architecture sections]
+
+**Architectural Constraints:**
+- [Constraint 1]: [implication for implementation]
+- [Constraint 2]: [implication for implementation]
+
+**Pattern Examples:**
+- Component pattern: src/components/UserProfile/
+- API pattern: src/api/users/createUser.ts
+- Test pattern: tests/unit/services/UserService.test.ts
+```
+
+**Total Handoff Improvements Effort:** 1-2 hours to build task file
+
+---
+
+#### 6.6: Mode-Aware Implementation
+
+**YOLO Mode (Speed Priority):**
+- Skip: Research phase entirely
+- Skip: Comprehensive validation
+- Keep: Basic template processing
+- Result: Current workflow speed (70 min)
+- Use Case: Rapid prototyping, low-stakes projects
+
+**Batch Mode (Balance):**
+- Research: Simplified (3 agents instead of 7, 30 min)
+- Validation: Batch execution (20 min)
+- Result: Moderate enhancement (~90 min)
+- Use Case: Standard projects, moderate complexity
+
+**Interactive Mode (Quality Priority):**
+- Research: Full (7+ agents, 75 min)
+- Validation: Section-by-section (35 min)
+- Result: Maximum quality (230 min)
+- Use Case: Production-critical, complex projects
+
+**Implementation:** Workflow mode parameter determines which components execute
+
+---
+
+**Total Recommendation 6 Effort:** 27-36 hours
+
+**Breakdown:**
+- Research infrastructure: 7-8 hours
+- Template enhancements: 7-9 hours
+- Validation infrastructure: 6-8 hours
+- Handoff improvements: 1-2 hours
+- Agent & workflow updates: 2-3 hours
+- Integration & testing: 4-6 hours
+
+---
+
+**Success Metrics:**
+
+**Quality Improvements:**
+- Validation checkpoints: +900% (10 → 100+)
+- Architecture quality score: +40% (unmeasured → 85%+ average)
+- One-pass implementation success: +35% (50% → 85%)
+- Handoff quality: +50% (subjective → objective scores)
+- Section coverage: +130% (37% → 85% of BMAD)
+
+**Efficiency Gains:**
+- Rework time: -60% (8-12 hours → 2-4 hours per project)
+- PRP clarification requests: -70% (5-8 hours → 1-2 hours)
+- Context completeness: +45% (55% → 95%+)
+- Confidence: +70% (low/subjective → high/score 8+)
+
+**ROI Analysis:**
+- Upfront investment: +2.6 hours per architecture (interactive mode)
+- Downstream savings: 20-24 hours per project
+- Net benefit: +17.4-21.4 hours saved per project
+- **ROI: 670-823%** return on time investment
+
+**Risk Mitigation:**
+- Research too time-consuming → Mode-aware (YOLO/batch/interactive)
+- ULTRATHINK complexity → TodoWrite structure, examples, help available
+- Validation overhead → Batch mode (20 min), automation, skip in YOLO
+- Backward compatibility → Additive changes only, YOLO mode = current workflow
+- Research quality varies → Clear specs, cross-validation, gap detection, iterative refinement
+- User overwhelmed → Executive summary, prioritized issues, section-by-section, single quality metric
+
+---
+
+**Implementation Priority:** HIGH (but can be phased)
+
+**Phased Rollout Strategy (Recommended):**
+
+**Milestone 1: Template Enhancement (Week 1-2)**
+- Add 5 new/enhanced sections
+- Integrate confidence scoring
+- Update architect.md agent
+- **Effort:** 8-10 hours
+- **Priority:** HIGH
+
+**Milestone 2: Validation Infrastructure (Week 2-3)**
+- Create validation checklist (100+ items)
+- Add zero-knowledge test
+- Add confidence scoring to validation-gate.md
+- **Effort:** 6-8 hours
+- **Priority:** HIGH
+
+**Milestone 3: Research Infrastructure (Week 3-5)**
+- Create preplanning task
+- Create research task (7 tracks)
+- Create synthesis task
+- Integrate Archon RAG
+- **Effort:** 7-8 hours
+- **Priority:** MEDIUM (high impact but can validate templates first)
+
+**Milestone 4: Integration & Testing (Week 5-6)**
+- Update workflow definitions
+- Create handoff task
+- Test with real projects (3 projects minimum)
+- Measure effectiveness vs success metrics
+- Refine based on findings
+- **Effort:** 6-10 hours
+- **Priority:** MEDIUM
+
+---
+
+### Implementation Roadmap (Revised for v0.1 + Architect Transformation)
+
+**Phase 1: Critical Quality Foundation (Weeks 1-3) - 70-89 hours**
 
 **Week 1: Validation Infrastructure (35-40 hours)**
 - Create 5 comprehensive checklists (20-25h)
   - discovery-quality-gate.md (NEW)
   - analyst-quality-gate.md (NEW)
   - pm-quality-gate.md (90 items)
-  - architect-quality-gate.md (169 items)
+  - architect-quality-gate.md (169 items) + architect validation checklist (100+ items)
   - prp-quality-gate.md (NEW)
 - Create quality-gate agent (8-10h)
 - Integration & testing (7-5h)
@@ -2687,17 +3434,21 @@ After PRP execution completes:
 - Template variable extraction protocol (3h)
 - Restore 4 BMAD template sections (8h)
 
-**Week 3: Critical Fixes & Additions (6-18 hours)**
+**Week 3: Critical Fixes & Architect Template Enhancement (14-28 hours)**
 - PM elicitation menu format fix (30min)
 - AI story sizing guidance (2h)
 - Vertical slice pattern (2h)
-- Frontend architecture section (2-3h)
-- Testing strategy section (2-3h)
+- **Architect Template Enhancement (Rec 6.2):**
+  - Frontend architecture section (2-3h)
+  - Testing strategy section (2-3h)
+  - Platform selection section (1h)
+  - Enhanced error handling section (1h)
+  - Confidence scoring section (1h)
 - Tech stack emphasis (30min)
 - AI coding standards (1-2h)
 - *Optional:* PRP pre-flight validation (4-8h)
 
-**Phase 2: Feedback & Iteration (Weeks 4-5) - 36-53 hours**
+**Phase 2: Feedback, Iteration & Architect Validation (Weeks 4-5) - 42-61 hours**
 
 **Week 4: Feedback Mechanisms & PRP Quality (24-38 hours)**
 - Feedback request protocol (8-10h)
@@ -2705,9 +3456,13 @@ After PRP execution completes:
 - PRP failure escalation protocol (6-10h)
 - Epic-based workflow updates (4-8h)
 
-**Week 5: QA & Learning Loops (12-15 hours)**
+**Week 5: QA, Learning & Architect Validation Infrastructure (18-23 hours)**
 - QA reviewer agent (12-15h)
 - Execution learnings capture system (included in Week 4)
+- **Architect Validation Infrastructure (Rec 6.3):**
+  - Zero-knowledge test (1h)
+  - Confidence scoring system (1h)
+  - Handoff task creation (1-2h)
 
 **Phase 3: Archon Integration (Week 6) - 16-24 hours**
 
@@ -2717,12 +3472,26 @@ After PRP execution completes:
   - Add Phase 0 checks
   - Integrate project/task/document management
   - Update all agents for status tracking
+  - Integrate Archon RAG into architect research workflow
 
-**v0.1.0 Total Effort:** 114-156 hours (14-20 days)
+**Phase 4: Architect Research Infrastructure (Weeks 7-8) - Optional/Deferred - 13-18 hours**
+
+**Week 7-8: Advanced Architect Capabilities (Rec 6.1)**
+- **Note:** This phase is OPTIONAL for v0.1.0 and can be deferred based on template/validation results
+- Create architect-preplanning task (2h)
+- Create architect-research task with 7 tracks (3-4h)
+- Create architect-synthesis task (2h)
+- Update architect agent for research workflow (2-3h)
+- Integration & testing with real projects (4-6h)
+
+**v0.1.0 Core Total Effort:** 128-174 hours (16-22 days)
+**v0.1.0 with Optional Architect Research:** 141-192 hours (18-24 days)
+
+**Recommended Approach:** Start with Phases 1-3 (128-174 hours), validate improvements with 3 real projects, then decide whether to implement Phase 4 based on measured ROI.
 
 ---
 
-**Phase 4: Brownfield Support (v0.2.0) - 30-40 hours**
+**Phase 5: Brownfield Support (v0.2.0) - 30-40 hours**
 
 **Deferred to v0.2.0:**
 - Brownfield PRD template (6-8h)
@@ -2732,11 +3501,11 @@ After PRP execution completes:
 - Integration verification patterns (4-6h)
 
 **Rationale for Deferral:**
-- v0.1.0 focuses on greenfield MVP workflows
-- Brownfield requires mature base workflow first
+- v0.1.0 focuses on greenfield MVP workflows with enhanced architect quality
+- Brownfield requires mature base workflow first (including validated architect enhancements)
 - Real-world greenfield usage will inform brownfield design
-- Epic-based incremental pattern more critical for v0.1
-- Limited v0.1 resources better spent on quality foundations
+- Epic-based incremental pattern + architect transformation more critical for v0.1
+- Limited v0.1 resources better spent on quality foundations (Recommendations 1-6)
 
 ---
 
@@ -2777,6 +3546,17 @@ After PRP execution completes:
 - Policy Compliance: Archon violation → Full MCP integration
 - PRP Success Rate: ~60-70% → >90% (one-pass implementation)
 
+**Architect Workflow Transformation (Recommendation 6):**
+- Validation Checkpoints: +900% (10 → 100+ checkpoints)
+- Architecture Quality Score: Unmeasured → 85%+ average
+- One-Pass Implementation Success: +35% (50% → 85%)
+- Section Coverage: +130% (37% → 85% of BMAD)
+- Rework Time: -60% (8-12 hours → 2-4 hours per project)
+- PRP Clarification Requests: -70% (5-8 hours → 1-2 hours)
+- Context Completeness: +45% (55% → 95%+)
+- Architect Confidence: +70% (low/subjective → high/score 8+)
+- **ROI: 670-823%** (upfront +2.6h saves 20-24h downstream)
+
 **Expected Outcomes:**
 - **40-50% PRD quality improvement** through 90-item PM checklist
 - **90% reduction in incomplete handoffs** through quality gates
@@ -2784,6 +3564,8 @@ After PRP execution completes:
 - **Progressive quality improvement** through epic-based learning
 - **Quantified quality metrics** at every phase transition
 - **~30% faster time-to-value** through reduced rework
+- **85%+ architecture quality** through research-driven workflow
+- **17-21 hours saved per project** through architect transformation
 
 ---
 
@@ -2807,7 +3589,7 @@ After PRP execution completes:
 
 ### Final Recommendations Summary
 
-**Must-Have (v0.1.0) - 114-156 hours:**
+**Must-Have (v0.1.0 Core) - 128-174 hours:**
 
 **Foundation (Weeks 1-3):**
 1. ✅ Comprehensive quality gates at all phase transitions (5 checklists: 15-169 items each)
@@ -2815,7 +3597,7 @@ After PRP execution completes:
 3. ✅ Discovery enrichment (3→9 questions) & persistence
 4. ✅ Analyst enhancements (variable extraction, 4 restored sections)
 5. ✅ PM critical fixes (checklist, format, AI sizing, vertical slice)
-6. ✅ Architect enhancements (frontend architecture, testing strategy, AI standards)
+6. ✅ Architect template enhancements (frontend architecture, testing strategy, platform selection, error handling, confidence scoring)
 
 **Iteration (Weeks 4-5):**
 7. ✅ Feedback request protocol (PM↔Architect, PRP↔Execution)
@@ -2823,29 +3605,33 @@ After PRP execution completes:
 9. ✅ PRP enhancements (validation enforcement, failure escalation)
 10. ✅ QA review agent (post-implementation quality)
 11. ✅ Execution learning feedback loop & PRP versioning
+12. ✅ Architect validation infrastructure (zero-knowledge test, comprehensive checklist, confidence scoring, handoff improvements)
 
 **Compliance (Week 6):**
-12. ✅ Archon MCP integration (architectural mandate - full project/task/document management)
+13. ✅ Archon MCP integration (architectural mandate - full project/task/document management + RAG for research)
+
+**Advanced (Optional - Weeks 7-8) - +13-18 hours:**
+14. ⚡ Architect research infrastructure (pre-planning, 7-track parallel research, ULTRATHINK synthesis) - **High ROI (670-823%) but can validate templates first**
 
 **Deferred to v0.2.0 - 30-40 hours:**
-13. ⏸️ Brownfield templates and workflows
-14. ⏸️ Risk assessment frameworks
-15. ⏸️ Integration verification patterns
-16. ⏸️ Advanced brownfield features
+15. ⏸️ Brownfield templates and workflows
+16. ⏸️ Risk assessment frameworks
+17. ⏸️ Integration verification patterns
+18. ⏸️ Advanced brownfield features
 
 **Rationale for Brownfield Deferral:**
-- v0.1.0 targets greenfield MVP workflows
-- Brownfield requires mature base workflow foundation
+- v0.1.0 targets greenfield MVP workflows with architect transformation
+- Brownfield requires mature base workflow foundation (including validated architect enhancements)
 - Real-world greenfield usage will inform brownfield design decisions
-- Epic-based incremental pattern more critical for initial release
-- Quality foundations deliver higher ROI than brownfield support
+- Epic-based incremental pattern + architect quality transformation more critical for initial release
+- Quality foundations (Recommendations 1-6) deliver higher ROI than brownfield support
 
 **Could-Have (v0.3.0+):**
-17. Pattern library system with verified patterns
-18. Automated context completeness scoring
-19. Document sharding for large PRDs
-20. PRP state persistence & resume capability
-21. Advanced error handling & rollback mechanisms
+19. Pattern library system with verified patterns
+20. Automated context completeness scoring
+21. Document sharding for large PRDs
+22. PRP state persistence & resume capability
+23. Advanced error handling & rollback mechanisms
 
 ---
 
@@ -2856,17 +3642,20 @@ After PRP execution completes:
 - **Epic-Based Flow:** Enable progressive learning
 - **Archon Compliance:** Architectural policy adherence
 - **Feedback Loops:** Iterative refinement capability
+- **Architect Transformation:** Research-driven architecture with 670-823% ROI
 
 **Phase 2 Focus (v0.2.0):**
 - **Brownfield Support:** Production codebase enhancements
 - **Advanced Features:** Pattern libraries, automated scoring
 - **Optimization:** Based on v0.1 real-world usage
+- **Architect Research (if deferred):** Full 7-track research infrastructure
 
 ---
 
-**Document Status:** Comprehensive Analysis Complete (6 Parallel Agents + Synthesis)
-**Total Gaps Identified:** 70+ across all workflows
-**v0.1.0 Scope:** 114-156 hours (14-20 days full-time)
+**Document Status:** Comprehensive Analysis Complete (6 Parallel Agents + Synthesis + Architect Enhancement Integration)
+**Total Gaps Identified:** 70+ across all workflows (including 11 architect-specific gaps)
+**v0.1.0 Core Scope:** 128-174 hours (16-22 days full-time)
+**v0.1.0 with Architect Research:** 141-192 hours (18-24 days full-time)
 **v0.2.0 Scope:** 30-40 hours (brownfield support)
 **Next Steps:** Begin Phase 1 Week 1 - Validation Infrastructure
 **Review Cadence:** Weekly progress review with quality metrics
@@ -2875,7 +3664,9 @@ After PRP execution completes:
 - 90%+ validation item coverage (vs current 8-10 items)
 - Epic-based incremental workflow operational
 - Full Archon MCP integration complete
-- 40-50% quality improvement demonstrated
+- 40-50% PRD/PM quality improvement demonstrated
+- 85%+ architect quality scores with 670-823% ROI
+- 17-21 hours saved per project through architect transformation
 
 ---
 
@@ -3325,10 +4116,19 @@ All gaps documented in this appendix were extracted from the following comprehen
    - Gaps: 17 (P0: 5, P1: 7, P2: 5)
    - Total Effort: Phased implementation (8-16 weeks)
 
+6. **Architect Workflow PRP Enhancement Analysis**
+   - File: `docs/v0.1-Plan/references-docs/architect-workflow-prp-enhancement-analysis.md`
+   - Date: 2025-10-07
+   - Focus: Comprehensive architect workflow transformation with research-driven architecture
+   - Recommendations: 13 implementation tasks across 6 major components
+   - Total Effort: 27-36 hours (phased implementation recommended)
+   - ROI: 670-823% (saves 17.4-21.4 hours per project)
+
 ### Extraction Methodology
 
 Gap data extracted using parallel agent analysis:
-- 5 concurrent agents (one per source document)
+- 6 source documents (5 gap analyses + 1 enhancement analysis)
+- Parallel agent processing for comprehensive extraction
 - Complete gap extraction with all metadata
 - Structured format for tracking system import
 - Validation against source documents
