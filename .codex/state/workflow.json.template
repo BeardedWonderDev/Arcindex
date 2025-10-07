@@ -130,12 +130,98 @@
     }
   },
 
+  "quality_gate_results": {
+    "discovery": {
+      "timestamp": "{iso_timestamp}",
+      "status": "{APPROVED|CONDITIONAL|REJECTED|NOT_RUN}",
+      "score": 0,
+      "checklist": "discovery-quality-gate.md",
+      "mode": "{interactive|batch|yolo}",
+      "summary": "{one-line_summary}",
+      "total_items": 0,
+      "items_passed": 0,
+      "items_failed": 0,
+      "critical_failures": 0,
+      "standard_failures": 0
+    },
+    "analyst": {
+      "timestamp": "{iso_timestamp}",
+      "status": "{APPROVED|CONDITIONAL|REJECTED|NOT_RUN}",
+      "score": 0,
+      "checklist": "analyst-quality-gate.md",
+      "mode": "{interactive|batch|yolo}",
+      "summary": "{one-line_summary}",
+      "total_items": 0,
+      "items_passed": 0,
+      "items_failed": 0,
+      "critical_failures": 0,
+      "standard_failures": 0
+    },
+    "pm": {
+      "timestamp": "{iso_timestamp}",
+      "status": "{APPROVED|CONDITIONAL|REJECTED|NOT_RUN}",
+      "score": 0,
+      "checklist": "pm-quality-gate.md",
+      "mode": "{interactive|batch|yolo}",
+      "summary": "{one-line_summary}",
+      "total_items": 0,
+      "items_passed": 0,
+      "items_failed": 0,
+      "critical_failures": 0,
+      "standard_failures": 0
+    },
+    "architect": {
+      "timestamp": "{iso_timestamp}",
+      "status": "{APPROVED|CONDITIONAL|REJECTED|NOT_RUN}",
+      "score": 0,
+      "checklist": "architect-quality-gate.md",
+      "mode": "{interactive|batch|yolo}",
+      "summary": "{one-line_summary}",
+      "total_items": 0,
+      "items_passed": 0,
+      "items_failed": 0,
+      "critical_failures": 0,
+      "standard_failures": 0
+    },
+    "prp": {
+      "timestamp": "{iso_timestamp}",
+      "status": "{APPROVED|CONDITIONAL|REJECTED|NOT_RUN}",
+      "score": 0,
+      "checklist": "prp-quality-gate.md",
+      "mode": "{interactive|batch|yolo}",
+      "summary": "{one-line_summary}",
+      "total_items": 0,
+      "items_passed": 0,
+      "items_failed": 0,
+      "critical_failures": 0,
+      "standard_failures": 0
+    }
+  },
+
+  "quality_scores": {
+    "discovery": 0,
+    "analyst": 0,
+    "pm": 0,
+    "architect": 0,
+    "prp": 0,
+    "average": 0
+  },
+
+  "validation_evidence": {
+    "discovery": [],
+    "analyst": [],
+    "pm": [],
+    "architect": [],
+    "prp": []
+  },
+
   "violation_log": [
     {
       "timestamp": "{iso_timestamp}",
       "phase": "{phase_name}",
-      "violation_type": "{elicitation_bypass|validation_skip}",
-      "details": "{violation_description}"
+      "violation_type": "{elicitation_bypass|validation_skip|quality_gate_skipped}",
+      "details": "{violation_description}",
+      "mode": "{yolo|override}"
     }
   ],
 
