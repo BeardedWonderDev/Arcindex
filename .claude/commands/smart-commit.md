@@ -105,16 +105,54 @@ For complex changes, include a body explaining what and why
       git add CHANGELOG.md
       ```
 
-   g. **Update Development History:**
-      - Determine the week of the commit (ISO week, Monday-Sunday)
+   g. **Development History - DEFERRED TO COMMIT 2:**
+      - DO NOT update Development History in this phase
+      - Development History will be updated in Commit 2 (see Phase 4)
+      - This two-commit approach prevents amend loops by allowing us to reference the actual hash from Commit 1
+
+## Phase 4: Create Commits (Two-Commit Workflow)
+
+8. **Create Commit 1 - Main Changes:**
+
+   Once approved and changelog updated, create the first commit:
+
+   ```bash
+   git commit -m "$(cat <<'EOF'
+   {type}: {description}
+
+   {optional body with details}
+
+   🤖 Generated with [Claude Code](https://claude.com/claude-code)
+
+   Co-Authored-By: Claude <noreply@anthropic.com>
+   EOF
+   )"
+   ```
+
+   This commit includes:
+   - Your code changes
+   - Updated CHANGELOG.md [Unreleased] section
+   - Updated CHANGELOG.md Statistics section
+   - NO Development History changes (yet)
+
+   Capture the commit hash: `git log -1 --format=%h`
+
+9. **Create Commit 2 - Development History Update:**
+
+   a. **Update Development History section in CHANGELOG.md:**
+      - Determine the week of Commit 1 (ISO week, Monday-Sunday)
       - Get Monday date of current week: `date -v-Mon +%Y-%m-%d` (or equivalent)
       - Check if "Week of {monday_date}" section exists in Development History
+      - Insert commit entry using ACTUAL hash from Commit 1
+      - Format: `- {hash}: {type}: {description} ({YYYY-MM-DD})`
+
       - If week section exists:
         * Insert new commit at TOP of that week's commit list (reverse chronological)
+        * Update week count (count all commits in that week)
         * Regenerate focus line for that week
       - If week section doesn't exist:
         * Create new week section at TOP of Development History
-        * Add commit entry
+        * Add commit entry with count: `### Week of YYYY-MM-DD (1 commit)`
         * Generate initial focus line
 
       **Focus Line Generation Algorithm:**
@@ -146,18 +184,25 @@ For complex changes, include a body explaining what and why
       - Week sections themselves are reverse chronological (newest week first)
       - Regenerate focus line each time a commit is added to ensure accuracy
 
-## Phase 4: Create Commit
+   b. **Create Commit 2:**
+      ```bash
+      git add CHANGELOG.md
+      git commit -m "$(cat <<'EOF'
+      chore: update changelog development history
 
-8. Once approved and changelog updated, create the commit and show me the result.
+      🤖 Generated with [Claude Code](https://claude.com/claude-code)
 
-   The commit will include:
-   - Your code changes (previously staged)
-   - Updated CHANGELOG.md (if applicable)
+      Co-Authored-By: Claude <noreply@anthropic.com>
+      EOF
+      )"
+      ```
 
-9. Display commit summary showing:
-   - Files changed
-   - Changelog sections updated (if applicable)
+10. **Display commit summary showing:**
+    - Commit 1 hash, type, description, files changed
+    - Commit 2 hash (development history update)
+    - Total: 2 commits created
+    - Changelog sections updated
 
 ## Phase 5: Next Steps
 
-10. Finally, ask if I want to push or create a PR.
+11. Finally, ask if I want to push or create a PR.
