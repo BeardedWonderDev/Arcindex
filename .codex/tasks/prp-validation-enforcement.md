@@ -21,9 +21,9 @@ inputs:
 
     validation_checklist:
       type: string
-      format: ".codex/data/prp-quality-checklist.md"
+      format: ".codex/checklists/prp-quality-gate.md"
       description: "PRP quality gate checklist"
-      default: ".codex/data/prp-quality-checklist.md"
+      default: ".codex/checklists/prp-quality-gate.md"
 
   optional:
     min_score:
@@ -43,7 +43,7 @@ inputs:
 ```yaml
 prerequisites:
   - PRP file exists and is readable
-  - PRP quality checklist exists (.codex/data/prp-quality-checklist.md)
+  - PRP quality checklist exists (.codex/checklists/prp-quality-gate.md)
   - workflow.json exists with current workflow state
   - Dev agent NOT yet started (pre-execution gate)
 ```
@@ -67,7 +67,7 @@ if [ ! -f "$PRP_FILE" ]; then
 fi
 
 # Check checklist exists
-CHECKLIST="${VALIDATION_CHECKLIST:-.codex/data/prp-quality-checklist.md}"
+CHECKLIST="${VALIDATION_CHECKLIST:-.codex/checklists/prp-quality-gate.md}"
 if [ ! -f "$CHECKLIST" ]; then
     echo "❌ ERROR: Quality checklist not found: $CHECKLIST"
     exit 1

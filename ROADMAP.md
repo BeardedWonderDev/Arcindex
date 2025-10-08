@@ -10,7 +10,7 @@
 
 **Status:** 🟡 In Progress (85% Infrastructure Complete)
 **Scope:** 128-174 hours of work identified in gap analysis
-**Remaining:** ~72-105 hours to v0.1.0 release (corrected)
+**Remaining:** ~60-88 hours to v0.1.0 release (corrected)
 **Theme:** Comprehensive quality gates, feedback loops, and validation infrastructure
 
 ### Implementation Status (As of 2025-10-08)
@@ -78,11 +78,12 @@
    - **Evidence**: greenfield-swift, greenfield-generic, brownfield-enhancement YAMLs missing execute-quality-gate task calls
    - **Effort**: 8-12 hours to wire into all workflows
 
-3. **Missing Critical Data Files** (Priority: P1)
-   - `.codex/data/elicitation-methods.md` - Referenced but NOT FOUND
-   - `.codex/data/quality-scoring-rubric.md` - Referenced but NOT FOUND
-   - **Impact**: advanced-elicitation.md and execute-quality-gate.md will fail
-   - **Effort**: 8-12 hours to create
+3. **Fix Broken File Reference** (Priority: P2 - COMPLETED 2025-10-08)
+   - **Issue**: `.codex/tasks/prp-validation-enforcement.md` incorrectly referenced `.codex/data/prp-quality-checklist.md` (doesn't exist)
+   - **Fix**: Updated to reference `.codex/checklists/prp-quality-gate.md` (correct location)
+   - **Impact**: Low - task would fail if invoked with incorrect path
+   - **Status**: ✅ FIXED
+   - **Note**: Original assessment incorrectly claimed `elicitation-methods.md` and `quality-scoring-rubric.md` were missing. Both files exist in `.codex/data/` and are properly referenced throughout the codebase (29 and 13 references respectively)
 
 **⚠️ HIGH PRIORITY - Complete for v0.1.0:**
 
@@ -108,10 +109,10 @@ The original assessment incorrectly identified state management as "DORMANT" bas
 - ✅ All state directories created
 - ⚠️ Runtime behavior requires end-to-end testing in actual projects
 
-**Corrected Total Effort to v0.1.0 Complete: 72-105 hours** (down from 90-130)
-- Critical blockers (P0): 48-72 hours
-- High priority (P1): 20-28 hours
-- Medium priority (P2): 4-6 hours
+**Corrected Total Effort to v0.1.0 Complete: 60-88 hours** (down from 72-105)
+- Critical blockers (P0): 48-72 hours (Archon MCP 40-60h + Quality Gate Wiring 8-12h)
+- High priority (P1): 12-16 hours (Git integration only)
+- Medium priority (P2): 0 hours (broken reference fixed)
 
 ### Remaining for v0.1.0
 
@@ -129,11 +130,11 @@ The original assessment incorrectly identified state management as "DORMANT" bas
   - Enforce minimum scores at phase transitions
   - **Blocking Issue**: 15-169 item checklists exist but not invoked
 
-- [ ] **Create Missing Data Files** - **0% complete, 8-12 hours, Priority: P1**
-  - Create `.codex/data/elicitation-methods.md` (9+ methods documented)
-  - Create `.codex/data/quality-scoring-rubric.md` (detailed rubric)
-  - Verify/create all checklist files in `.codex/checklists/`
-  - **Blocking Issue**: Referenced files missing, will cause runtime errors
+- [x] **Create Missing Data Files** - **100% complete, 0 hours, Priority: N/A - COMPLETED**
+  - ✅ `.codex/data/elicitation-methods.md` exists (8.2K, 29 references)
+  - ✅ `.codex/data/quality-scoring-rubric.md` exists (12K, 13 references)
+  - ✅ All checklist files verified in `.codex/checklists/` (5 quality gate checklists)
+  - **Status**: Original assessment was incorrect - all files exist and are properly organized
 
 **Git Integration (HIGH PRIORITY):**
 - [ ] Automated commits and branching - **5% complete (commands only), 12-16 hours**
@@ -323,9 +324,12 @@ Based on comprehensive analysis, 70+ gaps identified across workflows:
 **2025-10-08 - Comprehensive Deep Review** (5-agent parallel analysis - CORRECTED)
 - **Methodology**: 5 specialized agents reviewed Core Orchestration, Workflows, Agents, Templates/Tasks, and State Management
 - **Key Finding**: 85% infrastructure complete with excellent foundation, 2 critical code blockers identified
-- **Critical Gaps**: Archon MCP (0%), Quality Gate Wiring (30%), Missing Data Files
-- **Corrected Analysis**: State management is 95% complete (infrastructure); original assessment incorrectly flagged empty directories in template repo as "dormant"
-- **Estimated Effort to v0.1.0**: 72-105 hours remaining (corrected down from 90-130)
+- **Critical Gaps**: Archon MCP (0%), Quality Gate Wiring (30%)
+- **Corrected Analysis**:
+  - State management is 95% complete (infrastructure); original assessment incorrectly flagged empty directories in template repo as "dormant"
+  - Data files exist and are properly organized; original assessment incorrectly claimed `elicitation-methods.md` and `quality-scoring-rubric.md` were missing
+  - Fixed 1 broken file reference in prp-validation-enforcement.md
+- **Estimated Effort to v0.1.0**: 60-88 hours remaining (corrected down from 72-105)
 - **Recommendation**: Address 2 critical code blockers (Archon, Quality Gate wiring) and conduct end-to-end testing
 - **Status**: Implementation quality is HIGH, infrastructure is EXCELLENT, integration work needed (Archon + testing)
 
