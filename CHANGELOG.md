@@ -99,9 +99,27 @@ Current development version (pre-v0.1.0) - Core infrastructure complete, enterin
 
 ## Development History
 
-### Week of 2025-10-06 (6 commits)
-**Focus:** Quality validation enhancements, Phase 2 implementation, feedback mechanisms
+### Week of 2025-10-06 (24 commits)
+**Focus:** Automation workflows, workflow configuration fixes, execution learning infrastructure
 
+- 9567fa6: chore: update roadmap progress [skip ci] (2025-10-08)
+- 0267609: refactor: simplify roadmap and development history workflow prompts (2025-10-08)
+- 491480f: chore: increase changelog workflow max-turns to 50 for clean completion (2025-10-08)
+- e14c0fa: chore: update changelog [unreleased] and statistics [skip ci] (2025-10-08)
+- f4242b9: refactor: simplify changelog workflow prompt to goal-oriented approach (2025-10-08)
+- 8f3f505: fix: add missing Unix utilities to allowedTools for workflow prompts (2025-10-08)
+- 4885e6f: fix: increase max-turns limit and add echo to allowedTools (2025-10-08)
+- d497897: fix: add allowedTools to enable bash and file operations in workflows (2025-10-08)
+- b0c200b: fix: replace unsupported push trigger with schedule and workflow_dispatch (2025-10-08)
+- 1b5e50f: fix: remove backslash line continuations from workflow YAML prompts (2025-10-08)
+- 0cb20d2: fix: correct YAML syntax in GitHub Actions workflows (2025-10-08)
+- a983ad3: docs: add project roadmap and comprehensive validation guides (2025-10-08)
+- 7deb0e6: feat: implement execution learning capture and architect validation infrastructure (2025-10-08)
+- e28a365: feat: implement GitHub Actions automation for changelog and version management (2025-10-08)
+- e26546e: Merge pull request #1 from BeardedWonderDev/add-claude-github-actions-1759940351136 (2025-10-08)
+- 211cfd9: "Claude Code Review workflow" (2025-10-08)
+- a57d548: "Claude PR Assistant workflow" (2025-10-08)
+- 6fcf69f: chore: update changelog development history (2025-10-07)
 - 99935a5: feat: implement Phase 2 Week 4 feedback mechanisms and quality enhancements (2025-10-07)
 - d8969a6: docs: add Phase 2 PRP for feedback mechanisms and quality enhancement implementation (2025-10-07)
 - 379cd20: feat: enhance quality validation infrastructure with comprehensive checklist improvements and discovery persistence (2025-10-07)
