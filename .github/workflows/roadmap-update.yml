@@ -148,3 +148,4 @@ jobs:
           claude_args: |
             --max-turns 15
             --model claude-sonnet-4-5-20250929
+            --allowedTools "Read,Edit,Write,Bash(git:*),Bash(grep:*),Bash(test:*),Bash(ls:*)"
