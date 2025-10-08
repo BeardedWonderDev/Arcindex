@@ -164,9 +164,8 @@ jobs:
 
             2. Create git tag:
             ```bash
-            git tag -a "vX.Y.Z" -m "Release vX.Y.Z
-
-See CHANGELOG.md for details."
+            git tag -a "vX.Y.Z" -m "Release vX.Y.Z" \
+                               -m "See CHANGELOG.md for details."
             git push origin vX.Y.Z
             ```
 
@@ -181,9 +180,8 @@ See CHANGELOG.md for details."
             git config user.name "github-actions[bot]"
             git config user.email "github-actions[bot]@users.noreply.github.com"
             git add CHANGELOG.md
-            git commit -m "chore: release vX.Y.Z [skip ci]
-
-🤖 Generated with Claude Code GitHub Action"
+            git commit -m "chore: release vX.Y.Z [skip ci]" \
+                       -m "🤖 Generated with Claude Code GitHub Action"
             git push
             ```
 
