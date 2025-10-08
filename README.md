@@ -233,67 +233,12 @@ Discovery → Business Analysis → Requirements → Architecture → Enhanced P
 <!-- ROADMAP -->
 ## Roadmap
 
-### Current: Pre-v0.1.0 (Development Phase)
+For comprehensive project roadmap including v0.1.0, v0.2.0, and v0.3.0 plans, see **[ROADMAP.md](ROADMAP.md)**.
 
-**Completed:**
-- [x] Core orchestration system with 7 specialized agents
-- [x] Multi-language workflow support (Swift + Generic + Brownfield)
-- [x] Interactive elicitation enforcement system with 1-9 menu format
-- [x] 5-level progressive validation framework (Level 0: Elicitation, Levels 1-4: Technical)
-- [x] Zero-knowledge architecture with state management
-- [x] Universal discovery protocol with smart conditional prompts
-- [x] Mode-aware execution (Interactive/Batch/YOLO) with mode switching commands
-- [x] Command-based validation (Swift tooling integration)
-- [x] Runtime state management with workflow.json persistence
-- [x] Advanced elicitation task with intelligent method selection
-- [x] State manager task for runtime operations
-- [x] Phase validation task with hard enforcement
-- [x] PRP quality check with 3-gate validation system
-- [x] ULTRATHINK planning phase for PRP creation
-- [x] Context handoff validation for zero-knowledge architecture
-- [x] Elicitation history tracking and audit trail
-- [x] Development Context discovery question
-- [x] Brownfield enhancement workflow
-- [x] Health check workflow for system validation
-- [x] Workflow customization guide (320 lines)
-
-**In Progress:**
-- [ ] End-to-end workflow testing
-- [ ] Error handling refinement
-- [ ] User guide expansion with real examples
-- [ ] Performance optimization
-
-### v0.1.0 - Initial Release (Target: 4-6 weeks)
-
-**Critical Blockers:**
-- [ ] **Git integration** (automated commits, branching, rollback) - Epic 7 (P0 Priority)
-- [ ] Comprehensive end-to-end testing of all 4 workflows
-- [ ] Recovery mechanism implementation (session resumption)
-- [ ] Comprehensive violation logging system
-
-**Required Features:**
-- [ ] Enhanced error recovery mechanisms with automatic retry logic
-- [ ] Complete documentation suite with real-world examples
-- [ ] User guide expansion with actual workflow execution examples
-- [ ] Template elicit flags (project-brief, PRD, architecture templates)
-- [ ] Performance metric validation (verify 85% success rate, 40% cycle time reduction)
-- [ ] BMAD to CODEX migration guide
-
-**Timeline Extended**: Git integration work (Epic 7) requires additional 2-3 weeks beyond original estimate.
-
-### v0.2.0 - Enhanced Features (Target: 4-8 weeks after v0.1.0)
-- [ ] Context window management automation
-- [ ] Pre-configured templates for JavaScript, Python, Go, Rust
-- [ ] Advanced validation customization
-- [ ] Knowledge base system for pattern learning
-- [ ] Success metrics tracking and analysis
-
-### v0.3.0 - Advanced Capabilities (Target: 8-12 weeks after v0.2.0)
-- [ ] Custom workflow creation tools
-- [ ] Parallel phase execution
-- [ ] Multi-agent coordination (Swift agents re-integration)
-- [ ] Workflow debugging and inspection tools
-- [ ] Community workflow marketplace
+**Quick Overview:**
+- **v0.1.0** - Quality Foundation (In Progress): Archon integration, comprehensive quality gates, feedback loops, Git integration
+- **v0.2.0** - Brownfield Support: Existing codebase enhancement workflows, advanced templates
+- **v0.3.0** - Advanced Capabilities: Custom workflows, parallel execution, community marketplace
 
 See the [open issues](https://github.com/BeardedWonder/CODEX/issues) for a full list of proposed features and known issues.
 

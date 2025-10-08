@@ -211,29 +211,4 @@ Current development version (pre-v0.1.0) - Core infrastructure complete, enterin
 
 ---
 
-## Future Roadmap
-
-### v0.1.0 - Initial Release (Target: 2-4 weeks)
-- [ ] Comprehensive end-to-end testing of all workflows
-- [ ] Git integration (automated commits, branching, rollback)
-- [ ] Enhanced error recovery mechanisms
-- [ ] Complete documentation suite with real-world examples
-- [ ] Workflow customization guide completion
-
-### v0.2.0 - Enhanced Features (Target: 4-8 weeks after v0.1.0)
-- [ ] Context window management automation
-- [ ] Pre-configured templates for JavaScript, Python, Go, Rust
-- [ ] Advanced validation customization per project
-- [ ] Knowledge base system for pattern learning
-- [ ] Success metrics tracking and analysis dashboard
-
-### v0.3.0 - Advanced Capabilities (Target: 8-12 weeks after v0.2.0)
-- [ ] Custom workflow creation tools
-- [ ] Parallel phase execution where applicable
-- [ ] Multi-agent coordination (Swift agents re-integration)
-- [ ] Workflow debugging and inspection tools
-- [ ] Community workflow marketplace
-
----
-
 [Unreleased]: https://github.com/BeardedWonder/CODEX/compare/main...HEAD
