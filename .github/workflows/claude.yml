@@ -12,23 +12,33 @@ on:
 
 jobs:
   claude:
+    # Exclude @claude-artifacts mentions (handled by ai-artifact-cleanup.yml)
     if: |
-      (github.event_name == 'issue_comment' && contains(github.event.comment.body, '@claude')) ||
-      (github.event_name == 'pull_request_review_comment' && contains(github.event.comment.body, '@claude')) ||
-      (github.event_name == 'pull_request_review' && contains(github.event.review.body, '@claude')) ||
-      (github.event_name == 'issues' && (contains(github.event.issue.body, '@claude') || contains(github.event.issue.title, '@claude')))
+      (github.event_name == 'issue_comment' &&
+       contains(github.event.comment.body, '@claude') &&
+       !contains(github.event.comment.body, '@claude-artifacts')) ||
+      (github.event_name == 'pull_request_review_comment' &&
+       contains(github.event.comment.body, '@claude') &&
+       !contains(github.event.comment.body, '@claude-artifacts')) ||
+      (github.event_name == 'pull_request_review' &&
+       contains(github.event.review.body, '@claude') &&
+       !contains(github.event.review.body, '@claude-artifacts')) ||
+      (github.event_name == 'issues' &&
+       (contains(github.event.issue.body, '@claude') || contains(github.event.issue.title, '@claude')) &&
+       !contains(github.event.issue.body, '@claude-artifacts') &&
+       !contains(github.event.issue.title, '@claude-artifacts'))
     runs-on: ubuntu-latest
     permissions:
-      contents: read
-      pull-requests: read
-      issues: read
+      contents: write      # Allow Claude to update exception files and commit
+      pull-requests: write # Allow Claude to comment on PRs
+      issues: write        # Allow Claude to respond to issues
       id-token: write
-      actions: read # Required for Claude to read CI results on PRs
+      actions: read        # Required for Claude to read CI results on PRs
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 1
+          fetch-depth: 0  # Get full history for better artifact analysis context
 
       - name: Run Claude Code
         id: claude
