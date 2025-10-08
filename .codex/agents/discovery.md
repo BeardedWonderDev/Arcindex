@@ -50,9 +50,14 @@ step-definitions:
 
          GREENFIELD:
            - [CONDITIONAL] "1. Project Name/Working Title" (ONLY if not provided in command)
-           - "2. Brief Project Concept: What are you building with {project_name}? (1-3 sentences covering the problem, users, and core functionality)"
-           - "3. Existing Inputs: Do you have any existing materials (research, designs, technical requirements), or are we starting fresh?"
-           - "4. Development Context: Any technical considerations like target platform, technology preferences, or integration requirements?"
+           - "2. Brief Project Concept: What are you building with {project_name}? Describe the core problem you're solving, who will use it, and the primary functionality. (2-3 paragraphs)"
+           - "3. Target Users & Pain Points: Who are your target users, and what specific pain points or challenges are they currently experiencing that this project addresses? What makes these pain points significant enough to warrant this solution?"
+           - "4. User Research Status: What user research has been conducted so far (interviews, surveys, market analysis)? If none yet, what research do you plan to conduct, and how will you validate user needs before building?"
+           - "5. Competitive Landscape: Who are the main competitors or alternative solutions in this space? What are their key strengths and weaknesses? How will your solution differentiate itself from existing options?"
+           - "6. Market Opportunity: What market trends, gaps, or opportunities is this project addressing? Why is now the right time to build this solution? What evidence supports the market demand?"
+           - "7. Technical Platform & Language: What are the must-have technical constraints for this project? Specify target platform(s) (iOS, Android, Web, Backend Service, etc.), required programming languages, and any framework preferences or organizational standards that must be followed."
+           - "8. Integration Requirements: What existing systems, APIs, or third-party services must this project integrate with? Are there any authentication, data format, or protocol requirements for these integrations?"
+           - "9. Success Criteria & Constraints: How will you measure success for this project? What are the critical success factors, timeline constraints, budget considerations, and any other limitations (regulatory, compliance, organizational) that will shape the solution?"
 
          BROWNFIELD:
            - "1. Enhancement Goal: What feature/enhancement are you adding?"
@@ -180,14 +185,25 @@ step-definitions:
     execution:
       1. Read workflow.json
 
-      2. Update state via state-manager.md:
+      2. Execute persist-discovery-summary task:
+         - Parse discovery answers from workflow.json.project_discovery
+         - Extract structured data to .codex/state/discovery-summary.json
+         - Populate 9 fields: project_scope, target_users, user_research_status,
+           competitive_landscape, market_opportunities, technical_constraints,
+           integration_requirements, success_criteria, business_goals
+         - Update workflow.json with discovery_summary_path
+
+      3. Update state via state-manager.md:
          - Set discovery_state: "complete"
          - Set elicitation_completed.discovery: true
+         - Set project_discovery.discovery_completed: true
          - Set current_phase: "analyst" (ready for transformation)
 
-      3. Return to orchestrator:
+      4. Return to orchestrator:
          ```
          ✅ Discovery phase complete!
+
+         📄 Discovery summary saved to .codex/state/discovery-summary.json
 
          Ready to transform to Business Analyst.
          ```
@@ -210,10 +226,12 @@ dependencies:
   tasks:
     - state-manager.md
     - advanced-elicitation.md
+    - persist-discovery-summary.md
   data:
     - elicitation-methods.md
   state:
     - workflow.json
+    - discovery-summary.json (created by persist-discovery-summary)
 
 output-protocol:
   - NEVER display output to user directly

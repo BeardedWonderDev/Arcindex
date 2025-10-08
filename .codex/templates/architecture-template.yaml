@@ -65,15 +65,21 @@ sections:
     elicit: true
     sections:
       - id: platform-selection
-        title: Platform & Framework Selection
+        title: Platform & Framework Selection Rationale
         type: table
-        columns: [Layer, Technology, Version, Rationale, Alternatives Considered]
+        instruction: |
+          Provide detailed rationale for each technology choice.
+          CRITICAL: Exact versions required (not ranges like "^1.2.0").
+          Document alternatives considered and explicit trade-offs.
+        columns: [Layer, Technology, Version, Rationale, Alternatives Considered, Trade-offs]
         rows:
           - Frontend
           - Backend
           - Database
+          - Caching
           - Infrastructure
           - DevOps
+          - Monitoring
       - id: third-party-services
         title: Third-Party Services
         type: structured-list
@@ -133,6 +139,46 @@ sections:
           - Error Handling Standards
           - Documentation Approach
 
+  - id: frontend-architecture
+    title: Frontend Architecture
+    skip_if: Backend-only project (no UI component)
+    instruction: |
+      Define frontend architecture, state management, and component patterns.
+      Only required for projects with user interface components.
+      Skip this section for backend-only services.
+    elicit: true
+    sections:
+      - id: ui-framework
+        title: UI Framework & Libraries
+        type: structured
+        instruction: Define core frontend technology stack
+        components:
+          - Framework Selection (React, Vue, Angular, SwiftUI, UIKit, etc.)
+          - State Management Library (Redux, MobX, Zustand, Combine, etc.)
+          - Component Library/Design System (Material-UI, Tailwind, SwiftUI Views, etc.)
+          - Routing Strategy (React Router, Vue Router, Navigation patterns)
+          - Build & Bundle Configuration (Webpack, Vite, Xcode, etc.)
+      - id: component-architecture
+        title: Component Architecture
+        type: structured
+        instruction: Define how UI components are organized and interact
+        components:
+          - Component Hierarchy (Parent-child relationships, composition patterns)
+          - Reusable Component Patterns (Atomic design, compound components, etc.)
+          - State Management Patterns (Local state, global state, derived state)
+          - Data Fetching Strategy (Server state, client state, loading/error states)
+          - Error Boundary Implementation (Error handling in UI layer)
+      - id: frontend-data-flow
+        title: Frontend Data Flow
+        type: structured
+        instruction: Define how data flows through the frontend
+        components:
+          - API Integration Approach (REST client, GraphQL client, API layer abstraction)
+          - Caching Strategy (Client-side cache, SWR, React Query, etc.)
+          - Optimistic Updates (UI updates before server confirmation)
+          - Real-time Data Handling (WebSockets, SSE, polling strategies)
+          - Offline Support (If required - service workers, local storage, sync)
+
   - id: implementation-design
     title: Implementation Design Patterns
     instruction: |
@@ -172,6 +218,56 @@ sections:
           - Logging Standards
           - Documentation Requirements
           - Testing Requirements
+      - id: error-handling-patterns
+        title: Error Handling Patterns
+        type: structured
+        instruction: |
+          Define comprehensive error handling strategy across all layers.
+          Include classification, propagation, retry logic, and user-facing messaging.
+        components:
+          - Error Classification (By severity - CRITICAL/ERROR/WARNING/INFO, By recoverability - Recoverable vs Fatal, By source - User error vs System error vs External service error)
+          - Error Propagation Strategy (How errors bubble up through layers, Error transformation between layers, Context preservation in error chain, Structured error responses)
+          - Retry Logic & Backoff (Exponential backoff strategy for transient failures, Maximum retry attempts per operation type, Circuit breaker pattern for distributed systems, Idempotency requirements for retryable operations)
+          - User-Facing Error Messages (Error message templates by type, Localization strategy for errors, PII handling in error messages, Actionable guidance in error responses)
+          - Error Logging & Monitoring (Structured logging format for errors, Error correlation IDs and tracing, Alert thresholds and escalation, Error rate monitoring and dashboards)
+          - Rollback & Recovery Procedures (Transaction rollback strategies, Data consistency after errors, Compensating transactions, Manual intervention procedures for critical errors)
+
+  - id: testing-strategy
+    title: Testing Strategy
+    instruction: |
+      Define comprehensive testing approach at all levels with coverage targets.
+      Ensure testing strategy enables confident deployments and rapid iteration.
+    elicit: true
+    sections:
+      - id: test-levels
+        title: Test Levels
+        type: structured
+        instruction: Define testing approach for each level
+        components:
+          - Unit Testing (Framework - Jest, XCTest, pytest, etc., Coverage target - typically 80%+, Patterns - AAA, Given-When-Then)
+          - Integration Testing (Strategy - API contract tests, Database integration, Service integration, Scope - Component interactions, Tools - Supertest, Integration test frameworks)
+          - End-to-End Testing (Tools - Cypress, Playwright, Selenium, XCUITest, Critical user paths - Login, core workflows, Happy path + edge cases)
+          - Performance Testing (Benchmarks - Response time targets, Load testing - Concurrent users, tools, Stress testing - Breaking points)
+          - Security Testing (OWASP compliance - Top 10 vulnerabilities, Vulnerability scanning - SAST/DAST tools, Penetration testing - If required for compliance)
+      - id: test-infrastructure
+        title: Test Infrastructure
+        type: structured
+        instruction: Define testing infrastructure and tooling
+        components:
+          - Test Framework Setup (Unit test runner configuration, Integration test environment setup, E2E test infrastructure)
+          - Mocking Strategy (API mocking approach, Database mocking/seeding, External service mocking, Time/randomness mocking)
+          - Test Data Management (Test data generation strategy, Fixtures and seed data, Data cleanup between tests, PII handling in tests)
+          - CI/CD Integration (Test execution in pipeline, Parallel test execution, Test result reporting, Failure handling and retries)
+          - Test Reporting (Coverage reports, Test result dashboards, Flaky test detection, Performance test trends)
+      - id: coverage-requirements
+        title: Coverage Requirements
+        type: structured
+        instruction: Define test coverage expectations and targets
+        components:
+          - Unit Test Coverage Target (Typically 80%+ for new code, Line coverage vs branch coverage, Exceptions for trivial code)
+          - Critical Path Coverage (100% coverage for payment flows, 100% coverage for authentication/authorization, 100% coverage for security-sensitive features, 100% coverage for data integrity operations)
+          - Integration Test Coverage (All API endpoints tested, All database operations tested, All external integrations tested, Error scenarios covered)
+          - Acceptance Criteria Validation (Every story AC has automated test, Tests map directly to user requirements, Tests serve as living documentation)
 
   - id: security-architecture
     title: Security Architecture
@@ -284,6 +380,34 @@ sections:
         title: Technical Glossary
         type: definition-list
         instruction: Define all technical terms and acronyms
+
+  - id: architecture-confidence
+    title: Architecture Confidence Assessment
+    instruction: |
+      Self-assess the architecture quality and completeness.
+      Scores below 70 should trigger architecture review.
+      Known gaps must be addressed before PRP creation.
+    sections:
+      - id: confidence-scores
+        title: Confidence Scores
+        type: structured
+        instruction: Rate confidence in each dimension (0-100 scale)
+        components:
+          - Requirements Coverage [0-100] (Percentage of PRD requirements fully addressed in architecture)
+          - Technical Feasibility [0-100] (Confidence that this architecture is implementable with available resources and technology)
+          - Scalability Confidence [0-100] (Confidence that system will scale to meet stated performance and user load requirements)
+          - Security Confidence [0-100] (Confidence that all security requirements and best practices are adequately addressed)
+          - Testability Confidence [0-100] (Confidence that architecture supports comprehensive automated testing at all levels)
+          - Overall Architecture Score [0-100] (Average of above five scores - auto-calculated)
+      - id: gaps-and-risks
+        title: Known Gaps & Risk Factors
+        type: structured
+        instruction: Document unresolved questions and top architectural risks
+        components:
+          - Known Gaps (List any unresolved architectural questions or areas needing further investigation)
+          - Top 3 Architectural Risks (Identify the three highest-impact risks with brief mitigation approaches)
+          - Dependencies on External Decisions (List any architecture decisions blocked by external factors or pending decisions)
+          - Recommended Next Steps (Actions needed to address gaps and de-risk architecture before implementation)
 
 validation:
   completeness-check:

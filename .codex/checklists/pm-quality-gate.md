@@ -354,6 +354,36 @@ Validate that structure supports autonomous AI implementation]]
 - [ ] Local testability established early
   - Evidence: "Test framework, CI/CD basics in Epic 1"
 
+### 6.4 Story Sizing & Complexity (AI Implementation Readiness)
+
+[[LLM: AI agents work best with stories sized 4-8 hours with clear boundaries. Stories requiring human decisions or complex context switching reduce autonomous implementation success. Validate that stories are optimized for AI implementation:
+- 4-8 hour stories are the AI sweet spot
+- Stories must have clear entry/exit points
+- Dependencies must be explicit, not implicit
+- Stories should be independently testable
+- Avoid stories requiring human-in-the-loop decisions]]
+
+- ⚠️ [ ] Stories are sized appropriately for AI implementation (4-8 hours ideal)
+  - Evidence: "No stories exceed 8 hours estimated implementation time"
+- ⚠️ [ ] Large stories (>8 hours) are broken into smaller vertical slices
+  - Evidence: "Complex features split into sequential deliverable stories"
+- [ ] Each story has clear entry and exit points
+  - Evidence: "Stories define starting context and completion criteria explicitly"
+- [ ] Dependencies between stories are explicit and documented
+  - Evidence: "Story dependencies listed with clear prerequisites"
+- [ ] Story complexity matches AI agent capabilities
+  - Evidence: "Stories avoid requiring human judgment or external context not in PRD"
+- [ ] Acceptance criteria are testable by AI
+  - Evidence: "ACs are programmatically verifiable (no subjective 'looks good' criteria)"
+- [ ] Stories avoid human-in-the-loop requirements
+  - Evidence: "No stories require manual review, approval, or decision during implementation"
+- [ ] Technical complexity is appropriate for autonomous implementation
+  - Evidence: "Stories avoid novel algorithms or undefined technical approaches"
+- [ ] Stories can be validated programmatically
+  - Evidence: "Each story includes unit/integration test requirements"
+- [ ] Rollback strategy defined for each story
+  - Evidence: "Stories include how to revert changes if validation fails"
+
 ## 7. TECHNICAL GUIDANCE
 
 [[LLM: Technical guidance helps architect make aligned decisions. This section bridges PM and architect roles]]

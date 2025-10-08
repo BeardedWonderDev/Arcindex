@@ -47,10 +47,10 @@ sections:
       ## Target Users & Stakeholders
 
       ### Primary Users
-      - **User Type**: {{primary_user_type}}
+      - **User Type**: {{var:target_users}}
       - **Characteristics**: {{primary_user_characteristics}}
       - **Goals**: {{primary_user_goals}}
-      - **Pain Points**: {{primary_user_pain_points}}
+      - **Pain Points**: {{var:user_pain_points}}
 
       ### Secondary Users
       {{secondary_users}}
@@ -58,27 +58,85 @@ sections:
       ### Stakeholders
       {{stakeholders}}
 
+  - name: user_research_insights
+    title: "User Research & Insights"
+    instruction: "Document user research findings, validation methods, and key insights that inform the product direction"
+    elicit: true
+    content: |
+      ## User Research & Insights
+
+      ### Research Conducted
+      {{var:user_research_completed}}
+
+      ### Planned Research
+      {{var:user_research_planned}}
+
+      ### Validation Approach
+      {{var:validation_approach}}
+
+      ### Key Findings
+      {{user_research_findings}}
+
+      ### User Personas
+      Based on research, we've identified the following user personas:
+
+      #### Primary Persona: {{primary_persona_name}}
+      - **Demographics**: {{primary_persona_demographics}}
+      - **Behaviors**: {{primary_persona_behaviors}}
+      - **Needs**: {{primary_persona_needs}}
+      - **Pain Points**: {{var:user_pain_points}}
+      - **Goals**: {{primary_persona_goals}}
+
+      #### Secondary Persona: {{secondary_persona_name}}
+      - **Demographics**: {{secondary_persona_demographics}}
+      - **Behaviors**: {{secondary_persona_behaviors}}
+      - **Needs**: {{secondary_persona_needs}}
+
+      ### Research-Driven Insights
+      1. {{insight_1}}
+      2. {{insight_2}}
+      3. {{insight_3}}
+
+      ### Implications for Product Design
+      {{research_implications}}
+
   - name: business_goals
     title: "Business Goals & Success Metrics"
-    instruction: "Define measurable business objectives and key performance indicators that will determine project success"
+    instruction: "Define measurable business objectives and key performance indicators that will determine project success. Make goals SMART (Specific, Measurable, Achievable, Relevant, Time-bound)"
     elicit: true
     content: |
       ## Business Goals & Success Metrics
 
-      ### Primary Business Goals
+      ### Primary Business Objectives
       1. {{business_goal_1}}
       2. {{business_goal_2}}
       3. {{business_goal_3}}
 
-      ### Success Metrics (KPIs)
-      - **Metric 1**: {{kpi_1}}
-      - **Metric 2**: {{kpi_2}}
-      - **Metric 3**: {{kpi_3}}
+      ### Success Metrics & KPIs
+
+      #### User Success Metrics
+      {{var:success_metrics}}
+
+      #### Business Performance Indicators
+      - **Metric 1**: {{kpi_1}} - Target: {{kpi_1_target}} by {{kpi_1_timeline}}
+      - **Metric 2**: {{kpi_2}} - Target: {{kpi_2_target}} by {{kpi_2_timeline}}
+      - **Metric 3**: {{kpi_3}} - Target: {{kpi_3_target}} by {{kpi_3_timeline}}
+
+      #### Technical Performance Metrics
+      - **Performance**: {{performance_metrics}}
+      - **Reliability**: {{reliability_metrics}}
+      - **Scalability**: {{scalability_metrics}}
 
       ### Success Timeline
       - **Short-term (1-3 months)**: {{short_term_success}}
       - **Medium-term (3-6 months)**: {{medium_term_success}}
       - **Long-term (6+ months)**: {{long_term_success}}
+
+      ### Success Criteria Definition
+      The project will be considered successful when:
+      1. {{success_criterion_1}}
+      2. {{success_criterion_2}}
+      3. {{success_criterion_3}}
 
   - name: scope_boundaries
     title: "Project Scope & Boundaries"
@@ -101,38 +159,88 @@ sections:
 
   - name: constraints_assumptions
     title: "Constraints & Assumptions"
-    instruction: "Document technical, business, and resource constraints along with key assumptions being made"
+    instruction: "Document technical, business, and resource constraints along with key assumptions being made. Be explicit about limitations that shape the solution."
     elicit: true
     content: |
       ## Constraints & Assumptions
 
       ### Technical Constraints
-      {{technical_constraints}}
+      - **Platform Requirements**: {{var:target_platform}}
+      - **Technology Stack**: {{var:primary_language}}, {{var:frameworks}}
+      - **Integration Requirements**: {{var:required_integrations}}
+      - **Standards & Compliance**: {{var:organizational_standards}}
+      - **Other Technical Constraints**: {{additional_technical_constraints}}
 
       ### Business Constraints
-      - **Budget**: {{budget_constraints}}
-      - **Timeline**: {{timeline_constraints}}
+      - **Budget**: {{var:budget_constraint}}
+      - **Timeline**: {{var:timeline_constraint}}
       - **Resources**: {{resource_constraints}}
+      - **Regulatory**: {{var:regulatory_constraints}}
+      - **Market Constraints**: {{market_constraints}}
+
+      ### Organizational Constraints
+      - **Team Expertise**: {{team_expertise_constraints}}
+      - **Process Requirements**: {{process_constraints}}
+      - **Stakeholder Constraints**: {{stakeholder_constraints}}
 
       ### Key Assumptions
-      {{key_assumptions}}
+      1. {{assumption_1}}
+      2. {{assumption_2}}
+      3. {{assumption_3}}
+      4. {{assumption_4}}
+
+      ### Dependency Assumptions
+      {{dependency_assumptions}}
+
+      ### Risk-Related Assumptions
+      {{risk_assumptions}}
 
   - name: competitive_landscape
-    title: "Competitive Landscape"
-    instruction: "Brief analysis of existing solutions and competitive differentiation"
+    title: "Competitive Analysis"
+    instruction: "Comprehensive analysis of existing solutions, competitive positioning, and differentiation strategy"
     elicit: true
-    condition: "requires_market_analysis"
     content: |
-      ## Competitive Landscape
+      ## Competitive Analysis
 
-      ### Existing Solutions
-      {{existing_solutions}}
+      ### Major Competitors
+      {{var:competitors}}
+
+      #### Competitor Analysis
+
+      ##### Competitor 1: {{competitor_1_name}}
+      - **Strengths**: {{competitor_1_strengths}}
+      - **Weaknesses**: {{competitor_1_weaknesses}}
+      - **Market Position**: {{competitor_1_position}}
+      - **Pricing**: {{competitor_1_pricing}}
+
+      ##### Competitor 2: {{competitor_2_name}}
+      - **Strengths**: {{competitor_2_strengths}}
+      - **Weaknesses**: {{competitor_2_weaknesses}}
+      - **Market Position**: {{competitor_2_position}}
+      - **Pricing**: {{competitor_2_pricing}}
+
+      ##### Competitor 3: {{competitor_3_name}}
+      - **Strengths**: {{competitor_3_strengths}}
+      - **Weaknesses**: {{competitor_3_weaknesses}}
+      - **Market Position**: {{competitor_3_position}}
+      - **Pricing**: {{competitor_3_pricing}}
+
+      ### Our Differentiation
+      {{var:differentiation}}
 
       ### Competitive Advantages
-      {{competitive_advantages}}
+      1. {{competitive_advantage_1}}
+      2. {{competitive_advantage_2}}
+      3. {{competitive_advantage_3}}
 
-      ### Market Positioning
+      ### Market Positioning Strategy
       {{market_positioning}}
+
+      ### Barriers to Entry
+      {{barriers_to_entry}}
+
+      ### Market Timing
+      {{var:market_timing}}
 
   - name: risk_assessment
     title: "Risk Assessment"

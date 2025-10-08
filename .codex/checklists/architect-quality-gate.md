@@ -205,6 +205,10 @@ Vague versioning is a CRITICAL failure - it leads to dependency conflicts and in
   - Evidence: "Cite 'Alternatives Considered' sections showing evaluation process"
 - [ ] Selected stack components work well together
   - Evidence: "No incompatibilities or integration challenges between chosen technologies"
+- [ ] All chosen technologies have active maintenance and security support
+  - Evidence: "Verify no deprecated or end-of-life technologies in the stack"
+- [ ] Technology stack aligns with team expertise or learning goals
+  - Evidence: "Cite rationale for unfamiliar technologies and learning plan if needed"
 
 ### 3.2 Frontend Architecture [[FRONTEND ONLY]]
 
@@ -235,6 +239,10 @@ If evaluating, ensure alignment between the main architecture.md and any fronten
   - Evidence: "Cite error response formats, logging, and recovery approaches"
 - [ ] Backend scaling approach is defined
   - Evidence: "Cite horizontal/vertical scaling strategy"
+- [ ] Caching strategy is defined for performance optimization
+  - Evidence: "Cite Redis/Memcached/CDN usage, cache invalidation strategy"
+- [ ] Rate limiting and throttling mechanisms are specified
+  - Evidence: "Cite rate limit tiers, throttling algorithms, and implementation approach"
 
 ### 3.4 Data Architecture
 
@@ -248,6 +256,10 @@ If evaluating, ensure alignment between the main architecture.md and any fronten
   - Evidence: "Cite migration tools and strategy for schema evolution"
 - [ ] Data backup and recovery strategies are outlined
   - Evidence: "Cite backup frequency, retention, and recovery procedures"
+- [ ] Data consistency and transaction management approach is defined
+  - Evidence: "Cite ACID compliance, eventual consistency, or distributed transaction handling"
+- [ ] Database indexing strategy is specified for performance
+  - Evidence: "Cite key indexes, query optimization approach, and index maintenance plan"
 
 ## 4. FRONTEND DESIGN & IMPLEMENTATION [[FRONTEND ONLY]]
 
@@ -522,6 +534,10 @@ Remember: AI agents excel when patterns are explicit and consistent.]]
   - Evidence: "Cite load testing tools, performance benchmarks"
 - [ ] Security testing approach is defined
   - Evidence: "Cite security testing tools (OWASP ZAP, Snyk), scan frequency"
+- [ ] Test data management and seeding strategy is defined
+  - Evidence: "Cite test fixtures, database seeding, mock data generation approach"
+- [ ] CI/CD integration for automated testing is specified
+  - Evidence: "Cite test execution in pipeline, test reporting, failure handling"
 
 ### 7.3 Frontend Testing [[FRONTEND ONLY]]
 
@@ -546,6 +562,10 @@ Remember: AI agents excel when patterns are explicit and consistent.]]
   - Evidence: "Cite IDE, Node version (nvm), Docker, database setup"
 - [ ] Development workflows are outlined
   - Evidence: "Cite branch strategy, commit conventions, PR process"
+- [ ] Environment variable management and secrets handling is defined
+  - Evidence: "Cite .env structure, secrets manager usage, local vs production config"
+- [ ] Debugging and troubleshooting guidance is provided
+  - Evidence: "Cite logging levels, debug tools, common issues and solutions"
 - [ ] Source control practices are defined
   - Evidence: "Cite Git workflow, branch naming, commit message format"
 - [ ] Dependency management approach is specified
@@ -696,6 +716,45 @@ Remember: Explicit > Implicit, Simple > Clever, Consistent > Creative]]
   - Evidence: "Cite test templates, testing utilities, test patterns"
 - [ ] Debugging guidance is provided
   - Evidence: "Cite logging statements, debug endpoints, troubleshooting steps"
+
+### 9.5 AI Coding Standards & Infrastructure
+
+[[LLM: AI agents need explicit infrastructure, automation, and operational clarity. Implicit conventions and manual processes create implementation barriers. Validate that the architecture explicitly defines:
+- Build and deployment automation
+- Development environment reproducibility
+- Clear operational procedures
+- Infrastructure as code patterns]]
+
+- ⚠️ [ ] Code organization designed for AI agent navigation
+  - Evidence: "Logical directory structure, consistent file placement, predictable module organization"
+- ⚠️ [ ] File naming conventions are consistent and predictable
+  - Evidence: "All files follow same naming pattern (kebab-case, PascalCase, etc.)"
+- [ ] Dependencies are explicitly declared (no implicit imports)
+  - Evidence: "All imports explicit, no global dependencies, dependency injection used"
+- [ ] Configuration is externalized (no hardcoded values)
+  - Evidence: "Environment variables, config files, feature flags - no magic values in code"
+- ⚠️ [ ] Validation commands are project-specific and executable
+  - Evidence: "npm test, npm run lint commands defined and functional"
+- [ ] Test patterns are consistent across all components
+  - Evidence: "All tests follow same structure (AAA, Given-When-Then), same tools/mocking"
+- [ ] Error messages are descriptive and actionable
+  - Evidence: "Errors include context, suggested fixes, not just 'Something went wrong'"
+- [ ] Documentation is inline and up-to-date
+  - Evidence: "JSDoc/TSDoc comments, inline explanations for complex logic"
+- [ ] API contracts are explicit (OpenAPI, GraphQL schema, etc.)
+  - Evidence: "API documented with schemas, types, validation rules"
+- [ ] Database migrations are version-controlled
+  - Evidence: "Migration files timestamped, reversible, tracked in version control"
+- [ ] Build process is automated and documented
+  - Evidence: "README explains build steps, CI/CD automates builds"
+- [ ] Local development environment is reproducible
+  - Evidence: "Docker Compose, detailed setup docs, dependency versions locked"
+- ⚠️ [ ] Deployment process is documented step-by-step
+  - Evidence: "Deployment runbook, automated deployment scripts, rollback procedures"
+- [ ] Monitoring and logging infrastructure defined
+  - Evidence: "Logging framework configured, metrics collection setup, dashboards planned"
+- [ ] Rollback procedures documented
+  - Evidence: "Database rollback scripts, deployment rollback process, data recovery plan"
 
 ## 10. ACCESSIBILITY IMPLEMENTATION [[FRONTEND ONLY]]
 
