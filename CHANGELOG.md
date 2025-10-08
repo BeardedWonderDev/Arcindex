@@ -11,6 +11,9 @@ Current development version (pre-v0.1.0) - Core infrastructure complete, enterin
 
 ### Added
 
+- GitHub Actions automation workflows: Changelog automation, development history tracking, roadmap updates, and version management using Claude Code GitHub Action - Replaces manual two-commit workflow with automated pipeline that updates CHANGELOG.md, development history, and roadmap on every push to main, reducing commit time by 2-3 minutes and ensuring consistent formatting (5 files, 832 insertions, 164 deletions)
+- Execution learning capture and architect validation infrastructure: Complete Phase 2 Week 5 deliverables with execution learning feedback loop, epic-based learning integration, zero-knowledge architecture testing, and confidence scoring framework - Enables progressive quality improvement across epics through systematic learning capture with .codex/state/execution-reports/ and epic-learnings/ directories (11 files, 2,998 insertions)
+- Project roadmap and comprehensive validation guides: ROADMAP.md with v0.1.0-v0.3.0 plans, operational validation playbook, Level 3-4 testing guides, and Phase 2 completion documentation - Provides clear roadmap for v0.1.0 completion and enables systematic operational validation across 5 test scenarios (5 files, 3,159 insertions)
 - Phase 2 Week 4: Feedback mechanisms and quality enhancements - Bi-directional feedback system (PM↔Architect, Execution↔PRP) with workflow.json tracking, PRP validation enforcement (Phase 0 gate with ≥90 score requirement), 4-level failure escalation protocol (auto-retry, pattern analysis, user intervention, checkpoint), epic-based workflow support with just-in-time architecture/PRP creation, and extended workflow.json template with feedback_requests, failure_escalations, and epic_learnings tracking (1,786 insertions across 12 files)
 - Phase 2 PRP: Feedback Mechanisms & Quality Enhancement Implementation (42-61 hours over 2 weeks) - Comprehensive implementation plan for bi-directional feedback loops (PM↔Architect, PRP↔Execution), PRP validation enforcement, 4-level failure escalation protocol, epic-based incremental workflow, QA reviewer enhancements, execution learning capture, and architect validation infrastructure with 92/100 validation readiness score
 - Enhanced quality validation infrastructure with comprehensive checklist improvements across architect (169 items) and PM (96 items) quality gates, including AI coding standards, story sizing for AI implementation readiness, frontend architecture validation, testing strategy validation, error handling patterns, and architecture confidence assessment scoring
@@ -58,6 +61,7 @@ Current development version (pre-v0.1.0) - Core infrastructure complete, enterin
 
 ### Changed
 
+- Changelog workflow prompt: Simplified from 180-line prescriptive prompt to 32-line goal-oriented approach - Replaces detailed bash commands with high-level tasks, giving Claude freedom to use Read/Grep/Edit or Bash, reducing turn usage and eliminating permission denial loops (1 file, 31 insertions, 130 deletions)
 - Simplified architecture by removing Swift agent dependencies (feature-developer, syntax-reviewer, etc.)
 - Replaced agent-based Level 4 validation with direct command execution (swiftlint, swift test, xcodebuild)
 - Updated elicitation menu from confusing 0-8+9 format to intuitive 1-9 pattern with option 1 = "Proceed to next section"
@@ -72,6 +76,11 @@ Current development version (pre-v0.1.0) - Core infrastructure complete, enterin
 
 ### Fixed
 
+- GitHub Actions workflow triggers: Replaced unsupported push event with schedule (daily) and workflow_dispatch (manual testing) triggers based on claude-code-action documentation - Resolves 'Unsupported event type: push' error (2 files, 10 insertions, 6 deletions)
+- Workflow allowedTools configuration: Added Read, Edit, Write, and Bash tools (git, grep, awk, date, head, tail, wc, cut, echo) to enable file operations and git commands - Resolves permission denials that prevented Claude from executing workflow tasks (3 files, 3 insertions)
+- Workflow max-turns limits: Increased from 15-20 to 30-40 turns to allow Claude enough time to complete complex changelog operations - Previous runs hit max-turns before completing (3 files, 6 insertions, 6 deletions)
+- YAML syntax in GitHub Actions workflows: Fixed multi-line git commit message format using multiple -m flags instead of embedded newlines - Resolves "could not find expected ':' while scanning a simple key" parsing error (4 files, 11 insertions, 17 deletions)
+- Backslash line continuations in workflow YAML prompts: Removed backslash continuations from bash commands inside YAML literal blocks - YAML interprets backslashes before bash sees them, causing parsing errors (4 files, 5 insertions, 11 deletions)
 - Orchestrator auto-spawning next section without waiting for user input in interactive mode
 - Project brief template elicit flags (sections 6-8 now require elicitation)
 - Analyst agent bypassing elicitation in interactive mode (was using batch processing incorrectly)
@@ -158,20 +167,21 @@ Current development version (pre-v0.1.0) - Core infrastructure complete, enterin
 
 ## Statistics
 
-- **Total Commits**: 57
-- **Total Lines Added**: ~35,000+
-- **Total Lines Deleted**: ~500
-- **Net Change**: +34,500 lines
-- **Date Range**: 2025-09-23 to 2025-10-07
-- **Files Created/Modified**: ~220 files
+- **Total Commits**: 71
+- **Total Lines Added**: ~41,000+
+- **Total Lines Deleted**: ~700
+- **Net Change**: +40,300 lines
+- **Date Range**: 2025-09-23 to 2025-10-08
+- **Files Created/Modified**: ~240 files
 
 ## Commit Type Distribution
 
-- **Features (feat)**: 17 commits (29.8%)
-- **Fixes (fix)**: 10 commits (17.5%)
-- **Refactoring (refactor)**: 4 commits (7.0%)
-- **Documentation (docs)**: 14 commits (24.6%)
-- **Miscellaneous**: 12 commits (21.1%)
+- **Features (feat)**: 17 commits (23.9%)
+- **Fixes (fix)**: 15 commits (21.1%)
+- **Refactoring (refactor)**: 4 commits (5.6%)
+- **Documentation (docs)**: 15 commits (21.1%)
+- **Chore (chore)**: 3 commits (4.2%)
+- **Miscellaneous**: 17 commits (23.9%)
 
 ## Key Development Themes
 
