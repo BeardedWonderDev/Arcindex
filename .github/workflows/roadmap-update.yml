@@ -116,9 +116,7 @@ jobs:
             git config user.name "github-actions[bot]"
             git config user.email "github-actions[bot]@users.noreply.github.com"
             git add ROADMAP.md
-            git commit -m "chore: update roadmap progress [skip ci]" \
-                       -m "Updated based on recent commits." \
-                       -m "🤖 Generated with Claude Code GitHub Action"
+            git commit -m "chore: update roadmap progress [skip ci]" -m "Updated based on recent commits." -m "Generated with Claude Code GitHub Action"
             git push
             ```
 
