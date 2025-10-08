@@ -409,6 +409,158 @@ sections:
           - Dependencies on External Decisions (List any architecture decisions blocked by external factors or pending decisions)
           - Recommended Next Steps (Actions needed to address gaps and de-risk architecture before implementation)
 
+  - id: prp-creation-guidance
+    title: PRP Creation Guidance
+    instruction: |
+      Provide specific guidance for PRP creators on implementing this architecture.
+      This section bridges architecture and implementation, enabling one-pass PRP success.
+    elicit: false
+    sections:
+      - id: critical-sections-for-prps
+        title: Critical Architecture Sections for PRPs
+        type: structured-list
+        instruction: |
+          List specific architecture sections with page/line references that PRP creators must review.
+          Be explicit about where to find implementation details.
+        template: |
+          - Section [Number]: [Section Name] → [What it provides for implementation]
+            - Lines/Pages: [Specific reference]
+            - Critical for: [Which stories/features]
+            - Key Details: [What implementer needs to extract]
+        examples:
+          - "Section 3.2: Database Schema (lines 145-178) → Data model definitions"
+          - "Section 4.1: API Design (lines 201-245) → Request/response schemas"
+          - "Section 5.3: Authentication Flow (lines 312-340) → Security implementation"
+
+      - id: implementation-priorities-epic-based
+        title: Implementation Priorities (Epic-Based)
+        type: structured-list
+        instruction: |
+          Break down implementation by epic with specific architecture sections to reference.
+          Enable just-in-time PRP creation per epic.
+        template: |
+          Epic [Number]: [Epic Name]
+          Priority: [High/Medium/Low]
+          Architecture Sections:
+            - [Section references specific to this epic]
+          Foundation Requirements:
+            - [Core infrastructure needed before this epic]
+          Dependencies:
+            - [Other epics or systems this depends on]
+        examples:
+          - "Epic 1: Core Authentication"
+          - "  - Sections: 3.1 (User Model), 4.2 (Auth API), 5.3 (Security)"
+          - "  - Foundation: Database setup, API framework, session management"
+          - "  - Dependencies: None (foundational epic)"
+
+      - id: architectural-constraints
+        title: Architectural Constraints for Implementation
+        type: structured-list
+        instruction: |
+          List architectural constraints and their implementation implications.
+          These are non-negotiable decisions that constrain implementation approaches.
+        template: |
+          Constraint: [Architectural decision or limitation]
+          Implication: [How this affects implementation]
+          Rationale: [Why this constraint exists]
+          Examples: [Concrete implementation examples]
+        examples:
+          - "Must use PostgreSQL 14+: Affects data models, migrations, connection pooling"
+          - "API must be RESTful: No GraphQL, affects endpoint design and versioning"
+          - "Frontend must work offline: Requires local state, sync strategy, conflict resolution"
+
+      - id: pattern-examples
+        title: Implementation Pattern Examples
+        type: structured-list
+        instruction: |
+          Provide specific file references for each major pattern type.
+          These serve as concrete examples for PRP creators to reference.
+        categories:
+          Component Patterns:
+            - "Example: [Specific file path and lines]"
+            - "Pattern: [What pattern it demonstrates]"
+            - "Use for: [Which features should follow this pattern]"
+          API Patterns:
+            - "Example: [Specific file path and lines]"
+            - "Pattern: [Request/response structure, error handling, validation]"
+            - "Use for: [Which endpoints should follow this pattern]"
+          Data Access Patterns:
+            - "Example: [Specific file path and lines]"
+            - "Pattern: [Repository pattern, ORM usage, query optimization]"
+            - "Use for: [Which data operations should follow this pattern]"
+          Test Patterns:
+            - "Example: [Specific file path and lines]"
+            - "Pattern: [Unit test structure, fixtures, mocks]"
+            - "Use for: [Which components should follow this testing approach]"
+        examples:
+          - "Component: src/components/UserProfile/index.tsx (props, state, styling)"
+          - "API: src/api/users/createUser.ts (validation, error handling, response)"
+          - "Data: src/repositories/UserRepository.ts (query patterns, transactions)"
+          - "Test: tests/unit/services/UserService.test.ts (fixtures, mocks, assertions)"
+
+      - id: known-gotchas
+        title: Known Gotchas for Implementation
+        type: structured-list
+        instruction: |
+          Document technology-specific gotchas and workarounds.
+          These prevent common pitfalls during implementation.
+        template: |
+          Technology/Library: [Specific technology]
+          Gotcha: [Specific issue to avoid]
+          Workaround: [How to handle it correctly]
+          Example: [Code example or reference]
+        examples:
+          - "React 18: useEffect cleanup required for async operations"
+          - "PostgreSQL: Use parameterized queries to prevent SQL injection"
+          - "JWT: Store tokens in httpOnly cookies, not localStorage"
+          - "TypeScript: Use strict mode, avoid 'any' type"
+
+      - id: validation-command-examples
+        title: Validation Command Examples
+        type: structured-list
+        instruction: |
+          Provide working validation commands for each validation level.
+          These commands should be copy-pasteable for PRP validation sections.
+        categories:
+          Level 1 (Syntax/Style):
+            - "Command: [Exact command to run]"
+            - "Expected Output: [What success looks like]"
+            - "Common Issues: [What might fail and why]"
+          Level 2 (Unit Tests):
+            - "Command: [Exact command to run]"
+            - "Coverage Target: [Minimum coverage percentage]"
+            - "Test Structure: [Where tests should be located]"
+          Level 3 (Integration Tests):
+            - "Command: [Exact command to run]"
+            - "Environment Setup: [What needs to be running]"
+            - "Test Data: [How to set up test data]"
+          Level 4 (Domain Validation):
+            - "Command: [Domain-specific validation]"
+            - "Success Criteria: [What validates successful implementation]"
+        examples:
+          - "Level 1: npm run lint && npm run typecheck"
+          - "Level 2: npm test -- --coverage --coverageThreshold=80"
+          - "Level 3: docker-compose up -d && npm run test:integration"
+          - "Level 4: npm run test:e2e -- --spec=user-authentication"
+
+      - id: epic-learning-integration
+        title: Epic Learning Integration Points
+        type: text
+        instruction: |
+          For Epic 2+ architectures, document how Epic 1 learnings were applied.
+          This creates a feedback loop for continuous improvement.
+        template: |
+          If this is Epic 2 or later:
+
+          **Learnings Applied from Previous Epic:**
+          - [Pattern that worked well in Epic 1, now applied here]
+          - [Issue discovered in Epic 1, now addressed in this architecture]
+          - [Gotcha from Epic 1 implementation, documented in Known Gotchas above]
+
+          **Architecture Adjustments Based on Implementation Insights:**
+          - [How actual implementation informed this architecture]
+          - [Technology decisions refined based on Epic 1 experience]
+
 validation:
   completeness-check:
     - All PRD requirements addressed

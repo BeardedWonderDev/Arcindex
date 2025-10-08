@@ -329,6 +329,77 @@ completion-verification:
   enforcement: "Cannot proceed to QA handoff without all checklist items verified"
   export-requirement: "Include checklist completion status in artifacts exported to QA"
 
+learning-capture-integration:
+  purpose: "Capture execution learnings during PRP implementation to improve future PRP quality"
+
+  integration-points:
+    prp_start:
+      timing: "At the beginning of *execute-prp, immediately after ULTRATHINK planning"
+      action: "Invoke capture-execution-learnings.md with action=start"
+      inputs:
+        - prp_file: "Path to PRP being executed"
+        - epic_number: "Epic number from PRP"
+        - story_number: "Story number from PRP"
+        - estimated_hours: "Time estimate from PRP (if provided)"
+      purpose: "Initialize execution report for tracking"
+
+    validation_level_complete:
+      timing: "After each validation level (0-4) completes, regardless of pass/fail"
+      action: "Invoke capture-execution-learnings.md with action=level_complete"
+      inputs:
+        - prp_file: "Path to PRP being executed"
+        - epic_number: "Epic number"
+        - story_number: "Story number"
+        - validation_level: "Level just completed (0, 1, 2, 3, or 4)"
+        - validation_passed: "true or false"
+        - attempts: "Number of attempts for this level"
+        - issues_encountered: "Array of issues if failed"
+      purpose: "Track validation results, capture PRP quality issues, and identify working patterns"
+      prompts:
+        - "If validation failed: Prompt to capture PRP quality issues"
+        - "If validation passed: Prompt to capture effective patterns used"
+
+    prp_completion:
+      timing: "After all validation levels pass and before QA handoff"
+      action: "Invoke capture-execution-learnings.md with action=final"
+      inputs:
+        - prp_file: "Path to PRP"
+        - epic_number: "Epic number"
+        - story_number: "Story number"
+        - actual_hours: "Actual time spent on implementation"
+      purpose: "Generate final execution report with quality assessment and improvement recommendations"
+
+  workflow-integration:
+    execute-prp-sequence:
+      - "1. ULTRATHINK planning"
+      - "2. **Invoke capture-execution-learnings.md (action=start)**"
+      - "3. Implement following TodoWrite plan"
+      - "4. For each validation level:"
+      - "   a. Run validation-gate.md"
+      - "   b. **Invoke capture-execution-learnings.md (action=level_complete)**"
+      - "   c. If failed: Use failure-escalation.md, fix, retry from step 4a"
+      - "   d. If passed: Continue to next level"
+      - "5. After all levels pass: **Invoke capture-execution-learnings.md (action=final)**"
+      - "6. Validate completion checklist"
+      - "7. Export to QA"
+
+  outputs:
+    execution_report: ".codex/state/execution-reports/epic-{N}-story-{M}.json"
+    contains:
+      - "Validation results per level"
+      - "PRP quality issues discovered"
+      - "Patterns that worked"
+      - "Time estimates vs actual"
+      - "Quality assessment score"
+      - "Improvements for next PRP"
+
+  benefits:
+    - "Systematic capture of what works and what doesn't"
+    - "Identify PRP gaps early for immediate fixes"
+    - "Build knowledge base for Epic N+1 PRP creation"
+    - "Track time estimate accuracy over time"
+    - "Improve PRP quality progressively across epics"
+
 # language-agent-integration:  # DISABLED - temporarily removed
 #   swift:
 #     - swift-feature-developer: Feature implementation
@@ -349,6 +420,7 @@ dependencies:
     - context-handoff.md
     - prp-quality-check.md
     - failure-escalation.md
+    - capture-execution-learnings.md
   templates:
     - prp-enhanced-template.md
   data:
@@ -356,4 +428,6 @@ dependencies:
   directories:
     - .codex/state/escalations/
     - .codex/state/checkpoints/
+    - .codex/state/execution-reports/
+    - .codex/state/epic-learnings/
 ```

@@ -588,4 +588,7 @@ dependencies:
     - prp-quality-check.md
   data:
     - codex-kb.md
+  directories:
+    - .codex/state/execution-reports/  # For reviewing execution learnings
+    - .codex/state/epic-learnings/  # For reviewing epic-level patterns and issues
 ```

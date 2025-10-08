@@ -178,6 +178,23 @@ research-process:
 
 create-prp-workflow:
   phase-1-research:
+    epic-learning-review:
+      condition: "Creating PRPs for Epic N where N > 1"
+      action: "Review learnings from Epic N-1 execution"
+      task: "epic-learning-integration.md"
+      inputs:
+        completed_epic: "N-1"
+        next_epic: "N"
+      outputs:
+        - ".codex/state/epic-learnings/epic-{N-1}-learning-summary.md"
+        - ".codex/state/epic-learnings/epic-{N}-integration-checklist.md"
+      purpose: "Apply learnings from previous epic to improve PRP quality"
+      integration-points:
+        - "Review successful patterns to incorporate"
+        - "Note PRP gaps to avoid"
+        - "Apply time estimate adjustments"
+        - "Use integration checklist during PRP creation"
+
     codebase-analysis: "Use research-process.codebase-analysis section"
     external-research: "Use research-process.external-research section"
     validation-command-verification: "Use research-process.validation-command-verification section"
@@ -397,6 +414,7 @@ dependencies:
     - zero-knowledge-validator.md
     - context-synthesis.md
     - prp-validation-enforcement.md  # Phase 0 validation gate
+    - epic-learning-integration.md  # Epic N learnings for Epic N+1 PRPs
   data:
     - validation-criteria.md
     - implementation-patterns.md
@@ -405,4 +423,6 @@ dependencies:
   directories:
     - PRPs/ai_docs/  # For critical documentation during research
     - .codex/state/validation-logs/  # For Phase 0 verification logs
+    - .codex/state/epic-learnings/  # For epic execution learnings and integration checklists
+    - .codex/state/execution-reports/  # For reading execution reports from previous epic
 ```
