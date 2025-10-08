@@ -1,0 +1,244 @@
+name: Version Bump Automation (Post-v1.0.0)
+
+# This workflow is DISABLED until v1.0.0 is released
+# It will automatically create version bumps based on changelog analysis
+# Before v1.0.0, versioning is manual via workflow_dispatch
+
+on:
+  workflow_dispatch:
+    inputs:
+      enable_auto_bump:
+        description: 'Enable automatic version bumping (only after v1.0.0)'
+        type: boolean
+        default: false
+      bump_type:
+        description: 'Version bump type (manual override)'
+        type: choice
+        options:
+          - auto
+          - major
+          - minor
+          - patch
+        default: auto
+      dry_run:
+        description: 'Dry run (preview only)'
+        type: boolean
+        default: true
+
+jobs:
+  version-analysis:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+      pull-requests: write
+      id-token: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Check if v1.0.0 released
+        id: version_check
+        run: |
+          LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
+          echo "latest_tag=$LATEST_TAG" >> $GITHUB_OUTPUT
+
+          # Extract major version
+          MAJOR=$(echo $LATEST_TAG | sed 's/v\([0-9]*\)\..*/\1/')
+
+          if [ "$MAJOR" -ge 1 ]; then
+            echo "ready=true" >> $GITHUB_OUTPUT
+            echo "✅ Project is at v$MAJOR.x.x - version automation available"
+          else
+            echo "ready=false" >> $GITHUB_OUTPUT
+            echo "⚠️ Project is pre-v1.0.0 ($LATEST_TAG) - version automation disabled"
+            echo "ℹ️ Use manual versioning until v1.0.0 release"
+          fi
+
+      - name: Analyze Changelog for Version Bump
+        if: steps.version_check.outputs.ready == 'true' || inputs.bump_type != 'auto'
+        uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+
+          prompt: |
+            # VERSION BUMP ANALYSIS TASK
+
+            Analyze CHANGELOG.md [Unreleased] section to suggest appropriate version bump.
+
+            **Current Version:** ${{ steps.version_check.outputs.latest_tag }}
+
+            ## Step 1: Read [Unreleased] Section
+
+            Read CHANGELOG.md from line 8 onwards to get [Unreleased] content.
+
+            ## Step 2: Analyze Changes
+
+            Categorize changes by impact:
+
+            **MAJOR (Breaking Changes):**
+            - Removals of features/APIs
+            - Incompatible changes
+            - Architecture rewrites
+            - Keywords: "removed", "breaking", "incompatible", "rewrite"
+
+            **MINOR (New Features):**
+            - New features/capabilities
+            - Enhancements to existing features
+            - New workflows/agents
+            - Keywords: "added", "new", "implement", "introduce"
+
+            **PATCH (Bug Fixes):**
+            - Bug fixes
+            - Documentation updates
+            - Performance improvements (non-breaking)
+            - Keywords: "fixed", "update", "improve", "refactor"
+
+            ## Step 3: Determine Suggested Bump
+
+            **User Input:** ${{ inputs.bump_type }}
+
+            If user selected "auto":
+            - Analyze [Unreleased] content
+            - Suggest: major, minor, or patch based on analysis
+
+            If user selected specific type:
+            - Use their selection
+            - Validate it makes sense given changes
+
+            ## Step 4: Generate Version Bump Preview
+
+            Output:
+
+            ```markdown
+            ## 🎯 Version Bump Analysis
+
+            **Current Version:** ${{ steps.version_check.outputs.latest_tag }}
+            **Suggested Bump:** {major|minor|patch}
+            **New Version:** v{X.Y.Z}
+
+            **Reasoning:**
+            - [Breaking changes found: X]
+            - [New features found: Y]
+            - [Bug fixes found: Z]
+
+            ## 📝 Changes in [Unreleased]
+
+            ### Added
+            {list from changelog}
+
+            ### Changed
+            {list from changelog}
+
+            ### Fixed
+            {list from changelog}
+
+            ## 🎬 Next Steps
+
+            **Dry Run Mode:** ${{ inputs.dry_run }}
+
+            If dry_run = true:
+            - STOP HERE (preview only)
+            - No changes will be made
+
+            If dry_run = false:
+            - Transform CHANGELOG.md ([Unreleased] → [vX.Y.Z])
+            - Create git tag vX.Y.Z
+            - Create GitHub release
+            - Update roadmap if needed
+            ```
+
+            ## Step 5: Execute Version Bump (if not dry run)
+
+            **Only if:** `${{ inputs.dry_run }}` == false
+
+            1. Update CHANGELOG.md:
+               - Add new version section: `## [vX.Y.Z] - $(date +%Y-%m-%d)`
+               - Move [Unreleased] content to new version section
+               - Create empty [Unreleased] template
+               - Update comparison links at bottom
+
+            2. Create git tag:
+            ```bash
+            git tag -a "vX.Y.Z" -m "Release vX.Y.Z
+
+See CHANGELOG.md for details."
+            git push origin vX.Y.Z
+            ```
+
+            3. Update CHANGELOG.md links:
+            ```markdown
+            [Unreleased]: https://github.com/BeardedWonder/CODEX/compare/vX.Y.Z...HEAD
+            [vX.Y.Z]: https://github.com/BeardedWonder/CODEX/compare/v{PREVIOUS}...vX.Y.Z
+            ```
+
+            4. Commit changes:
+            ```bash
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git add CHANGELOG.md
+            git commit -m "chore: release vX.Y.Z [skip ci]
+
+🤖 Generated with Claude Code GitHub Action"
+            git push
+            ```
+
+            5. Create GitHub Release:
+            ```bash
+            # Generate release notes from changelog section
+            gh release create "vX.Y.Z" \
+              --title "Release vX.Y.Z" \
+              --notes "{generated from changelog}" \
+              --latest
+            ```
+
+            ## Important Notes
+
+            - This workflow is DISABLED for pre-v1.0.0 versions
+            - Manual versioning recommended until v1.0.0
+            - Always use dry_run first to preview changes
+            - Breaking changes require major bump (unless pre-v1.0.0)
+            - Use `[skip ci]` to prevent infinite loops
+
+            ## Expected Outcome (Dry Run)
+
+            ℹ️ Version bump preview generated
+            ℹ️ No changes made to repository
+            ✅ Analysis complete
+
+            ## Expected Outcome (Live Run)
+
+            ✅ CHANGELOG.md updated with new version
+            ✅ Git tag created and pushed
+            ✅ GitHub release created
+            ✅ [Unreleased] section reset
+
+            PROCEED with analysis now.
+
+          claude_args: |
+            --max-turns 20
+            --model claude-sonnet-4-5-20250929
+
+      - name: Post-v1.0.0 Notice
+        if: steps.version_check.outputs.ready != 'true'
+        run: |
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "ℹ️  VERSION AUTOMATION NOTICE"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo ""
+          echo "Current Version: ${{ steps.version_check.outputs.latest_tag }}"
+          echo ""
+          echo "Automatic version bumping is disabled until v1.0.0"
+          echo ""
+          echo "To create a release:"
+          echo "  1. Manually update CHANGELOG.md"
+          echo "  2. Create git tag: git tag -a vX.Y.Z -m 'Release vX.Y.Z'"
+          echo "  3. Push tag: git push origin vX.Y.Z"
+          echo "  4. Create GitHub release via gh CLI or web UI"
+          echo ""
+          echo "After v1.0.0, this workflow will automate the process."
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"

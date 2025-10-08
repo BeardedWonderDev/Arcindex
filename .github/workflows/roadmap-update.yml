@@ -1,0 +1,152 @@
+name: Roadmap Update
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    types: [closed]
+    branches: [main]
+
+jobs:
+  update-roadmap:
+    if: |
+      github.event_name == 'push' ||
+      (github.event_name == 'pull_request' && github.event.pull_request.merged == true)
+
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+      id-token: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Check if should skip
+        id: skip_check
+        run: |
+          LAST_COMMIT_MSG=$(git log -1 --pretty=%B)
+          if echo "$LAST_COMMIT_MSG" | grep -qE "chore: update roadmap|^\[skip roadmap\]"; then
+            echo "skip=true" >> $GITHUB_OUTPUT
+            echo "⏭️ Skipping - last commit is roadmap automation"
+          else
+            echo "skip=false" >> $GITHUB_OUTPUT
+            echo "✅ Proceeding with roadmap update"
+          fi
+
+      - name: Update Roadmap Progress
+        if: steps.skip_check.outputs.skip != 'true'
+        uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+
+          prompt: |
+            # ROADMAP UPDATE TASK
+
+            Review recent commits and update ROADMAP.md to reflect completed tasks.
+
+            ## Step 1: Get Recent Commits
+
+            ```bash
+            # Get commits since last roadmap update
+            LAST_UPDATE=$(git log --grep="chore: update roadmap" -1 --format=%H 2>/dev/null || git rev-list --max-parents=0 HEAD)
+
+            RECENT_COMMITS=$(git log ${LAST_UPDATE}..HEAD --pretty=format:"%h|%s|%b")
+
+            echo "Commits to analyze:"
+            echo "$RECENT_COMMITS"
+            ```
+
+            ## Step 2: Analyze Commit Messages Against Roadmap
+
+            Read ROADMAP.md and identify which tasks have been completed based on recent commits.
+
+            **Analysis Criteria:**
+
+            For each unchecked task in ROADMAP.md (`- [ ]`):
+            1. Check if recent commit messages indicate completion
+            2. Look for keywords matching task descriptions
+            3. Verify implementation (check if mentioned files exist)
+
+            **Examples:**
+            - Commit: "feat: add comprehensive quality gates"
+              → Matches: "✅ Comprehensive quality gates at all phase transitions"
+            - Commit: "feat: implement feedback request protocol"
+              → Matches: "✅ Feedback request protocol (PM↔Architect, PRP↔Execution)"
+            - Commit: "docs: add architect research infrastructure"
+              → Matches: "Architect research infrastructure"
+
+            ## Step 3: Update Roadmap Checkboxes
+
+            For each identified completed task:
+
+            Change `- [ ]` to `- [x]` or prefix with `✅` if already using that format.
+
+            **Be Conservative:**
+            - Only mark complete if commit clearly implements the task
+            - Don't mark as complete if only partially implemented
+            - When in doubt, leave unchecked
+
+            ## Step 4: Check for New Tasks from Changelog
+
+            Read CHANGELOG.md [Unreleased] section:
+            - If significant new features were added that aren't in roadmap
+            - Consider if they should be added to future versions (v0.2.0+)
+            - Add new tasks if they represent major capabilities not yet planned
+
+            ## Step 5: Version Readiness Check
+
+            **Check v0.1.0 Completion:**
+            Count remaining unchecked v0.1.0 tasks.
+
+            If all v0.1.0 tasks are complete (or <5 remaining):
+            - Add a note: "**v0.1.0 Status:** Near completion - X tasks remaining"
+
+            **Do NOT automatically bump version** - that's handled by a separate workflow.
+
+            ## Step 6: Commit Changes
+
+            If any changes were made to ROADMAP.md:
+
+            ```bash
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git add ROADMAP.md
+            git commit -m "chore: update roadmap progress [skip ci]
+
+Updated based on recent commits.
+
+🤖 Generated with Claude Code GitHub Action"
+            git push
+            ```
+
+            If no changes needed:
+            ```bash
+            echo "ℹ️ No roadmap updates needed"
+            exit 0
+            ```
+
+            ## Important Notes
+
+            - Only update task completion status
+            - Don't change task descriptions or add new versions
+            - Be conservative - only mark clearly completed tasks
+            - Use `[skip ci]` to prevent infinite loops
+            - Check file existence to verify implementation
+
+            ## Expected Outcome
+
+            ✅ Completed tasks marked with checkboxes
+            ✅ Accurate progress reflection
+            ✅ No false positives (partial implementations)
+            ℹ️ Version readiness noted if applicable
+
+            PROCEED with the update now.
+
+          claude_args: |
+            --max-turns 15
+            --model claude-sonnet-4-5-20250929

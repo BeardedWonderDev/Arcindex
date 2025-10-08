@@ -1,0 +1,184 @@
+name: Changelog Automation
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    types: [closed]
+    branches: [main]
+
+jobs:
+  update-changelog:
+    if: |
+      github.event_name == 'push' ||
+      (github.event_name == 'pull_request' && github.event.pull_request.merged == true)
+
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+      pull-requests: write
+      id-token: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Check if should skip
+        id: skip_check
+        run: |
+          LAST_COMMIT_MSG=$(git log -1 --pretty=%B)
+          if echo "$LAST_COMMIT_MSG" | grep -qE "chore: update changelog|^\[skip changelog\]"; then
+            echo "skip=true" >> $GITHUB_OUTPUT
+            echo "⏭️ Skipping - last commit is changelog automation"
+          else
+            echo "skip=false" >> $GITHUB_OUTPUT
+            echo "✅ Proceeding with changelog update"
+          fi
+
+      - name: Update Changelog [Unreleased] and Statistics
+        if: steps.skip_check.outputs.skip != 'true'
+        uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+
+          prompt: |
+            # CHANGELOG AUTOMATION TASK
+
+            Update CHANGELOG.md with new commit information for [Unreleased] section and statistics.
+
+            ## Step 1: Identify New Commits
+
+            Get commits not yet in Development History section:
+
+            ```bash
+            # Get last commit hash from Development History
+            LAST_LOGGED=$(grep -oP "^- \K[a-f0-9]{7}" CHANGELOG.md | head -1 || echo "")
+
+            if [ -z "$LAST_LOGGED" ]; then
+              # No commits logged yet - get all
+              NEW_COMMITS=$(git log --pretty=format:"%h|%s|%b|%as" --reverse)
+            else
+              # Get commits since last logged
+              NEW_COMMITS=$(git log ${LAST_LOGGED}..HEAD --pretty=format:"%h|%s|%b|%as" --reverse)
+            fi
+
+            echo "New commits to process:"
+            echo "$NEW_COMMITS"
+            ```
+
+            ## Step 2: Generate [Unreleased] Entries
+
+            For EACH new commit that should appear in changelog:
+
+            **Categorization Rules:**
+            - `feat:` → ### Added
+            - `fix:` → ### Fixed
+            - `refactor:` or `perf:` → ### Changed
+            - `docs:` → ### Changed (or Added if entirely new documentation)
+            - **SKIP:** style, test, chore (don't add to [Unreleased])
+
+            **Entry Format:**
+            Follow the existing detailed style in CHANGELOG.md. Look at current [Unreleased] entries for format examples.
+
+            For example:
+            ```
+            - {Feature/Component}: {Description} - {Technical details} ({file count} files, {line count} insertions)
+            ```
+
+            **Content Quality:**
+            - Read commit message and body
+            - Analyze git diff if needed: `git show {hash} --stat`
+            - Extract key technical points
+            - Include file/line statistics
+            - Use professional, descriptive language
+            - Match the style of existing entries
+
+            **Insert into [Unreleased]:**
+            - Add to appropriate category (Added/Changed/Fixed/Removed)
+            - Preserve existing entries
+            - Most recent entries at top within each category
+
+            ## Step 3: Update Statistics Section
+
+            Update the statistics section at the bottom of CHANGELOG.md:
+
+            **a. Total Commits:**
+            ```bash
+            TOTAL=$(git rev-list --count HEAD)
+            ```
+            Update line: `- **Total Commits**: {TOTAL}`
+
+            **b. Date Range:**
+            ```bash
+            START_DATE=$(git log --reverse --format=%as | head -1)
+            END_DATE=$(date +%Y-%m-%d)
+            ```
+            Update line: `- **Date Range**: {START_DATE} to {END_DATE}`
+
+            **c. Commit Type Distribution:**
+            ```bash
+            # Count each type
+            feat_count=$(git log --oneline --all | grep -c "^[a-f0-9]\+ feat:" || echo 0)
+            fix_count=$(git log --oneline --all | grep -c "^[a-f0-9]\+ fix:" || echo 0)
+            refactor_count=$(git log --oneline --all | grep -c "^[a-f0-9]\+ refactor:" || echo 0)
+            docs_count=$(git log --oneline --all | grep -c "^[a-f0-9]\+ docs:" || echo 0)
+            perf_count=$(git log --oneline --all | grep -c "^[a-f0-9]\+ perf:" || echo 0)
+            test_count=$(git log --oneline --all | grep -c "^[a-f0-9]\+ test:" || echo 0)
+            chore_count=$(git log --oneline --all | grep -c "^[a-f0-9]\+ chore:" || echo 0)
+            style_count=$(git log --oneline --all | grep -c "^[a-f0-9]\+ style:" || echo 0)
+
+            # Calculate percentages (one decimal place)
+            feat_pct=$(awk "BEGIN {printf \"%.1f\", ($feat_count * 100.0 / $TOTAL)}")
+            # ... repeat for each type
+            ```
+
+            Update the Commit Type Distribution section with format:
+            ```
+            - `feat`: XX commits (XX.X%)
+            - `fix`: XX commits (XX.X%)
+            - `refactor`: XX commits (XX.X%)
+            - `docs`: XX commits (XX.X%)
+            - `perf`: XX commits (XX.X%)
+            - `test`: XX commits (XX.X%)
+            - `chore`: XX commits (XX.X%)
+            - `style`: XX commits (XX.X%)
+            ```
+
+            ## Step 4: Commit Changes
+
+            After updating CHANGELOG.md:
+
+            ```bash
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git add CHANGELOG.md
+            git commit -m "chore: update changelog [unreleased] and statistics [skip ci]
+
+🤖 Generated with Claude Code GitHub Action"
+            git push
+            ```
+
+            ## Important Notes
+
+            - DO NOT modify Development History section (separate workflow handles that)
+            - Match existing entry style and detail level
+            - Use actual commit data (git show, git diff --stat)
+            - Handle edge cases: first commit, no new commits, etc.
+            - ALWAYS use `[skip ci]` in commit message to prevent loops
+
+            ## Expected Outcome
+
+            ✅ [Unreleased] section updated with new entries
+            ✅ Statistics section updated with current counts
+            ✅ Existing Development History preserved
+            ✅ Changes committed and pushed
+
+            PROCEED with the update now.
+
+          claude_args: |
+            --max-turns 20
+            --model claude-sonnet-4-5-20250929
