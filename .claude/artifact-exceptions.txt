@@ -1,0 +1,34 @@
+# AI Artifact Exception List
+# Format: pattern # reason - PR/reference - date
+# This file is automatically updated by Claude Code
+
+# === ROOT DOCUMENTATION (KEEP) ===
+README.md # Project documentation - Initial - 2025-10-08
+ROADMAP.md # Development roadmap - Initial - 2025-10-08
+CHANGELOG.md # Change history - Initial - 2025-10-08
+LICENSE # Project license - Initial - 2025-10-08
+CONTRIBUTING.md # Contributor guidelines - Initial - 2025-10-08
+CLAUDE.md # Claude project guidelines - Initial - 2025-10-08
+
+# === USER DOCUMENTATION (MOVED TO ROOT) ===
+CODEX-User-Guide.md # User documentation - Moved from docs/ - 2025-10-08
+CODEX-Workflow-Guide.md # Workflow guide - Moved from docs/ - 2025-10-08
+
+# === CLAUDE CONFIGURATION (KEEP) ===
+.claude/commands/*.md # Project-level slash commands - Initial - 2025-10-08
+.claude/settings.json # Project Claude configuration - Initial - 2025-10-08
+.claude/artifact-exceptions.txt # This file (exception system) - Initial - 2025-10-08
+.claude/artifact-policy-reference.md # Detailed artifact policy - Initial - 2025-10-08
+
+# === IMPORTANT NOTES ===
+#
+# ENTIRE DIRECTORIES ARE ARTIFACTS (remove completely):
+# - docs/** (all AI planning, research, testing)
+# - PRPs/** (all PRP workflow artifacts)
+# - .bmad-core/** (reference files only)
+#
+# PRODUCT CODE (never remove):
+# - .codex/** (entire CODEX framework)
+#
+# This exception list is primarily for edge cases and files that
+# don't fit the standard directory-based rules above.
