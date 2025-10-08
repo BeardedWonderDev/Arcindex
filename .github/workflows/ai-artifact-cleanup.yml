@@ -398,7 +398,7 @@ jobs:
 
             This prevents workflow conflicts and provides clear interaction patterns.
 
-          track_progress: true  # Enable real-time comment updates with checkboxes
+          track_progress: ${{ github.event_name != 'workflow_dispatch' }}  # Enable for PR events only
 
           claude_args: |
             --max-turns 50
