@@ -180,6 +180,6 @@ jobs:
             PROCEED with the update now.
 
           claude_args: |
-            --max-turns 20
+            --max-turns 40
             --model claude-sonnet-4-5-20250929
-            --allowedTools "Read,Edit,Write,Bash(git:*),Bash(grep:*),Bash(awk:*),Bash(date:*)"
+            --allowedTools "Read,Edit,Write,Bash(git:*),Bash(grep:*),Bash(awk:*),Bash(date:*),Bash(echo:*)"
