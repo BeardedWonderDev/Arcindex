@@ -77,7 +77,7 @@ help-display-template: |
   *create-prp .......... Create enhanced PRP from workflow documents
                         (includes automatic ULTRATHINK planning with TodoWrite)
   *synthesize .......... Synthesize context from project brief, PRD, and architecture
-  *validate ............ Run "No Prior Knowledge" test and validation
+  *validate ............ Run "No Prior Knowledge" test and comprehensive validation (includes Phase 0 enforcement)
 
   Enhancement & Research:
   *research ............ Conduct additional research for context enrichment
@@ -212,6 +212,50 @@ create-prp-workflow:
 fuzzy-matching:
   - 85% confidence threshold for command recognition
   - Show numbered validation checklist if validation unclear
+
+phase-0-validation:
+  enforcement: "MANDATORY before PRP export/handoff"
+  task: "prp-validation-enforcement.md"
+  minimum_score: 90
+  blocking: true
+
+  execution_timing:
+    - During *validate command (interactive check)
+    - Before *export command (automated gate)
+    - Final quality gate before dev handoff
+
+  workflow:
+    step_1_invoke:
+      command: "*validate"
+      action: "Invoke prp-validation-enforcement.md"
+      inputs:
+        prp_file: "PRPs/{current_prp}.md"
+        min_score: 90
+        create_log: true
+
+    step_2_review_score:
+      display: "Show overall score and breakdown"
+      pass_threshold: ">= 90"
+      fail_action: "Provide specific improvement guidance"
+
+    step_3_iterate:
+      on_fail: "Allow PRP improvements and re-validation"
+      max_iterations: 3
+      escalation: "If score still < 90 after 3 attempts, flag for user review"
+
+    step_4_export_gate:
+      requirement: "Phase 0 MUST pass before export"
+      verification_log: "Must exist in .codex/state/validation-logs/"
+      workflow_state: "validation_results.level_0.passed == true"
+
+  enforcement_protocol:
+    pre_export_check: |
+      Before running *export:
+      1. Check if Phase 0 validation has been run
+      2. Verify score >= 90
+      3. Confirm verification log exists
+      4. If any check fails: BLOCK export, run *validate first
+
 transformation:
   - Focus on PRP creation and validation workflow
   - Maintain systematic and quality-focused persona
@@ -352,6 +396,7 @@ dependencies:
   tasks:
     - zero-knowledge-validator.md
     - context-synthesis.md
+    - prp-validation-enforcement.md  # Phase 0 validation gate
   data:
     - validation-criteria.md
     - implementation-patterns.md
@@ -359,4 +404,5 @@ dependencies:
     - TodoWrite  # Required for ULTRATHINK planning step
   directories:
     - PRPs/ai_docs/  # For critical documentation during research
+    - .codex/state/validation-logs/  # For Phase 0 verification logs
 ```

@@ -55,11 +55,25 @@ phases:
     agent: architect
     description: "Design system architecture and integration approach"
     outputs: ["architecture.md", "implementation-plan.md"]
+    epic_based_workflow: true
+    guidance: |
+      EPIC-BASED APPROACH (Just-In-Time Pattern):
+      - Initial architecture covers system-wide concerns and foundational design
+      - Per-epic architecture created just-in-time before epic implementation
+      - Captures epic-specific patterns, constraints, and integration points
+      - Feeds learnings back to refine subsequent epic architectures
 
   - phase: prp_creation
     agent: prp-creator
     description: "Generate enhanced PRP for implementation"
     outputs: ["enhanced-prp.md"]
+    epic_based_workflow: true
+    guidance: |
+      EPIC-BASED APPROACH (Just-In-Time Pattern):
+      - Create PRP per epic, not one massive PRP for entire project
+      - Review epic_learnings from previous epics before creating new PRP
+      - Incorporate discovered patterns and avoid repeated issues
+      - Each PRP focuses on one epic's implementation with full context
 
   - phase: implementation
     agent: dev

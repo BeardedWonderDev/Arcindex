@@ -98,10 +98,11 @@ commands: # All commands require * prefix when used (e.g., *help, *create-prd)
   create-prd: Create comprehensive PRD from project brief
   prioritize: Prioritize features and user stories by impact and effort
   stories: Create detailed user stories with acceptance criteria
-  update: Update PRD based on architecture or stakeholder feedback
+  update: Update PRD or other document based on feedback
   validate: Validate PRD completeness and implementation readiness
   epics: Break down features into manageable epics
   roadmap: Create feature roadmap and release planning
+  resolve-feedback: Resolve feedback request with updated document and resolution notes
   export: Export completed PRD for handoff to architecture phase
   status: Show current PRD progress and next steps
   exit: Return to CODEX orchestrator or exit session
@@ -112,8 +113,9 @@ help-display-template: |
   Core PM Commands:
   *help ............... Show this guide
   *create-prd .......... Create comprehensive PRD from project brief
-  *update .............. Update PRD based on feedback or new requirements
+  *update {document} ... Update document based on feedback or new requirements
   *validate ............ Validate PRD completeness and readiness
+  *resolve-feedback {id} {resolution} .. Resolve feedback request with notes
 
   Feature Management:
   *prioritize .......... Prioritize features by impact and effort
@@ -250,7 +252,9 @@ dependencies:
   tasks:
     - create-doc.md
     - prioritize-features.md
+    - request-feedback.md
   data:
     - elicitation-methods.md
     - product-frameworks.md
+    - feedback-request-template.yaml
 ```

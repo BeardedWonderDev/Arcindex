@@ -259,7 +259,7 @@ implementation-methods:
         retry-protocol: "Fix domain issues, re-run until passing"
         pass-criteria: "Release build succeeds, strict linting clean, security compliant"
 
-    failure-protocol: "When validation fails, use PRP patterns and gotchas to fix issues, then re-run validation until passing. Do not proceed to next level with failures."
+    failure-protocol: "When validation fails, invoke failure-escalation.md to determine retry strategy. Handle exit codes: 2=retry, 3=pattern-based retry, 4=user intervention, 5=checkpoint. Use PRP patterns and gotchas to fix issues, then re-run validation until passing. Do not proceed to next level with failures."
 
 anti-pattern-enforcement:
   placeholder-prevention:
@@ -348,8 +348,12 @@ dependencies:
     - validation-gate.md
     - context-handoff.md
     - prp-quality-check.md
+    - failure-escalation.md
   templates:
     - prp-enhanced-template.md
   data:
     - codex-kb.md
+  directories:
+    - .codex/state/escalations/
+    - .codex/state/checkpoints/
 ```

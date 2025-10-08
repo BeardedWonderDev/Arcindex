@@ -468,12 +468,55 @@ workflow-management:
   - Ensure "No Prior Knowledge" test passes at each transition
   - Handle workflow interruption and resumption gracefully
   - Track elicitation_history and elicitation_completed per phase
+
+feedback-routing:
+  purpose: Monitor and route bi-directional feedback between agents
+
+  monitoring:
+    - Check workflow.json feedback_requests array for pending items
+    - Filter for status=pending
+    - Prioritize high-priority feedback for immediate routing
+
+  routing-workflow:
+    step_1_detect:
+      check: "Read workflow.json → feedback_requests[]"
+      filter: "status == 'pending'"
+      log: "Feedback request detected: {feedback_id} from {from_agent} to {to_agent}"
+
+    step_2_prepare_context:
+      action: "Load feedback context package"
+      file: ".codex/state/feedback/{feedback_id}-context.md"
+      purpose: "Provide complete context to target agent"
+
+    step_3_spawn_agent:
+      method: "Task tool to spawn target agent"
+      context_provided:
+        - feedback_id
+        - feedback context package
+        - original document reference
+        - requesting agent identity
+      message: "📨 Routing feedback {feedback_id} to {to_agent}"
+
+    step_4_update_status:
+      action: "Update feedback.status to 'in_progress'"
+      log_transformation: "Record feedback routing in transformation_history"
+
+    step_5_monitor_resolution:
+      check: "Wait for target agent to resolve feedback"
+      resolution_signal: "feedback.status changes to 'resolved'"
+      notification: "Alert requesting agent of resolution"
+
+  iteration_enforcement:
+    max_iterations: 3
+    escalation_trigger: "iteration_count >= 3"
+    escalation_action: "Present user with escalation options (direct session, blocking issue, accept current state)"
+
 agent-coordination:
   purpose: Orchestrator spawns all agents as Task executions
 
   core-principle: |
     YOU (orchestrator) are a COORDINATOR ONLY. You:
-    - NEVER read or write workflow.json (agents do this)
+    - NEVER read or write workflow.json (agents do this except for feedback/escalation routing)
     - NEVER do discovery, analysis, or any actual work (agents do this)
     - ONLY spawn agents via Task tool
     - ONLY display agent outputs verbatim

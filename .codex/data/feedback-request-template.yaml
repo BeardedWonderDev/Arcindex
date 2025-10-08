@@ -1,0 +1,205 @@
+# Feedback Request Template
+# Used for bi-directional feedback between agents in CODEX workflow
+
+template:
+  id: feedback-request-v1
+  name: CODEX Feedback Request
+  version: 1.0
+  purpose: Structured feedback exchange between workflow agents
+
+structure:
+  id:
+    type: string
+    format: "fb-{ISO-8601-timestamp}"
+    example: "fb-2025-10-08T00:45:48.860815Z"
+    description: Unique identifier for this feedback request
+    generation: auto
+
+  from_agent:
+    type: string
+    required: true
+    values: [orchestrator, discovery, analyst, pm, architect, prp-creator, dev, qa]
+    description: Agent initiating the feedback request
+    example: "architect"
+
+  to_agent:
+    type: string
+    required: true
+    values: [orchestrator, discovery, analyst, pm, architect, prp-creator, dev, qa]
+    description: Agent that should resolve the feedback
+    example: "pm"
+    validation: "Cannot request feedback from yourself (from_agent != to_agent)"
+
+  issue:
+    type: string
+    required: true
+    min_length: 10
+    description: Clear description of the ambiguity, question, or issue
+    example: "Story 1.3 acceptance criteria unclear - 'real-time' undefined. Need specific latency requirement."
+    guidelines:
+      - Be specific and actionable
+      - Reference exact location in document
+      - Explain why clarification is needed
+      - Suggest potential solutions if applicable
+
+  context:
+    type: object
+    required: true
+    description: Context information for locating and understanding the issue
+    fields:
+      document:
+        type: string
+        required: true
+        format: "relative/path/to/document.md"
+        example: "docs/prd.md"
+        description: Path to document containing the issue
+
+      section:
+        type: string
+        required: false
+        example: "User Stories → Epic 1 → Story 1.3: Real-time Updates"
+        description: Section name or heading where issue is located
+
+      line_refs:
+        type: array
+        items: integer
+        required: false
+        example: [42, 43, 44]
+        description: Specific line numbers related to the issue
+
+      quote:
+        type: string
+        required: false
+        example: "The system shall provide real-time updates to users"
+        description: Direct quote from document highlighting the issue
+
+  status:
+    type: string
+    required: true
+    default: "pending"
+    values: [pending, in_progress, resolved, closed]
+    description: Current status of the feedback request
+    workflow:
+      pending: "Feedback requested, awaiting assignment"
+      in_progress: "Target agent is working on resolution"
+      resolved: "Issue addressed, updated document available"
+      closed: "Feedback cycle complete, no further action needed"
+
+  priority:
+    type: string
+    required: true
+    default: "medium"
+    values: [high, medium, low]
+    description: Priority level for resolution
+    guidelines:
+      high: "Blocks forward progress, needs immediate resolution"
+      medium: "Important for quality, should resolve before handoff"
+      low: "Nice to have, can be deferred if needed"
+
+  created_at:
+    type: string
+    format: ISO-8601
+    required: true
+    generation: auto
+    example: "2025-10-08T00:45:48.860815Z"
+    description: Timestamp when feedback was requested
+
+  resolved_at:
+    type: string
+    format: ISO-8601
+    required: false
+    default: null
+    generation: auto-on-resolution
+    example: "2025-10-08T01:23:15.123456Z"
+    description: Timestamp when feedback was resolved
+
+  resolution:
+    type: string
+    required: false
+    default: null
+    min_length: 10
+    example: "Clarified: real-time = <100ms response time for UI updates, <500ms for background sync"
+    description: Explanation of how the issue was resolved
+    guidelines:
+      - Provide specific answer or clarification
+      - Reference updated document section if applicable
+      - Include rationale for decision if relevant
+      - Confirm requesting agent's understanding
+
+  iteration_count:
+    type: integer
+    required: false
+    default: 1
+    min: 1
+    max: 3
+    description: Number of feedback iterations for this issue
+    enforcement: "Max 3 iterations - escalate to user if exceeded"
+
+  related_feedback:
+    type: array
+    items: string
+    required: false
+    default: []
+    description: IDs of related feedback requests
+    example: ["fb-2025-10-08T00:30:12.123456Z"]
+
+validation_rules:
+  - name: "Agent relationship validation"
+    rule: "from_agent and to_agent must be adjacent in workflow (e.g., pm → architect, architect → pm)"
+    enforcement: warn
+
+  - name: "Priority enforcement"
+    rule: "High priority feedback must be resolved within same session"
+    enforcement: soft
+
+  - name: "Iteration limit"
+    rule: "Max 3 iterations per feedback request"
+    enforcement: hard
+    action: "Escalate to user intervention on 4th iteration"
+
+  - name: "Resolution completeness"
+    rule: "When status=resolved, resolution field must be populated"
+    enforcement: hard
+
+workflow_integration:
+  state_location: ".codex/state/workflow.json → feedback_requests[]"
+  tracking: "All feedback requests tracked in workflow.json"
+  notification: "Orchestrator detects pending feedback and routes to target agent"
+  completion: "Requesting agent notified when status changes to resolved"
+
+usage_examples:
+  - scenario: "Architect needs PRD clarification"
+    from_agent: "architect"
+    to_agent: "pm"
+    issue: "Story 2.1: Payment processing requirements incomplete - missing fraud detection specs"
+    context:
+      document: "docs/prd.md"
+      section: "Epic 2: Payment System → Story 2.1"
+      line_refs: [89, 90]
+    priority: "high"
+    expected_resolution: "Added fraud detection requirements: address verification, velocity checks, blacklist integration"
+
+  - scenario: "Dev encounters PRP ambiguity"
+    from_agent: "dev"
+    to_agent: "prp-creator"
+    issue: "Implementation Task 5 references 'similar pattern' but no specific file path provided"
+    context:
+      document: "PRPs/user-authentication.md"
+      section: "Implementation Tasks → Task 5: Token Refresh"
+      line_refs: [234]
+    priority: "medium"
+    expected_resolution: "Updated PRP with specific pattern: src/auth/SessionManager.swift:78-95"
+
+anti_patterns:
+  - pattern: "Vague or generic issue descriptions"
+    example_bad: "Something unclear in PRD"
+    example_good: "Story 1.3: 'real-time' latency requirement undefined"
+
+  - pattern: "Missing document context"
+    example_bad: "Need clarification on payment flow"
+    example_good: "docs/architecture.md, Section 4.2: Payment Gateway Integration - which fraud service to use?"
+
+  - pattern: "Resolving without actual update"
+    example_bad: "Looks good to me" (no document change)
+    example_good: "Updated docs/prd.md lines 89-92 with fraud detection requirements"
+

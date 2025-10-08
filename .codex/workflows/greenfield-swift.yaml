@@ -113,6 +113,13 @@ workflow:
       template: "architecture-template.yaml"
       requires: ["docs/prd.md"]
       description: "Technical architecture and Swift-specific design patterns"
+      epic_based_workflow: true
+      epic_guidance: |
+        EPIC-BASED APPROACH (Just-In-Time Pattern):
+        - Initial architecture covers system-wide concerns and foundational design
+        - Per-epic architecture created just-in-time before epic implementation
+        - Captures epic-specific patterns, constraints, and integration points
+        - Feeds learnings back to refine subsequent epic architectures
       enhancements:
         - swift_patterns_research: true
         - ios_architecture_patterns: true
@@ -140,6 +147,13 @@ workflow:
       template: "prp-enhanced-template.md"
       requires: ["docs/prd.md", "docs/architecture.md"]
       description: "Enhanced PRP creation with complete workflow context integration"
+      epic_based_workflow: true
+      epic_guidance: |
+        EPIC-BASED APPROACH (Just-In-Time Pattern):
+        - Create PRP per epic, not one massive PRP for entire project
+        - Review epic_learnings from previous epics before creating new PRP
+        - Incorporate discovered patterns and avoid repeated issues
+        - Each PRP focuses on one epic's implementation with full context
       enhancements:
         - codebase_pattern_analysis: true
         - swift_documentation_research: true

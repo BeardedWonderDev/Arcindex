@@ -122,6 +122,7 @@ commands: # All commands require * prefix when used (e.g., *help, *create-archit
   patterns: Apply and document architectural patterns
   review: Review existing architecture for improvements
   validate: Validate architecture against requirements
+  request-feedback: Request clarification from upstream agent (PM) on unclear requirements
   export: Export architecture document for PRP creation phase
   status: Show current architecture progress
   exit: Return to CODEX orchestrator or exit session
@@ -144,6 +145,7 @@ help-display-template: |
   Validation & Review:
   *review ............... Review existing architecture
   *validate ............. Validate against requirements
+  *request-feedback {to_agent} {issue} .. Request clarification from upstream agent
 
   Workflow Management:
   *export ............... Export architecture for PRP phase
@@ -280,7 +282,9 @@ dependencies:
   tasks:
     - create-doc.md
     - context-handoff.md
+    - request-feedback.md
   data:
     - elicitation-methods.md
     - codex-kb.md
+    - feedback-request-template.yaml
 ```

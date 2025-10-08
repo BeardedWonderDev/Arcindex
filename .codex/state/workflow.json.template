@@ -225,6 +225,78 @@
     }
   ],
 
+  "feedback_requests": [
+    {
+      "id": "{fb-ISO-8601-timestamp}",
+      "from_agent": "{requesting_agent}",
+      "to_agent": "{target_agent}",
+      "issue": "{issue_description}",
+      "context": {
+        "document": "{document_path}",
+        "section": "{section_name}",
+        "line_refs": [],
+        "quote": "{relevant_quote}"
+      },
+      "status": "{pending|in_progress|resolved|closed}",
+      "priority": "{high|medium|low}",
+      "created_at": "{iso_timestamp}",
+      "resolved_at": "{iso_timestamp_or_null}",
+      "resolution": "{resolution_notes_or_null}",
+      "iteration_count": 1,
+      "related_feedback": []
+    }
+  ],
+
+  "failure_escalations": [
+    {
+      "escalation_id": "{esc-ISO-8601-timestamp}",
+      "level": "{1|2|3|4}",
+      "failed_task": "{task_description}",
+      "validation_level": "{0|1|2|3|4}",
+      "attempt_count": 0,
+      "error_message": "{error_details}",
+      "resolution_strategy": "{retry|pattern_analysis|user_intervention|checkpoint}",
+      "timestamp": "{iso_timestamp}",
+      "resolved": false,
+      "resolution_notes": null
+    }
+  ],
+
+  "epic_learnings": {
+    "current_epic": "{epic_name_or_null}",
+    "learnings": [
+      {
+        "epic_id": "{epic_identifier}",
+        "epic_name": "{epic_name}",
+        "architecture_insights": [],
+        "prp_improvements": [],
+        "validation_patterns": [],
+        "common_issues": [],
+        "best_practices_discovered": [],
+        "created_at": "{iso_timestamp}"
+      }
+    ]
+  },
+
+  "execution_reports": [
+    {
+      "report_id": "{report-ISO-8601-timestamp}",
+      "prp_file": "{prp_file_path}",
+      "epic": "{epic_name}",
+      "validation_results": {
+        "level_0": true,
+        "level_1": true,
+        "level_2": true,
+        "level_3": true,
+        "level_4": true
+      },
+      "prp_issues_found": [],
+      "working_patterns": [],
+      "improvement_recommendations": [],
+      "timestamp": "{iso_timestamp}"
+    }
+  ],
+
   "started_at": "{iso_timestamp}",
   "last_updated": "{iso_timestamp}",
   "status": "{active|paused|completed|failed}"
