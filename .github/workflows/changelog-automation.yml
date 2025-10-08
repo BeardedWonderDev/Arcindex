@@ -81,6 +81,6 @@ jobs:
             **Important:** Do NOT modify Development History section. Use `[skip ci]` in commit message.
 
           claude_args: |
-            --max-turns 40
+            --max-turns 50
             --model claude-sonnet-4-5-20250929
             --allowedTools "Read,Edit,Write,Bash(git:*),Bash(grep:*),Bash(awk:*),Bash(date:*),Bash(echo:*),Bash(head:*),Bash(tail:*),Bash(wc:*),Bash(cut:*)"
