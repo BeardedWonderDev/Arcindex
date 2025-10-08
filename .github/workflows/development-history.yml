@@ -48,154 +48,41 @@ jobs:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
 
           prompt: |
-            # DEVELOPMENT HISTORY UPDATE TASK
+            Update CHANGELOG.md Development History section with new commits grouped by week.
 
-            Update the Development History section of CHANGELOG.md with new commits.
+            **Goal:** Add new commits to Development History, organized by week, then commit and push.
 
-            ## Step 1: Get New Commits
+            **Tasks:**
 
-            ```bash
-            # Get last commit hash from Development History
-            LAST_LOGGED=$(grep -oP "^- \K[a-f0-9]{7}" CHANGELOG.md | head -1 || echo "")
+            1. **Find new commits:** Read CHANGELOG.md Development History section, find the most recent commit hash (first 7-char hash in a line starting with "- "). Get all commits since that hash using git log.
 
-            if [ -z "$LAST_LOGGED" ]; then
-              # First time - get all commits
-              NEW_COMMITS=$(git log --pretty=format:"%h|%s|%as" --reverse)
-            else
-              # Get commits since last logged
-              NEW_COMMITS=$(git log ${LAST_LOGGED}..HEAD --pretty=format:"%h|%s|%as" --reverse)
-            fi
-            ```
+            2. **Group commits by week (Monday-Sunday):** For each new commit, determine which week it belongs to. Calculate the Monday date for that week.
 
-            ## Step 2: Process Each Commit
+            3. **Update Development History section:**
+               - Create or update week sections: `### Week of YYYY-MM-DD (X commits)`
+               - Add each commit as: `- {hash}: {type}: {description} ({YYYY-MM-DD})`
+               - Ordering: Newest weeks first, newest commits first within each week
+               - Place new/updated weeks at TOP of Development History section
 
-            For EACH new commit, extract:
-            - **hash:** 7-character commit hash
-            - **message:** Full commit message
-            - **date:** YYYY-MM-DD format
+            4. **Generate Focus lines:** For each week section being created/updated:
+               - Analyze commit messages in that week
+               - Identify 2-3 main themes based on commit types and keywords
+               - Weight important commits more (feat > fix > refactor > docs)
+               - Format as: `**Focus:** theme1, theme2, theme3`
+               - Use lowercase, gerund/noun phrases (e.g., "quality validation enhancements")
 
-            ## Step 3: Group by Week
+            5. **Commit and push:**
+               ```bash
+               git config user.name "github-actions[bot]"
+               git config user.email "github-actions[bot]@users.noreply.github.com"
+               git add CHANGELOG.md
+               git commit -m "chore: update changelog development history [skip ci]" -m "Generated with Claude Code GitHub Action"
+               git push
+               ```
 
-            For each commit:
-
-            **Determine week (Monday-Sunday):**
-            ```bash
-            # Get Monday of the week for commit date
-            COMMIT_DATE="YYYY-MM-DD"
-
-            # Linux:
-            WEEK_START=$(date -d "$COMMIT_DATE" +%Y-%m-%d -d "monday this week" 2>/dev/null)
-
-            # macOS:
-            WEEK_START=$(date -j -f "%Y-%m-%d" "$COMMIT_DATE" -v-Mon +%Y-%m-%d 2>/dev/null)
-
-            # Or use this week calculation
-            ```
-
-            ## Step 4: Update Development History Section
-
-            For each week with new commits:
-
-            **Week Section Format:**
-            ```markdown
-            ### Week of YYYY-MM-DD (X commits)
-            **Focus:** theme1, theme2, theme3
-
-            - hash: type: description (YYYY-MM-DD)
-            - hash: type: description (YYYY-MM-DD)
-            ```
-
-            **Ordering Rules:**
-            - Week sections: **Reverse chronological** (newest week first)
-            - Commits within week: **Reverse chronological** (newest first)
-            - Insert new week sections at TOP of Development History
-
-            **If week section exists:**
-            1. Insert new commit at TOP of that week's list
-            2. Update week commit count
-            3. Regenerate focus line
-
-            **If week section doesn't exist:**
-            1. Create new week section
-            2. Insert at TOP of Development History (before all other weeks)
-            3. Add commit entry
-            4. Generate initial focus line
-
-            ## Step 5: Generate Focus Lines
-
-            For each week being updated/created:
-
-            **Focus Line Algorithm:**
-
-            1. Get ALL commits for that week:
-            ```bash
-            WEEK_START="YYYY-MM-DD"  # Monday
-            WEEK_END=$(date -d "$WEEK_START + 6 days" +%Y-%m-%d)  # Sunday
-
-            git log --since="$WEEK_START" --until="$WEEK_END" --pretty=format:"%s"
-            ```
-
-            2. Extract keywords from commit messages (text after "type:")
-
-            3. Weight by commit type:
-               - feat: 3 points
-               - fix: 2 points
-               - refactor: 2 points
-               - docs: 1 point
-               - others: 1 point
-
-            4. Calculate weighted keyword frequency
-
-            5. Select top 2-3 themes (most frequent weighted keywords)
-
-            6. Format as gerunds/noun phrases:
-               - Examples: "quality validation enhancements", "feedback mechanisms", "Phase 2 implementation"
-               - Lowercase, descriptive, technical but readable
-
-            7. Combine: `**Focus:** theme1, theme2, theme3`
-
-            **Example week section:**
-            ```markdown
-            ### Week of 2025-10-06 (6 commits)
-            **Focus:** Quality validation enhancements, Phase 2 implementation, feedback mechanisms
-
-            - 99935a5: feat: implement Phase 2 Week 4 feedback mechanisms and quality enhancements (2025-10-07)
-            - d8969a6: docs: add Phase 2 PRP for feedback mechanisms and quality enhancement implementation (2025-10-07)
-            - 379cd20: feat: enhance quality validation infrastructure with comprehensive checklist improvements and discovery persistence (2025-10-07)
-            ```
-
-            ## Step 6: Commit Changes
-
-            After updating Development History:
-
-            ```bash
-            git config user.name "github-actions[bot]"
-            git config user.email "github-actions[bot]@users.noreply.github.com"
-            git add CHANGELOG.md
-            git commit -m "chore: update changelog development history [skip ci]" -m "Generated with Claude Code GitHub Action"
-            git push
-            ```
-
-            ## Important Notes
-
-            - DO NOT modify [Unreleased] or Statistics sections
-            - ALWAYS regenerate focus lines when updating weeks
-            - Use ACTUAL commit hashes from git log (7 characters)
-            - Handle week boundaries correctly (Monday-Sunday)
-            - Maintain reverse chronological order
-            - Use `[skip ci]` to prevent infinite loop
-
-            ## Expected Outcome
-
-            ✅ New commits added to Development History
-            ✅ Week sections created/updated with correct counts
-            ✅ Focus lines accurately reflect week's work
-            ✅ Proper reverse chronological ordering
-            ✅ [Unreleased] and Statistics sections untouched
-
-            PROCEED with the update now.
+            **Important:** Do NOT modify [Unreleased] or Statistics sections. Use `[skip ci]` in commit message.
 
           claude_args: |
-            --max-turns 40
+            --max-turns 35
             --model claude-sonnet-4-5-20250929
             --allowedTools "Read,Edit,Write,Bash(git:*),Bash(grep:*),Bash(awk:*),Bash(date:*),Bash(echo:*),Bash(head:*),Bash(tail:*),Bash(wc:*),Bash(cut:*)"
