@@ -19,6 +19,16 @@ metadata:
     dev: false
     qa: false
 
+  quality_gate_config:
+    default_mode: "auto"
+    default_minimum_score: 70
+    default_blocking: true
+    enforce_gates: true
+    track_scores: true
+    brownfield_mode: true
+    skip_conditionals:
+      - "[[GREENFIELD ONLY]]"
+
 phases:
   - name: "Discovery"
     id: "discovery"
@@ -41,6 +51,16 @@ phases:
       to: "analyst"
       passes_context: true
       validation: "Discovery Complete"
+    quality_gate:
+      enabled: true
+      checklist: ".codex/checklists/discovery-quality-gate.md"
+      mode: "auto"
+      blocking: true
+      minimum_score: 70
+      on_failure: "halt"
+      brownfield_mode: true
+      skip_items:
+        - "[[GREENFIELD ONLY]]"
 
   - name: "Analysis"
     id: "analysis"
@@ -74,6 +94,16 @@ phases:
       to: "pm"
       requires_elicitation: true
       validation: "Zero Knowledge Test"
+    quality_gate:
+      enabled: true
+      checklist: ".codex/checklists/analyst-quality-gate.md"
+      mode: "auto"
+      blocking: true
+      minimum_score: 70
+      on_failure: "halt"
+      brownfield_mode: true
+      skip_items:
+        - "[[GREENFIELD ONLY]]"
 
   - name: "Requirements"
     id: "requirements"
@@ -101,6 +131,16 @@ phases:
       to: "architect"
       requires_elicitation: true
       validation: "Requirements Completeness Check"
+    quality_gate:
+      enabled: true
+      checklist: ".codex/checklists/pm-quality-gate.md"
+      mode: "auto"
+      blocking: true
+      minimum_score: 70
+      on_failure: "halt"
+      brownfield_mode: true
+      skip_items:
+        - "[[GREENFIELD ONLY]]"
 
   - name: "Architecture"
     id: "architecture"
@@ -129,6 +169,16 @@ phases:
       to: "prp-creator"
       requires_elicitation: true
       validation: "Architecture Coherence Check"
+    quality_gate:
+      enabled: true
+      checklist: ".codex/checklists/architect-quality-gate.md"
+      mode: "auto"
+      blocking: true
+      minimum_score: 75
+      on_failure: "halt"
+      brownfield_mode: true
+      skip_items:
+        - "[[GREENFIELD ONLY]]"
 
   - name: "PRP Creation"
     id: "prp_creator"
@@ -155,6 +205,16 @@ phases:
       to: "dev"
       requires_elicitation: true
       validation: "PRP Quality Gate"
+    quality_gate:
+      enabled: true
+      checklist: ".codex/checklists/prp-quality-gate.md"
+      mode: "auto"
+      blocking: true
+      minimum_score: 90
+      on_failure: "halt"
+      brownfield_mode: true
+      skip_items:
+        - "[[GREENFIELD ONLY]]"
 
   - name: "Implementation"
     id: "implementation"

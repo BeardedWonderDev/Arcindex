@@ -21,6 +21,13 @@ metadata:
     dev: false
     qa: false
 
+  quality_gate_config:
+    default_mode: "auto"
+    default_minimum_score: 70
+    default_blocking: true
+    enforce_gates: true
+    track_scores: true
+
 # Language Configuration - Customize per project
 language_support:
   primary: "{{LANGUAGE}}"  # Set to: javascript, python, go, rust, etc.
@@ -40,16 +47,51 @@ phases:
     agent: discovery
     description: "Analyze existing codebase and identify enhancement requirements"
     outputs: ["project-analysis.md", "enhancement-requirements.md"]
+    validation:
+      - discovery_questions_answered: true
+      - project_name_captured: true
+      - project_concept_documented: true
+    quality_gate:
+      enabled: true
+      checklist: ".codex/checklists/discovery-quality-gate.md"
+      mode: "auto"
+      blocking: true
+      minimum_score: 70
+      on_failure: "halt"
 
   - phase: requirements_analysis
     agent: analyst
     description: "Create detailed requirements and technical constraints"
     outputs: ["technical-requirements.md", "integration-analysis.md"]
+    validation:
+      - context_completeness_for_pm: true
+      - business_case_clarity: true
+      - target_user_definition: true
+      - success_metrics_defined: true
+    quality_gate:
+      enabled: true
+      checklist: ".codex/checklists/analyst-quality-gate.md"
+      mode: "auto"
+      blocking: true
+      minimum_score: 70
+      on_failure: "halt"
 
   - phase: product_management
     agent: pm
     description: "Create PRD with user stories and acceptance criteria"
     outputs: ["prd.md", "user-stories.md"]
+    validation:
+      - feature_specifications_complete: true
+      - acceptance_criteria_measurable: true
+      - architecture_input_sufficient: true
+      - user_stories_detailed: true
+    quality_gate:
+      enabled: true
+      checklist: ".codex/checklists/pm-quality-gate.md"
+      mode: "auto"
+      blocking: true
+      minimum_score: 70
+      on_failure: "halt"
 
   - phase: architecture_design
     agent: architect
@@ -62,6 +104,18 @@ phases:
       - Per-epic architecture created just-in-time before epic implementation
       - Captures epic-specific patterns, constraints, and integration points
       - Feeds learnings back to refine subsequent epic architectures
+    validation:
+      - implementation_guidance_specific: true
+      - conventions_defined: true
+      - file_structure_complete: true
+      - integration_patterns_documented: true
+    quality_gate:
+      enabled: true
+      checklist: ".codex/checklists/architect-quality-gate.md"
+      mode: "auto"
+      blocking: true
+      minimum_score: 75
+      on_failure: "halt"
 
   - phase: prp_creation
     agent: prp-creator
@@ -74,6 +128,19 @@ phases:
       - Review epic_learnings from previous epics before creating new PRP
       - Incorporate discovered patterns and avoid repeated issues
       - Each PRP focuses on one epic's implementation with full context
+    validation:
+      - zero_knowledge_test: true
+      - url_accessibility_check: true
+      - implementation_task_specificity: true
+      - validation_commands_project_specific: true
+      - context_completeness_verification: true
+    quality_gate:
+      enabled: true
+      checklist: ".codex/checklists/prp-quality-gate.md"
+      mode: "auto"
+      blocking: true
+      minimum_score: 90
+      on_failure: "halt"
 
   - phase: implementation
     agent: dev
@@ -160,6 +227,36 @@ documentation:
   optional_files:
     - "docs/deployment.md"
     - "docs/contributing.md"
+
+# Context Breakpoints - Quality Gate Tracking
+context_breakpoints:
+  after_project_brief:
+    validation: "pm_can_create_prd_without_analyst_context"
+    checkpoint_file: "docs/project-brief.md"
+    test_criteria: "Business context complete for product planning"
+    quality_gate_score: "analyst"
+    minimum_score: 70
+
+  after_prd:
+    validation: "architect_can_design_without_pm_context"
+    checkpoint_file: "docs/prd.md"
+    test_criteria: "Feature requirements complete for technical design"
+    quality_gate_score: "pm"
+    minimum_score: 70
+
+  after_architecture:
+    validation: "prp_creator_has_complete_technical_context"
+    checkpoint_file: "docs/architecture.md"
+    test_criteria: "Technical design complete for PRP creation"
+    quality_gate_score: "architect"
+    minimum_score: 75
+
+  after_enhanced_prp:
+    validation: "dev_agent_can_implement_without_workflow_context"
+    checkpoint_file: "PRPs/{feature-name}.md"
+    test_criteria: "Implementation guidance complete for development"
+    quality_gate_score: "prp"
+    minimum_score: 90
 
 # Quality Gates
 quality_requirements:

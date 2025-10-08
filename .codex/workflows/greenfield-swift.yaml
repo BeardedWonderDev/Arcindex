@@ -34,6 +34,13 @@ workflow:
     max_context_per_phase: 45000  # tokens
     checkpoint_frequency: 600  # seconds
 
+  quality_gate_config:
+    default_mode: "auto"
+    default_minimum_score: 70
+    default_blocking: true
+    enforce_gates: true
+    track_scores: true
+
   language_support:
     primary: "swift"
     # agents: []  # DISABLED - temporarily removed for development simplification
@@ -60,6 +67,13 @@ workflow:
         - discovery_questions_answered: true
         - project_name_captured: true
         - project_concept_documented: true
+      quality_gate:
+        enabled: true
+        checklist: ".codex/checklists/discovery-quality-gate.md"
+        mode: "auto"
+        blocking: true
+        minimum_score: 70
+        on_failure: "halt"
 
     - agent: analyst
       creates: "docs/project-brief.md"
@@ -85,6 +99,13 @@ workflow:
         - market_research
         - problem_definition
         - business_goals_alignment
+      quality_gate:
+        enabled: true
+        checklist: ".codex/checklists/analyst-quality-gate.md"
+        mode: "auto"
+        blocking: true
+        minimum_score: 70
+        on_failure: "halt"
 
     - agent: pm
       creates: "docs/prd.md"
@@ -107,6 +128,13 @@ workflow:
         - user_story_creation
         - acceptance_criteria_definition
         - mvp_scope_establishment
+      quality_gate:
+        enabled: true
+        checklist: ".codex/checklists/pm-quality-gate.md"
+        mode: "auto"
+        blocking: true
+        minimum_score: 70
+        on_failure: "halt"
 
     - agent: architect
       creates: "docs/architecture.md"
@@ -141,6 +169,13 @@ workflow:
         - swift_patterns_selection
         - data_flow_definition
         - security_architecture_planning
+      quality_gate:
+        enabled: true
+        checklist: ".codex/checklists/architect-quality-gate.md"
+        mode: "auto"
+        blocking: true
+        minimum_score: 75
+        on_failure: "halt"
 
     - agent: prp-creator
       creates: "PRPs/{feature-name}.md"
@@ -176,6 +211,13 @@ workflow:
         - documentation_research
         - implementation_planning
         - validation_strategy_creation
+      quality_gate:
+        enabled: true
+        checklist: ".codex/checklists/prp-quality-gate.md"
+        mode: "auto"
+        blocking: true
+        minimum_score: 90
+        on_failure: "halt"
 
     - phase: implementation_coordination
       primary_agent: dev
@@ -252,21 +294,29 @@ workflow:
       validation: "pm_can_create_prd_without_analyst_context"
       checkpoint_file: "docs/project-brief.md"
       test_criteria: "Business context complete for product planning"
+      quality_gate_score: "analyst"
+      minimum_score: 70
 
     after_prd:
       validation: "architect_can_design_without_pm_context"
       checkpoint_file: "docs/prd.md"
       test_criteria: "Feature requirements complete for technical design"
+      quality_gate_score: "pm"
+      minimum_score: 70
 
     after_architecture:
       validation: "prp_creator_has_complete_technical_context"
       checkpoint_file: "docs/architecture.md"
       test_criteria: "Technical design complete for PRP creation"
+      quality_gate_score: "architect"
+      minimum_score: 75
 
     after_enhanced_prp:
       validation: "dev_agent_can_implement_without_workflow_context"
       checkpoint_file: "PRPs/{feature-name}.md"
       test_criteria: "Implementation guidance complete for development"
+      quality_gate_score: "prp"
+      minimum_score: 90
 
     after_implementation:
       validation: "qa_can_validate_without_implementation_context"

@@ -99,7 +99,332 @@ When Level 0 fails:
 - Completion status confirmed via elicitation_completed[phase] check
 - Elicitation history validated for proper user interaction
 - State integrity verified and runtime state maintained
-- Proceed to Level 1
+- Proceed to Level 0.5
+
+## Level 0.5: Document Quality Gate
+
+### Purpose: Validate Phase Document Quality Before Progression
+
+This level validates phase document quality using the quality gate system, ensuring documents meet quality standards before phase progression.
+
+**Key Characteristics:**
+- Executes AFTER Level 0 (elicitation) passes
+- Executes BEFORE allowing phase transition to next phase
+- Provides quality metrics and improvement recommendations
+- Enforcement mode configurable: strict, conditional, or advisory
+
+### Configuration
+
+Quality gate behavior is controlled by `.codex/config/codex-config.yaml`:
+
+```yaml
+quality_gates:
+  enforcement: "conditional"  # strict|conditional|advisory
+  minimum_scores:
+    discovery: 70
+    analyst: 70
+    pm: 75
+    architect: 80
+    prp: 90
+```
+
+### When to Execute
+
+Quality gates execute at every phase transition:
+- After Level 0 (elicitation validation) PASSES
+- Before allowing phase transition to next phase
+- For all phases: discovery, analyst, pm, architect, prp
+
+### Execution Logic
+
+**Step 1: Read Configuration**
+```pseudocode
+FUNCTION get_quality_gate_config(current_phase):
+    config = read_config(".codex/config/codex-config.yaml")
+
+    RETURN {
+        enforcement: config.quality_gates.enforcement,
+        minimum_score: config.quality_gates.minimum_scores[current_phase]
+    }
+```
+
+**Step 2: Invoke Quality Gate Agent**
+```pseudocode
+FUNCTION execute_quality_gate(phase, document_path):
+    # Use invoke-quality-gate.md helper task
+    result = invoke_task(
+        task: ".codex/tasks/invoke-quality-gate.md",
+        inputs: {
+            phase: phase,
+            document: document_path,
+            mode: "from_config"
+        }
+    )
+
+    RETURN result  # Contains: score, status, recommendations, allow_progression
+```
+
+**Step 3: Apply Enforcement Policy**
+```pseudocode
+FUNCTION apply_enforcement_policy(quality_gate_result, config):
+    enforcement_mode = config.quality_gates.enforcement
+    status = quality_gate_result.status  # APPROVED|CONDITIONAL|REJECTED
+    score = quality_gate_result.score
+
+    CASE enforcement_mode:
+        WHEN "strict":
+            IF status == "REJECTED":  # score < 70
+                RETURN {
+                    allow_progression: false,
+                    action: "HALT",
+                    message: "Quality gate REJECTED. Score: {score}/100. Must reach minimum threshold."
+                }
+            ELSE IF status == "CONDITIONAL":  # score 70-89
+                RETURN {
+                    allow_progression: true,
+                    action: "WARN",
+                    message: "Quality gate CONDITIONAL. Score: {score}/100. Consider improvements."
+                }
+            ELSE:  # APPROVED (score >= 90)
+                RETURN {
+                    allow_progression: true,
+                    action: "PASS",
+                    message: "Quality gate APPROVED. Score: {score}/100."
+                }
+
+        WHEN "conditional":
+            IF status == "REJECTED":
+                PROMPT user: "Quality gate failed with score {score}/100. Continue anyway? (y/n)"
+                IF user_response == "y":
+                    LOG_WARNING("User bypassed failed quality gate")
+                    RETURN {allow_progression: true, action: "BYPASS"}
+                ELSE:
+                    RETURN {allow_progression: false, action: "HALT"}
+            ELSE IF status == "CONDITIONAL":
+                PROMPT user: "Quality gate conditional with score {score}/100. Review recommendations? (y/n)"
+                DISPLAY quality_gate_result.recommendations
+                RETURN {allow_progression: true, action: "WARN"}
+            ELSE:  # APPROVED
+                RETURN {allow_progression: true, action: "PASS"}
+
+        WHEN "advisory":
+            # Always allow progression, just display results
+            DISPLAY "Quality gate score: {score}/100 ({status})"
+            DISPLAY quality_gate_result.recommendations
+            RETURN {
+                allow_progression: true,
+                action: "ADVISORY",
+                message: "Quality gate results are advisory only"
+            }
+```
+
+**Step 4: Update State**
+```pseudocode
+FUNCTION save_quality_gate_results(phase, result):
+    state = read_state(".codex/state/workflow.json")
+
+    state.quality_gate_results[phase] = {
+        score: result.score,
+        status: result.status,
+        timestamp: current_timestamp(),
+        recommendations: result.recommendations,
+        allow_progression: result.allow_progression
+    }
+
+    save_state(state)
+```
+
+### Complete Execution Flow
+
+```pseudocode
+FUNCTION validation_level_0_5(current_phase, document_path):
+    # Step 1: Execute quality gate validation
+    LOG("Executing quality gate for {current_phase}...")
+    quality_gate_result = execute_quality_gate(current_phase, document_path)
+
+    # Step 2: Apply enforcement policy
+    config = read_config(".codex/config/codex-config.yaml")
+    enforcement_result = apply_enforcement_policy(quality_gate_result, config)
+
+    # Step 3: Save results to state
+    save_quality_gate_results(current_phase, quality_gate_result)
+
+    # Step 4: Return progression decision
+    IF enforcement_result.allow_progression == true:
+        LOG("✅ Level 0.5 PASSED: {enforcement_result.message}")
+        RETURN {allow_progression: true, result: quality_gate_result}
+    ELSE:
+        LOG("❌ Level 0.5 FAILED: {enforcement_result.message}")
+        DISPLAY quality_gate_result.recommendations
+        RETURN {allow_progression: false, result: quality_gate_result}
+```
+
+### Quality Gate Status Thresholds
+
+```yaml
+status_thresholds:
+  APPROVED:
+    score_range: "90-100"
+    meaning: "Document meets or exceeds quality standards"
+    action: "Allow progression without warnings"
+
+  CONDITIONAL:
+    score_range: "70-89"
+    meaning: "Document meets minimum standards but has improvement opportunities"
+    action: "Allow progression with recommendations (strict/conditional modes)"
+
+  REJECTED:
+    score_range: "0-69"
+    meaning: "Document does not meet minimum quality standards"
+    action: "Block progression (strict), prompt user (conditional), advisory (advisory)"
+```
+
+### Test Cases
+
+**Test Case 1: Strict Mode, APPROVED Status (Score 95)**
+```yaml
+input:
+  config.quality_gates.enforcement: "strict"
+  quality_gate_score: 95
+  status: "APPROVED"
+expected:
+  allow_progression: true
+  action: "PASS"
+  message: "Quality gate APPROVED. Score: 95/100"
+```
+
+**Test Case 2: Strict Mode, CONDITIONAL Status (Score 75)**
+```yaml
+input:
+  config.quality_gates.enforcement: "strict"
+  quality_gate_score: 75
+  status: "CONDITIONAL"
+expected:
+  allow_progression: true
+  action: "WARN"
+  message: "Quality gate CONDITIONAL. Score: 75/100. Consider improvements."
+```
+
+**Test Case 3: Strict Mode, REJECTED Status (Score 60)**
+```yaml
+input:
+  config.quality_gates.enforcement: "strict"
+  quality_gate_score: 60
+  status: "REJECTED"
+expected:
+  allow_progression: false
+  action: "HALT"
+  message: "Quality gate REJECTED. Score: 60/100. Must reach minimum threshold."
+```
+
+**Test Case 4: Conditional Mode, REJECTED Status with User Bypass**
+```yaml
+input:
+  config.quality_gates.enforcement: "conditional"
+  quality_gate_score: 55
+  status: "REJECTED"
+  user_response: "y"
+expected:
+  allow_progression: true
+  action: "BYPASS"
+  warning_logged: true
+```
+
+**Test Case 5: Conditional Mode, REJECTED Status with User Block**
+```yaml
+input:
+  config.quality_gates.enforcement: "conditional"
+  quality_gate_score: 55
+  status: "REJECTED"
+  user_response: "n"
+expected:
+  allow_progression: false
+  action: "HALT"
+```
+
+**Test Case 6: Advisory Mode, All Statuses**
+```yaml
+input:
+  config.quality_gates.enforcement: "advisory"
+  quality_gate_score: [any value]
+  status: [any status]
+expected:
+  allow_progression: true
+  action: "ADVISORY"
+  recommendations_displayed: true
+```
+
+### Success Criteria
+
+Level 0.5 is considered successful when:
+
+1. **Configuration Read**: Quality gate configuration properly read and validated
+2. **Quality Gate Invocation**: Successfully invokes quality-gate agent via invoke-quality-gate.md
+3. **Score Calculation**: Receives valid score (0-100) and status (APPROVED|CONDITIONAL|REJECTED)
+4. **Enforcement Application**: Applies correct enforcement policy based on mode
+5. **State Persistence**: Saves quality gate results to workflow.json
+6. **Progression Decision**: Returns correct allow_progression boolean based on enforcement outcome
+
+### Failure Protocol
+
+When Level 0.5 fails (in strict mode):
+
+1. **HALT WORKFLOW** - Do not proceed to Level 1
+2. Display quality gate score and status
+3. Display specific recommendations for improvement
+4. Provide guidance on which quality gate items failed
+5. User addresses quality issues
+6. Re-run Level 0.5 validation
+7. Only proceed when quality gate passes or user bypasses (conditional mode)
+
+### Integration with Other Levels
+
+```yaml
+validation_sequence:
+  level_0:
+    name: "Elicitation Validation"
+    required: true
+    blocking: true
+    next: "level_0_5"
+
+  level_0_5:
+    name: "Document Quality Gate"
+    required: true
+    blocking: true  # Enforcement mode controls behavior
+    next: "level_1"
+
+  level_1:
+    name: "Syntax & Style Validation"
+    required: true
+    blocking: true
+    next: "level_2"
+```
+
+### Performance Characteristics
+
+```yaml
+performance:
+  typical_execution_time: "30-90 seconds"
+  factors:
+    - quality_gate_checklist_size: "15-169 items"
+    - evidence_collection_mode: "interactive|batch|auto"
+    - enforcement_mode: "strict < conditional < advisory"
+
+  optimization:
+    - cache_quality_gate_results: true
+    - parallel_evidence_collection: "when possible"
+    - incremental_validation: "re-check only changed items"
+```
+
+### Notes
+
+- **Standard Validation Step**: Quality gates are part of the standard validation sequence
+- **Configurable Enforcement**: Enforcement mode (strict/conditional/advisory) controls blocking behavior
+- **Progressive Enhancement**: Adds quality metrics without replacing core validation (Levels 1-4)
+- **State Tracked**: All quality gate results saved for learning and improvement
+- **Fix-Forward**: Quality issues are identified and resolved immediately per beta development principles
+
+---
 
 ## Level 1: Syntax & Style Validation
 

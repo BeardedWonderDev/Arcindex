@@ -81,3 +81,15 @@ elicitation:
   violation_log_path: ".codex/debug-log.md"
   recovery_enabled: true
   session_timeout: 1800  # 30 minutes
+
+# Quality Gates
+quality_gates:
+  enforcement: "conditional"  # strict|conditional|advisory
+  minimum_scores:
+    discovery: 70
+    analyst: 70
+    pm: 75
+    architect: 80
+    prp: 90
+  auto_fix_enabled: true
+  evidence_collection_mode: "interactive"  # interactive|batch|auto

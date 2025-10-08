@@ -740,10 +740,12 @@ agent-transformation-protocol:
     But NEVER summarize or reformat the agent's actual deliverable content.
   - **Pattern Source**: Adapted from BMAD lazy loading approach with validation enforcement
   - **Transformation Process**:
-    - **MANDATORY**: Execute validate-phase.md BEFORE any transformation
+    - **MANDATORY LEVEL 0**: Execute validate-phase.md BEFORE transformation
+    - **OPTIONAL LEVEL 0.5**: Execute quality gate validation (if configured)
     - **MODE PROPAGATION**: Read operation_mode from workflow.json
-    - If validation fails: HALT and complete elicitation first
-    - Only after validation passes:
+    - If Level 0 fails: HALT and complete elicitation
+    - If Level 0.5 fails (strict mode): HALT and improve quality
+    - Only after ALL validations pass: proceed to transformation
       - Match workflow phase to specialized agent persona
       - Update state to new phase via state-manager.md
       - **PASS MODE CONTEXT**: Include operation_mode in agent context
@@ -758,6 +760,12 @@ agent-transformation-protocol:
       - Execute agent tasks until phase completion or exit
       - **LOG MODE**: Record mode in transformation_history
       - Return to orchestrator for next phase transition
+  - **Quality Gate Integration**:
+    - After elicitation passes (Level 0)
+    - Invoke quality-gate agent with validate-{phase}
+    - Apply enforcement policy from codex-config.yaml (strict/conditional/advisory)
+    - Log results to transformation_history
+    - Quality gates are standard part of validation sequence
   - **Context Passing**:
     - Include project_discovery or enhancement_discovery from state
     - Pass workflow type and current phase information
