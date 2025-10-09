@@ -748,7 +748,6 @@ agent-transformation-protocol:
     analyst:
       deliverable: "docs/project-brief.md"
       template: "project-brief-template.yaml"
-      template_location: ".codex/templates/project-brief-template.yaml"
       content_includes:
         - "Project Overview"
         - "Problem Statement"
@@ -774,7 +773,6 @@ agent-transformation-protocol:
     pm:
       deliverable: "docs/prd.md"
       template: "prd-template.yaml"
-      template_location: ".codex/templates/prd-template.yaml"
       content_includes:
         - "Product Goals"
         - "User Stories"
@@ -787,7 +785,6 @@ agent-transformation-protocol:
     architect:
       deliverable: "docs/architecture.md"
       template: "architecture-template.yaml"
-      template_location: ".codex/templates/architecture-template.yaml"
       content_includes:
         - "System Architecture"
         - "Technology Stack"
@@ -799,7 +796,6 @@ agent-transformation-protocol:
     prp-creator:
       deliverable: "PRPs/{feature-name}.md"
       template: "prp-enhanced-template.md"
-      template_location: ".codex/templates/prp-enhanced-template.md"
       content_includes:
         - "Complete context synthesis (Brief + PRD + Architecture)"
         - "Implementation guidance"

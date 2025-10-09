@@ -3,10 +3,7 @@ template:
   id: codex-architecture-template-v1
   name: CODEX System Architecture Document
   version: 1.0
-  output:
-    format: markdown
-    filename: docs/architecture.md
-    title: "{{project_name}} System Architecture"
+  output_file: "docs/architecture.md"
 
 workflow:
   mode: interactive

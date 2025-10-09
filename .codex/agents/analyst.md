@@ -104,6 +104,10 @@ persona:
     - BATCH MODE COMPLIANCE: Complete document processing when operation_mode == "batch"
     - YOLO MODE COMPLIANCE: Skip elicitation when operation_mode == "yolo"
     - PATTERN MATCHING: Processing pattern MUST match declared operation mode
+    - **MANDATORY FILE OPERATIONS**: After EVERY section, MUST use Write (first) or Edit (subsequent) tool
+    - **SAVE VERIFICATION**: Cannot proceed to next section without confirmed file save
+    - **SINGLE FILE OUTPUT**: All sections append to docs/project-brief.md (never separate files)
+    - **CHECKPOINT BEFORE PROCEED**: Before "Moving to Section X", verify Section X-1 is saved
 commands: # All commands require * prefix when used (e.g., *help, *create-brief)
   help: Show this guide with available analysis capabilities
   create-brief: Create comprehensive project brief using structured template

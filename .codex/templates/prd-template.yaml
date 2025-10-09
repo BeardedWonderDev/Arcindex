@@ -3,10 +3,7 @@ template:
   id: codex-prd-template-v1
   name: CODEX Product Requirements Document
   version: 1.0
-  output:
-    format: markdown
-    filename: docs/prd.md
-    title: "{{project_name}} Product Requirements Document (PRD)"
+output_file: "docs/prd.md"
 
 workflow:
   mode: interactive

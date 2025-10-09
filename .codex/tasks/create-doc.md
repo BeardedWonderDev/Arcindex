@@ -136,7 +136,8 @@ Process all sections:
 
 1. **Parse YAML template** - Load template metadata and sections
 2. **CRITICAL: Extract output_file path** - Get the SINGLE output file from template
-   - Template specifies output_file: "docs/project-brief.md"
+   - Template specifies output_file: "docs/project-brief.md" (FLAT structure required)
+   - Nested paths (e.g., docs/subfolder/file.md) are NOT supported
    - This is the ONLY file that will be created
    - ALL sections save to this ONE file
 3. **Initialize output file** - Create empty file at output_file path
@@ -178,8 +179,9 @@ When presenting section content, ALWAYS include rationale that explains:
 
 **VIOLATION INDICATORS**:
 - ❌ Creating files like: docs/section-1.md, docs/section-2.md, docs/section-3.md
+- ❌ Using nested paths: docs/architecture/design.md (subdirectories not supported)
 - ❌ Saying "I'll save this section" without actually using Write/Edit tool
-- ✅ CORRECT: All sections in docs/project-brief.md (single file)
+- ✅ CORRECT: All sections in docs/project-brief.md (single flat file)
 
 **ENFORCEMENT**:
 - Before moving to next section, you MUST have used Write or Edit tool
@@ -266,6 +268,6 @@ User can type `#yolo` to toggle to YOLO mode (process all sections at once).
 
 - Templates located in .codex/templates/
 - Elicitation methods in .codex/data/elicitation-methods.md
-- Output documents typically saved to docs/ directory
+- Output documents saved to docs/ directory (flat structure - no subdirectories)
 - Agent permissions support CODEX workflow coordination
 - Template processing supports CODEX context management
