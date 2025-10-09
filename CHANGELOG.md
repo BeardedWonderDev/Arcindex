@@ -108,9 +108,24 @@ Current development version (pre-v0.1.0) - Core infrastructure complete, enterin
 
 ## Development History
 
-### Week of 2025-10-06 (24 commits)
-**Focus:** Automation workflows, workflow configuration fixes, execution learning infrastructure
+### Week of 2025-10-06 (39 commits)
+**Focus:** artifact cleanup automation, documentation reorganization, quality gate validation
 
+- b30538a: chore: update changelog [unreleased] and statistics [skip ci] (2025-10-09)
+- 6c74424: Merge pull request #3 from BeardedWonderDev/artifact-cleanup-20251009-000435 (2025-10-08)
+- f67e508: chore: update roadmap progress [skip ci] (2025-10-09)
+- d9a25d6: chore: update changelog [unreleased] and statistics [skip ci] (2025-10-09)
+- fb2663e: chore: remove AI workflow artifacts [bot] (2025-10-09)
+- 82441dc: fix: prevent workflow loop on bot-created artifact cleanup PRs (2025-10-08)
+- 9aa7058: fix: disable track_progress for workflow_dispatch events (2025-10-08)
+- 10b772e: feat: add manual trigger support to AI artifact cleanup workflow (2025-10-08)
+- 90381d4: docs: reorganize documentation structure and add development references (2025-10-08)
+- bd0c1ba: feat: add AI artifact cleanup workflow and update Claude workflow routing (2025-10-08)
+- 33a93c1: feat: add quality gate validation system (Level 0.5) to all workflows (2025-10-08)
+- 151e404: fix: correct broken file reference and update ROADMAP assessment (2025-10-08)
+- 7331a45: docs: update ROADMAP.md with comprehensive 5-agent deep review findings (2025-10-08)
+- f9f8e1a: docs: consolidate roadmap to ROADMAP.md file (2025-10-08)
+- 1d2a754: chore: update changelog development history [skip ci] (2025-10-08)
 - 9567fa6: chore: update roadmap progress [skip ci] (2025-10-08)
 - 0267609: refactor: simplify roadmap and development history workflow prompts (2025-10-08)
 - 491480f: chore: increase changelog workflow max-turns to 50 for clean completion (2025-10-08)
