@@ -11,6 +11,10 @@ Current development version (pre-v0.1.0) - Core infrastructure complete, enterin
 
 ### Added
 
+- Test harness infrastructure: Comprehensive testing system with branch isolation, automated analysis, and quality metrics extraction - Enables systematic CODEX workflow validation, branch comparison testing, and regression detection with standardized discovery inputs, test archival, and configurable thresholds (6 files, 922 insertions)
+- Quality gate validation system: Level 0.5 quality gates between elicitation and transformation phases with configurable enforcement modes (strict/conditional/advisory) - Integrates into all workflows with scoring and improvement recommendations at phase transitions (7 files, 680 insertions)
+- AI artifact cleanup workflow: Dedicated workflow for @claude-artifacts PR analysis with artifact policy enforcement - Separates artifact cleanup from general Claude interactions for improved clarity and performance (2 files, 246 insertions)
+- Development references: Comprehensive .claude/ directory with artifact-policy-reference.md, development-reference.md, and artifact-exceptions.txt - Provides detailed guidance for AI workflows and artifact management (3 files, 1118 insertions)
 - GitHub Actions automation workflows: Changelog automation, development history tracking, roadmap updates, and version management using Claude Code GitHub Action - Replaces manual two-commit workflow with automated pipeline that updates CHANGELOG.md, development history, and roadmap on every push to main, reducing commit time by 2-3 minutes and ensuring consistent formatting (5 files, 832 insertions, 164 deletions)
 - Execution learning capture and architect validation infrastructure: Complete Phase 2 Week 5 deliverables with execution learning feedback loop, epic-based learning integration, zero-knowledge architecture testing, and confidence scoring framework - Enables progressive quality improvement across epics through systematic learning capture with .codex/state/execution-reports/ and epic-learnings/ directories (11 files, 2,998 insertions)
 - Project roadmap and comprehensive validation guides: ROADMAP.md with v0.1.0-v0.3.0 plans, operational validation playbook, Level 3-4 testing guides, and Phase 2 completion documentation - Provides clear roadmap for v0.1.0 completion and enables systematic operational validation across 5 test scenarios (5 files, 3,159 insertions)
@@ -61,6 +65,10 @@ Current development version (pre-v0.1.0) - Core infrastructure complete, enterin
 
 ### Changed
 
+- Documentation structure: Reorganized with user guides moved to root level, .claude/ development references added, and docs/ research/testing directories created - Aligns with artifact policy where .codex/ is product code and detailed guides are artifacts (20 files, 10909 insertions)
+- Test harness results storage: Moved from in-repo to external ../codex-tests/ directory - Prevents git pollution, enables branch isolation without conflicts, and simplifies test management (7 files, 767 insertions)
+- Roadmap consolidation: Removed duplicate roadmap sections from CHANGELOG.md and README.md - Single source of truth in ROADMAP.md (2 files, 6 insertions, 86 deletions)
+- GitHub Actions workflow routing: Updated Claude workflow to exclude @claude-artifacts mentions and grant write permissions - Routed to dedicated ai-artifact-cleanup workflow (2 files, 28 modifications)
 - Changelog workflow prompt: Simplified from 180-line prescriptive prompt to 32-line goal-oriented approach - Replaces detailed bash commands with high-level tasks, giving Claude freedom to use Read/Grep/Edit or Bash, reducing turn usage and eliminating permission denial loops (1 file, 31 insertions, 130 deletions)
 - Simplified architecture by removing Swift agent dependencies (feature-developer, syntax-reviewer, etc.)
 - Replaced agent-based Level 4 validation with direct command execution (swiftlint, swift test, xcodebuild)
@@ -76,6 +84,8 @@ Current development version (pre-v0.1.0) - Core infrastructure complete, enterin
 
 ### Fixed
 
+- Orchestrator content suppression: Fixed progressive bug where orchestrator stops displaying section content after analyst phase sections 3-4 - Added mode-aware output handling with anti-summarization protocol, VERBATIM display requirements, and BLOCKING HALT after elicitation menus (1 file, 165 insertions, 10 deletions)
+- Broken file reference: Corrected prp-validation-enforcement.md references from non-existent .codex/data/prp-quality-checklist.md to correct .codex/checklists/prp-quality-gate.md - Task would fail if invoked with incorrect path (2 files, 26 insertions, 22 deletions)
 - GitHub Actions workflow triggers: Replaced unsupported push event with schedule (daily) and workflow_dispatch (manual testing) triggers based on claude-code-action documentation - Resolves 'Unsupported event type: push' error (2 files, 10 insertions, 6 deletions)
 - Workflow allowedTools configuration: Added Read, Edit, Write, and Bash tools (git, grep, awk, date, head, tail, wc, cut, echo) to enable file operations and git commands - Resolves permission denials that prevented Claude from executing workflow tasks (3 files, 3 insertions)
 - Workflow max-turns limits: Increased from 15-20 to 30-40 turns to allow Claude enough time to complete complex changelog operations - Previous runs hit max-turns before completing (3 files, 6 insertions, 6 deletions)
@@ -195,21 +205,22 @@ Current development version (pre-v0.1.0) - Core infrastructure complete, enterin
 
 ## Statistics
 
-- **Total Commits**: 71
-- **Total Lines Added**: ~41,000+
-- **Total Lines Deleted**: ~700
-- **Net Change**: +40,300 lines
-- **Date Range**: 2025-09-23 to 2025-10-08
-- **Files Created/Modified**: ~240 files
+- **Total Commits**: 86
+- **Total Lines Added**: ~54,000+
+- **Total Lines Deleted**: ~1,100
+- **Net Change**: +52,900 lines
+- **Date Range**: 2025-09-23 to 2025-10-09
+- **Files Created/Modified**: ~270 files
 
 ## Commit Type Distribution
 
-- **Features (feat)**: 17 commits (23.9%)
-- **Fixes (fix)**: 15 commits (21.1%)
-- **Refactoring (refactor)**: 4 commits (5.6%)
-- **Documentation (docs)**: 15 commits (21.1%)
-- **Chore (chore)**: 3 commits (4.2%)
-- **Miscellaneous**: 17 commits (23.9%)
+- **Features (feat)**: 20 commits (23.5%)
+- **Fixes (fix)**: 17 commits (20.0%)
+- **Refactoring (refactor)**: 6 commits (7.1%)
+- **Documentation (docs)**: 18 commits (21.2%)
+- **Chore (chore)**: 7 commits (8.2%)
+- **Sync (sync)**: 1 commit (1.2%)
+- **Miscellaneous**: 16 commits (18.8%)
 
 ## Key Development Themes
 
