@@ -113,9 +113,12 @@ Current development version (pre-v0.1.0) - Core infrastructure complete, enterin
 
 ## Development History
 
-### Week of 2025-10-06 (47 commits)
-**Focus:** test harness development, artifact cleanup automation, quality validation enhancements, architect agent improvements
+### Week of 2025-10-06 (50 commits)
+**Focus:** npx distribution automation, test harness development, artifact cleanup automation, quality validation enhancements
 
+- 87c40ec: feat: implement npx distribution system for CODEX (2025-10-09)
+- 0884fd0: chore: update changelog [unreleased] and statistics [skip ci] (2025-10-09)
+- a2601af: chore: update changelog development history [skip ci] (2025-10-09)
 - 1086776: fix: improve orchestrator discovery flow and test script reliability (2025-10-09)
 - 7721182: feat: add /codex test command for test harness operations (2025-10-09)
 - 824c38d: chore: update changelog [unreleased] and statistics [skip ci] (2025-10-09)
