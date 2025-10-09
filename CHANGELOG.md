@@ -111,9 +111,13 @@ Current development version (pre-v0.1.0) - Core infrastructure complete, enterin
 
 ## Development History
 
-### Week of 2025-10-06 (43 commits)
+### Week of 2025-10-06 (47 commits)
 **Focus:** test harness development, artifact cleanup automation, quality validation enhancements, architect agent improvements
 
+- 1086776: fix: improve orchestrator discovery flow and test script reliability (2025-10-09)
+- 7721182: feat: add /codex test command for test harness operations (2025-10-09)
+- 824c38d: chore: update changelog [unreleased] and statistics [skip ci] (2025-10-09)
+- f4b6def: chore: update changelog development history [skip ci] (2025-10-09)
 - 7622927: fix: resolve architect agent silent file creation failure (2025-10-09)
 - 82e6b9b: chore: update changelog development history [skip ci] (2025-10-09)
 - e32f06d: chore: update roadmap progress [skip ci] (2025-10-09)
