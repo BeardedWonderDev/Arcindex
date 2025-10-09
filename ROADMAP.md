@@ -13,7 +13,7 @@
 **Remaining:** ~52-76 hours to v0.1.0 release (corrected)
 **Theme:** Comprehensive quality gates, feedback loops, and validation infrastructure
 
-**v0.1.0 Status:** Near completion - 3 major tasks remaining (Archon MCP integration, Git integration, E2E testing)
+**v0.1.0 Status:** Near completion - 4 critical tasks remaining (Archon MCP integration, Git integration with 2 sub-tasks, E2E testing, Workflow customization guide)
 
 ### Implementation Status (As of 2025-10-09)
 
@@ -207,9 +207,6 @@ The original assessment incorrectly identified state management as "DORMANT" bas
 - [ ] Advanced validation customization per project
 - [ ] Knowledge base system for pattern learning
 - [ ] Success metrics tracking and analysis dashboard
-
-### Optional (if deferred from v0.1.0)
-- [ ] Architect research infrastructure (if not completed in v0.1.0)
 
 ---
 
