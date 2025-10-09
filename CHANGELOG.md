@@ -11,6 +11,7 @@ Current development version (pre-v0.1.0) - Core infrastructure complete, enterin
 
 ### Added
 
+- Test harness command interface: New /codex test command with run/analyze/compare/clean subcommands that map to existing test-harness scripts - Provides comprehensive test harness operations with special handling for branch arguments and auto-detection (1 file, 27 insertions)
 - Test harness infrastructure: Comprehensive testing system with branch isolation, automated analysis, and quality metrics extraction - Enables systematic CODEX workflow validation, branch comparison testing, and regression detection with standardized discovery inputs, test archival, and configurable thresholds (6 files, 922 insertions)
 - Quality gate validation system: Level 0.5 quality gates between elicitation and transformation phases with configurable enforcement modes (strict/conditional/advisory) - Integrates into all workflows with scoring and improvement recommendations at phase transitions (7 files, 680 insertions)
 - AI artifact cleanup workflow: Dedicated workflow for @claude-artifacts PR analysis with artifact policy enforcement - Separates artifact cleanup from general Claude interactions for improved clarity and performance (2 files, 246 insertions)
@@ -85,6 +86,7 @@ Current development version (pre-v0.1.0) - Core infrastructure complete, enterin
 
 ### Fixed
 
+- Orchestrator discovery flow and test script reliability: Enhanced discovery-phase-handling with multi-step agent pattern, enforced proper Task output display without summarizing, documented auto-progression vs HALT rules, and added self-check validation for discovery outputs - Also fixed test scripts with clean-tests.sh preserving directory structure and run-test.sh using proper mapfile alternative for branch array population (3 files, 134 insertions, 9 deletions)
 - Architect agent silent file creation failure: Standardized template format from nested output.filename to flat output_file structure, added mandatory file operation enforcement to all document-creating agents (analyst, PM, architect), and clarified flat-structure-only requirement in create-doc.md - Prevents silent file creation failures across entire document workflow chain where operations would fail silently while workflow state was optimistically updated (7 files, 19 insertions, 15 deletions)
 - Orchestrator content suppression: Fixed progressive bug where orchestrator stops displaying section content after analyst phase sections 3-4 - Added mode-aware output handling with anti-summarization protocol, VERBATIM display requirements, and BLOCKING HALT after elicitation menus (1 file, 165 insertions, 10 deletions)
 - Broken file reference: Corrected prp-validation-enforcement.md references from non-existent .codex/data/prp-quality-checklist.md to correct .codex/checklists/prp-quality-gate.md - Task would fail if invoked with incorrect path (2 files, 26 insertions, 22 deletions)
@@ -220,22 +222,22 @@ Current development version (pre-v0.1.0) - Core infrastructure complete, enterin
 
 ## Statistics
 
-- **Total Commits**: 95
-- **Total Lines Added**: ~134,646
-- **Total Lines Deleted**: ~2,316
-- **Net Change**: +132,330 lines
+- **Total Commits**: 99
+- **Total Lines Added**: ~134,807
+- **Total Lines Deleted**: ~2,325
+- **Net Change**: +132,482 lines
 - **Date Range**: 2025-09-23 to 2025-10-09
-- **Files Created/Modified**: ~637 files
+- **Files Created/Modified**: ~641 files
 
 ## Commit Type Distribution
 
-- **Features (feat)**: 20 commits (21.1%)
-- **Fixes (fix)**: 18 commits (18.9%)
-- **Refactoring (refactor)**: 6 commits (6.3%)
-- **Documentation (docs)**: 19 commits (20.0%)
-- **Chore (chore)**: 14 commits (14.7%)
-- **Sync (sync)**: 1 commit (1.1%)
-- **Miscellaneous**: 17 commits (17.9%)
+- **Features (feat)**: 21 commits (21.2%)
+- **Fixes (fix)**: 19 commits (19.2%)
+- **Refactoring (refactor)**: 6 commits (6.1%)
+- **Documentation (docs)**: 19 commits (19.2%)
+- **Chore (chore)**: 16 commits (16.2%)
+- **Sync (sync)**: 1 commit (1.0%)
+- **Miscellaneous**: 17 commits (17.2%)
 
 ## Key Development Themes
 
