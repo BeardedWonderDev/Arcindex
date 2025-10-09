@@ -1,6 +1,26 @@
 name: AI Artifact Auto-Cleanup
 
 on:
+  workflow_dispatch:
+    inputs:
+      target_branch:
+        description: 'Branch to analyze and clean (default: main)'
+        required: false
+        type: string
+        default: 'main'
+      strategy:
+        description: 'Cleanup strategy: create-pr (safe, default) or push-direct (fast)'
+        required: true
+        type: choice
+        options:
+          - 'create-pr'
+          - 'push-direct'
+        default: 'create-pr'
+      dry_run:
+        description: 'Analyze only, make no changes (testing mode)'
+        required: false
+        type: boolean
+        default: false
   pull_request:
     types: [opened, synchronize, reopened]
   issue_comment:
@@ -13,9 +33,10 @@ permissions:
 
 jobs:
   ai-cleanup:
-    # Run on PR events OR when someone uses @claude-artifacts keyword
+    # Run on PR events (except artifact-cleanup branches) OR @claude-artifacts keyword OR manual trigger
     if: |
-      github.event_name == 'pull_request' ||
+      (github.event_name == 'pull_request' && !startsWith(github.head_ref, 'artifact-cleanup-')) ||
+      github.event_name == 'workflow_dispatch' ||
       (github.event_name == 'issue_comment' &&
        github.event.issue.pull_request &&
        contains(github.event.comment.body, '@claude-artifacts'))
@@ -23,10 +44,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout PR branch
+      - name: Checkout target branch
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.pull_request.head.ref || github.event.issue.pull_request.head.ref }}
+          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.target_branch || github.event.pull_request.head.ref || github.event.issue.pull_request.head.ref }}
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
 
@@ -36,14 +57,133 @@ jobs:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
 
           prompt: |
-            **MISSION:** Clean AI workflow artifacts from this PR before merging to main.
+            **MISSION:** Clean AI workflow artifacts from this repository.
 
-            **CONTEXT:**
-            - PR Number: ${{ github.event.pull_request.number || github.event.issue.number }}
-            - Base Branch: main
+            **TRIGGER CONTEXT:**
+            - Event Type: ${{ github.event_name }}
+            - Target Branch: ${{ github.event_name == 'workflow_dispatch' && inputs.target_branch || github.event.pull_request.head.ref || github.event.issue.pull_request.head.ref }}
+            - Strategy: ${{ github.event_name == 'workflow_dispatch' && inputs.strategy || 'pr-branch-push' }}
+            - Dry Run: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run || 'false' }}
+            - PR Number: ${{ github.event.pull_request.number || github.event.issue.number || 'N/A (manual trigger)' }}
+
+            **EXECUTION MODE:**
+
+            ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run == 'true' && '
+            🧪 **DRY RUN MODE - ANALYSIS ONLY**
+
+            - DO NOT make any changes to the repository
+            - DO NOT run git rm, git commit, or git push commands
+            - Analyze files and generate detailed report showing what WOULD be changed
+            - Post summary to workflow output showing:
+              * Files that would be removed (with evidence)
+              * Files that would be kept (with rationale)
+              * Uncertain files requiring review
+            - This is for testing and validation purposes only
+
+            Skip to step 6 (Post Comprehensive Report) but output to console instead of PR comment.
+            ' || '' }}
+
+            ${{ github.event_name == 'workflow_dispatch' && inputs.strategy == 'create-pr' && inputs.dry_run != 'true' && '
+            📝 **CREATE PR MODE - SAFE CLEANUP**
+
+            After identifying artifacts (steps 1-4), you will:
+
+            - Create new branch: `artifact-cleanup-$(date +%Y%m%d-%H%M%S)`
+            - Commit artifact removals to new branch
+            - Push new branch to origin
+            - Create pull request using:
+              ```bash
+              BRANCH_NAME="artifact-cleanup-$(date +%Y%m%d-%H%M%S)"
+              git checkout -b "$BRANCH_NAME"
+
+              # ... perform artifact removal ...
+
+              git config user.name "claude-artifact-cleanup[bot]"
+              git config user.email "claude-artifact-cleanup[bot]@users.noreply.github.com"
+              git add -A
+              git commit -m "chore: remove AI workflow artifacts [bot]" \
+                -m "Automated cleanup of AI workflow artifacts" \
+                -m "" \
+                -m "Files removed: [list key files]" \
+                -m "" \
+                -m "Generated with Claude Code GitHub Action"
+
+              git push origin "$BRANCH_NAME"
+
+              # Create PR with detailed body
+              gh pr create \
+                --base main \
+                --head "$BRANCH_NAME" \
+                --title "chore: automated AI artifact cleanup" \
+                --body "$(cat <<EOF
+              ## 🤖 Automated Artifact Cleanup
+
+              This PR removes AI workflow artifacts identified by semantic analysis.
+
+              ### 📋 Summary
+              - Removed: X files
+              - Total: Y artifacts cleaned
+
+              ### 🔍 Analysis
+              [Include summary table of removed files with evidence]
+
+              ### ✅ Review Instructions
+              Please review the removed files to ensure no legitimate files were incorrectly classified as artifacts.
+
+              ---
+              Generated with Claude Code GitHub Action
+              EOF
+              )"
+              ```
+
+            This creates a reviewable PR instead of direct push to main.
+            ' || '' }}
+
+            ${{ github.event_name == 'workflow_dispatch' && inputs.strategy == 'push-direct' && inputs.dry_run != 'true' && '
+            ⚡ **DIRECT PUSH MODE - IMMEDIATE CLEANUP**
+
+            After identifying artifacts (steps 1-4), you will:
+
+            - Remove artifacts directly from current branch (${{ inputs.target_branch }})
+            - Commit changes with [skip ci] to prevent workflow loops
+            - Push directly to origin/${{ inputs.target_branch }}
+
+            Use this commit format:
+            ```bash
+            git config user.name "claude-artifact-cleanup[bot]"
+            git config user.email "claude-artifact-cleanup[bot]@users.noreply.github.com"
+
+            git rm <artifact-files>
+
+            git commit -m "chore: remove AI workflow artifacts [bot] [skip ci]" \
+              -m "Automated cleanup - direct push to ${{ inputs.target_branch }}" \
+              -m "Files removed: [list]" \
+              -m "" \
+              -m "Generated with Claude Code GitHub Action"
+
+            git push origin ${{ inputs.target_branch }}
+            ```
+
+            ⚠️ Changes are immediate and bypass code review.
+            ' || '' }}
+
+            ${{ github.event_name != 'workflow_dispatch' && '
+            📦 **PR BRANCH MODE - STANDARD CLEANUP**
+
+            This is a standard PR workflow. After identifying artifacts (steps 1-4):
+
+            - Remove artifacts from PR branch
+            - Commit and push to PR branch (existing behavior)
+            - Post analysis comment to PR
+
+            Standard PR cleanup workflow continues as normal...
+            ' || '' }}
+
+            **PROJECT CONTEXT:**
             - This project uses AI-assisted development (BMAD, PRP, Claude Code, etc.)
             - Contributors commit artifacts to feature branches for AI context
             - Artifacts must NOT be merged to main
+            - Base Branch: main
 
             **YOUR TASK:**
 
@@ -53,9 +193,16 @@ jobs:
                - Understand what this project considers artifacts
                - Check .claude/artifact-exceptions.txt for learned exceptions
 
-            2. **Analyze Changed Files:**
+            2. **Analyze Files:**
+
+               **For PR events:**
                - Use: `gh pr diff ${{ github.event.pull_request.number || github.event.issue.number }} --name-only`
                - Get list of all files changed in this PR
+
+               **For manual trigger (workflow_dispatch):**
+               - Use: `git diff --name-only main...HEAD` (if not on main)
+               - Or use: `git ls-files` to analyze all tracked files
+               - Focus on common artifact locations: docs/, PRPs/, .bmad-core/, *.prp.md
 
             3. **Semantic Analysis (For Each File):**
 
@@ -105,8 +252,16 @@ jobs:
 
             5. **Execute Removal (High-Confidence Only):**
 
-               For files you're CERTAIN are artifacts:
+               **⚠️ CRITICAL: Only execute if NOT in dry run mode**
 
+               For files you're CERTAIN are artifacts, follow the execution mode instructions from above:
+
+               - **Dry Run Mode:** Skip execution, proceed to step 6 for reporting
+               - **Create PR Mode:** Create branch, commit, push, create PR (see EXECUTION MODE section)
+               - **Direct Push Mode:** Commit and push to current branch (see EXECUTION MODE section)
+               - **PR Branch Mode:** Use existing behavior below
+
+               **Standard PR Branch Execution:**
                ```bash
                # Remove artifact files
                git rm file1.prp.md file2.xml dir/
@@ -126,11 +281,24 @@ jobs:
                git push origin ${{ github.event.pull_request.head.ref || github.event.issue.pull_request.head.ref }}
                ```
 
-            6. **Post Comprehensive PR Comment:**
+            6. **Post Analysis Report:**
 
-               Use: `gh pr comment ${{ github.event.pull_request.number || github.event.issue.number }} --body "..."`
+               **For PR events:**
+               - Use: `gh pr comment ${{ github.event.pull_request.number || github.event.issue.number }} --body "..."`
+               - Post detailed analysis as PR comment
 
-               Include in your comment:
+               **For manual trigger with create-pr strategy:**
+               - Analysis is included in the created PR body
+               - No separate comment needed
+
+               **For manual trigger with push-direct or dry-run:**
+               - Output analysis to console/workflow logs
+               - Use echo or cat to display analysis
+               - Format for readability in GitHub Actions logs
+
+               **Report Format** (adapt based on output destination):
+
+               Include in your report:
 
                ```markdown
                ## 🤖 AI Artifact Analysis Complete
@@ -206,10 +374,21 @@ jobs:
 
             **OUTPUT FORMAT:**
 
-            You MUST post a PR comment (even if no artifacts found). Your comment should be:
+            **For PR events:**
+            - You MUST post a PR comment (even if no artifacts found)
+            - Comment should be structured with checkboxes showing progress
+            - Evidence-based with reasoning in tables
+            - Actionable with clear instructions for maintainer responses
+
+            **For manual triggers:**
+            - **create-pr:** Include analysis in PR body when creating the PR
+            - **push-direct:** Output summary to workflow logs (use echo)
+            - **dry-run:** Output detailed analysis to workflow logs
+
+            Your output should be:
             - Structured with checkboxes showing progress (use track_progress)
             - Evidence-based (explain your reasoning in tables)
-            - Actionable (clear instructions for maintainer responses)
+            - Actionable (clear instructions for next steps)
 
             **RESPONSE INSTRUCTIONS FOR MAINTAINER:**
 
@@ -219,7 +398,7 @@ jobs:
 
             This prevents workflow conflicts and provides clear interaction patterns.
 
-          track_progress: true  # Enable real-time comment updates with checkboxes
+          track_progress: ${{ github.event_name != 'workflow_dispatch' }}  # Enable for PR events only
 
           claude_args: |
             --max-turns 50

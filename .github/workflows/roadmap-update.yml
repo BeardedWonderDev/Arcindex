@@ -2,7 +2,7 @@ name: Roadmap Update
 
 on:
   schedule:
-    - cron: '0 0 * * *'  # Daily at midnight UTC
+    - cron: '0 8 * * *'  # Daily at midnight PST (08:00 UTC)
   workflow_dispatch:  # Manual trigger for testing
   pull_request:
     types: [closed]
@@ -53,15 +53,32 @@ jobs:
 
             **Tasks:**
 
-            1. **Analyze recent commits:** Find commits since last "chore: update roadmap" commit (or from beginning if none). Review commit messages and changes to identify completed roadmap tasks.
+            1. **Deduplicate task lines (idempotent safety):**
 
-            2. **Update task completion:** For each completed task in ROADMAP.md, change `- [ ]` to `- [x]` or add `✅` prefix. Only mark tasks as complete if commits clearly implement them - be conservative with partial implementations.
+               Before updating task completion, clean any duplicate task entries:
 
-            3. **Check for new features:** Review CHANGELOG.md [Unreleased] section for significant features not in roadmap. Add them to appropriate future versions (v0.2.0+) if they represent major unplanned capabilities.
+               a. Scan ROADMAP.md for duplicate task lines (same task description, ignoring checkbox state)
+               b. Check for duplicates:
+                  ```bash
+                  grep -oP '- \[.\] \K.*' ROADMAP.md | sort | uniq -d
+                  ```
+               c. For each set of duplicate tasks:
+                  - If any version has [x]: keep the [x] version, remove all [ ] duplicates
+                  - If all are [x] or all are [ ]: keep first occurrence, remove duplicates
+                  - Preserve section structure and task ordering
+               d. Ensure no task appears more than once in the file
 
-            4. **Version readiness check:** Count remaining v0.1.0 tasks. If <5 remaining, add note: "**v0.1.0 Status:** Near completion - X tasks remaining". Do NOT bump version numbers.
+               This ensures clean task list before marking completions.
 
-            5. **Commit and push changes:**
+            2. **Analyze recent commits:** Find commits since last "chore: update roadmap" commit (or from beginning if none). Review commit messages and changes to identify completed roadmap tasks.
+
+            3. **Update task completion:** For each completed task in ROADMAP.md, change `- [ ]` to `- [x]` or add `✅` prefix. Only mark tasks as complete if commits clearly implement them - be conservative with partial implementations.
+
+            4. **Check for new features:** Review CHANGELOG.md [Unreleased] section for significant features not in roadmap. Add them to appropriate future versions (v0.2.0+) if they represent major unplanned capabilities.
+
+            5. **Version readiness check:** Count remaining v0.1.0 tasks. If <5 remaining, add note: "**v0.1.0 Status:** Near completion - X tasks remaining". Do NOT bump version numbers.
+
+            6. **Commit and push changes:**
                ```bash
                git config user.name "github-actions[bot]"
                git config user.email "github-actions[bot]@users.noreply.github.com"
