@@ -67,6 +67,7 @@ Current development version (pre-v0.1.0) - Core infrastructure complete, enterin
 
 ### Changed
 
+- NPX installer architecture: Migrated to pure ES modules and eliminated code duplication with thin CLI wrapper pattern - Fixed inquirer.prompt error through ES module conversion (6 .cjs→.js files), removed duplicate installCodex/updateCodex/showSuccessMessage functions (233 lines), corrected .claude directory copying (now only codex.md), fixed documentation files bug, improved success message with missing "claude" command step and correct workflow start command (10 files, 131 insertions, 338 deletions)
 - Distribution strategy: Comprehensive research on distribution methods including package managers, binary downloads, Docker, Git templates, and multi-platform automation with strategic recommendation for hybrid approach (Template via npx + CLI via npm/Homebrew/Scoop) - Supports v0.1 release planning with detailed analysis of npm vs npx trade-offs, real-world case studies (GitHub CLI, Deno, Stripe CLI, Vercel), and GoReleaser automation guidance (4 files, 4980 insertions)
 - Documentation structure: Reorganized with user guides moved to root level, .claude/ development references added, and docs/ research/testing directories created - Aligns with artifact policy where .codex/ is product code and detailed guides are artifacts (20 files, 10909 insertions)
 - Test harness results storage: Moved from in-repo to external ../codex-tests/ directory - Prevents git pollution, enables branch isolation without conflicts, and simplifies test management (7 files, 767 insertions)
@@ -230,21 +231,21 @@ Current development version (pre-v0.1.0) - Core infrastructure complete, enterin
 
 ## Statistics
 
-- **Total Commits**: 102
-- **Total Lines Added**: ~145,482
-- **Total Lines Deleted**: ~2,341
-- **Net Change**: +143,141 lines
+- **Total Commits**: 106
+- **Total Lines Added**: ~145,613
+- **Total Lines Deleted**: ~2,679
+- **Net Change**: +142,934 lines
 - **Date Range**: 2025-09-23 to 2025-10-09
-- **Files Created/Modified**: ~670 files
+- **Files Created/Modified**: ~680 files
 
 ## Commit Type Distribution
 
-- **Features (feat)**: 24 commits (23.5%)
-- **Fixes (fix)**: 21 commits (20.6%)
-- **Refactoring (refactor)**: 6 commits (5.9%)
-- **Documentation (docs)**: 19 commits (18.6%)
-- **Chore (chore)**: 27 commits (26.5%)
-- **Miscellaneous**: 5 commits (4.9%)
+- **Features (feat)**: 22 commits (20.8%)
+- **Fixes (fix)**: 19 commits (17.9%)
+- **Refactoring (refactor)**: 7 commits (6.6%)
+- **Documentation (docs)**: 19 commits (17.9%)
+- **Chore (chore)**: 21 commits (19.8%)
+- **Miscellaneous**: 18 commits (17.0%)
 
 ## Key Development Themes
 
