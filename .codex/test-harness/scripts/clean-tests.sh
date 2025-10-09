@@ -56,8 +56,13 @@ case $choice in
         TOTAL=$((ACTIVE_COUNT + ARCHIVE_COUNT))
         read -p "Remove ALL tests ($ACTIVE_COUNT active + $ARCHIVE_COUNT archived = $TOTAL total)? [y/N]: " confirm
         if [ "$confirm" = "y" ] || [ "$confirm" = "Y" ]; then
-            rm -rf "$TEST_BASE"
-            echo "✅ Removed all tests and test directory"
+            # Remove active tests
+            find "$TEST_BASE" -maxdepth 1 -name "taskmaster-*" -type d -exec rm -rf {} \; 2>/dev/null
+            # Remove archived tests
+            if [ -d "${TEST_BASE}/archive" ]; then
+                find "${TEST_BASE}/archive" -maxdepth 1 -name "taskmaster-*" -type d -exec rm -rf {} \; 2>/dev/null
+            fi
+            echo "✅ Removed all tests (preserved test directory structure)"
         else
             echo "Cancelled"
         fi

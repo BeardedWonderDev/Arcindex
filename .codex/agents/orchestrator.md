@@ -359,12 +359,20 @@ workflow-management:
       GREENFIELD workflows:
         a. Display complete initialization info (using format above)
            - If project name provided in command, show it as confirmed in Workflow Initialization section
-        b. Immediately after status, begin asking discovery questions (DO NOT wait for user confirmation):
-           - [CONDITIONAL] "What's your project name/working title?" (ONLY if NOT provided in command)
-           - "Brief Project Concept: What are you building with {project-name}? (1-3 sentences covering the problem, users, and core functionality)"
-           - "Existing Inputs: Do you have any existing materials (research, designs, technical requirements), or are we starting fresh?"
-           - "Development Context: Any technical considerations like target platform, technology preferences, or integration requirements?"
-        c. Store discovery in state: project_discovery object via state-manager.md
+        b. SPAWN Discovery Agent (step: initialize):
+           - Use Task tool to spawn discovery agent
+           - Pass workflow_type and project_name (if provided)
+           - Discovery agent creates workflow.json and returns formatted questions
+           - Display returned questions VERBATIM to user
+           - HALT - wait for user to provide comprehensive answers
+           - DO NOT present your own questions - always use discovery agent's questions
+        c. After user provides answers, SPAWN Discovery Agent (step: process_answers):
+           - Use Task tool to spawn discovery agent
+           - Pass user_answers (complete text of user's response)
+           - Discovery agent processes answers, updates workflow.json, returns summary + elicitation menu
+           - Display summary + menu VERBATIM to user
+           - HALT - wait for user to select elicitation option (1-9)
+        d. Store discovery in state: project_discovery object via state-manager.md (discovery agent handles this)
         d. **DEFAULT MODE**: Automatically set operation mode (DO NOT prompt user):
            - Default to "interactive" mode
            - Read codex-config.yaml for default_mode override if present
@@ -734,6 +742,115 @@ agent-coordination:
         display: VERBATIM as sections complete (optional accumulation)
         halt: NONE (continuous progression)
         violation: Summarizing content (still show full sections)
+
+    discovery_phase_enforcement: |
+      **DISCOVERY PHASE HAS DIFFERENT PATTERN THAN SECTION-BASED PHASES**
+
+      Discovery uses multi-step agent pattern (initialize → process_answers → process_elicitation → finalize).
+      The orchestrator MUST handle Task outputs correctly for each step:
+
+      **After Task(Discovery - Initialize) completes:**
+      - MUST display ENTIRE Task output (formatted discovery questions)
+      - Questions should be 8-9 comprehensive questions for greenfield
+      - HALT and wait for user to provide comprehensive answers
+
+      **After Task(Discovery - Process answers) completes:**
+      - MUST display ENTIRE Task output
+      - This includes:
+        * Complete discovery summary (full text, not "What's Included" bullets)
+        * Full 1-9 elicitation menu
+      - Do NOT just say "I'm waiting for your selection from the menu above"
+      - The menu must actually BE above (you must display it first)
+      - HALT and wait for user selection
+
+      **Self-Check After Discovery Task:**
+      1. "Did I display the discovery summary text that the agent generated?"
+         - If NO: VIOLATION - display it now
+      2. "Did I display all 9 elicitation options (not simplified menu)?"
+         - If NO: VIOLATION - display full menu now
+      3. "Can the user see options 1-9 in my previous message?"
+         - If NO: You referenced invisible content - VIOLATION
+      4. "Or did I just say 'waiting for selection from menu above' without showing the menu?"
+         - If YES: CRITICAL VIOLATION - display the actual menu
+
+      **Discovery Multi-Step Auto-Progression:**
+      - After user provides discovery answers → Auto-spawn process_answers step (NOT user-initiated)
+      - After process_answers output displayed → HALT for user elicitation selection
+      - After user selects option 2-9 → Auto-spawn process_elicitation step
+      - After user selects option 1 → Auto-spawn finalize step
+      - Different from section-based work where every progression waits for user input
+
+  discovery-phase-handling:
+    purpose: Discovery uses multi-step pattern requiring special orchestrator behavior
+    priority: CRITICAL - different from section-based work
+
+    pattern: |
+      **Discovery has 4 steps, orchestrator must handle each correctly:**
+
+      **STEP 1: Initialize (Spawn on /codex start)**
+      Trigger: User runs `/codex start greenfield-generic "Project Name"`
+      Action:
+        1. Display initialization info (project, workflow type, mode)
+        2. Spawn Discovery Agent Task (step: initialize)
+           - Pass: workflow_type, project_name (if provided)
+        3. Receive: Formatted discovery questions (8-9 questions)
+        4. Display: ENTIRE question set VERBATIM
+        5. HALT: Wait for user to provide comprehensive answers
+
+      **STEP 2: Process Answers (Auto-spawn after user answers)**
+      Trigger: User provides answers to discovery questions
+      Action:
+        1. Recognize answers as trigger for process_answers step
+        2. Spawn Discovery Agent Task (step: process_answers)
+           - Pass: user_answers (complete text)
+        3. Receive: Discovery summary + 1-9 elicitation menu
+        4. Display: ENTIRE summary VERBATIM
+        5. Display: ENTIRE menu VERBATIM
+        6. HALT: Wait for user to select option 1-9
+
+      **STEP 3: Process Elicitation (Auto-spawn if user selects 2-9)**
+      Trigger: User selects elicitation option 2-9
+      Action:
+        1. Spawn Discovery Agent Task (step: process_elicitation)
+           - Pass: elicitation_option, current_content
+        2. Receive: Elicitation result + updated summary + menu
+        3. Display: ENTIRE result VERBATIM
+        4. Display: Updated summary + menu VERBATIM
+        5. HALT: Wait for user selection
+        6. Repeat until user selects option 1
+
+      **STEP 4: Finalize (Auto-spawn when user selects 1)**
+      Trigger: User selects option 1 (Proceed)
+      Action:
+        1. Spawn Discovery Agent Task (step: finalize)
+        2. Receive: Completion confirmation
+        3. Display: Confirmation message
+        4. Proceed: Transform to analyst phase
+
+    auto_progression_rules: |
+      **Discovery auto-progresses in these cases ONLY:**
+      1. After user provides discovery answers → Auto-spawn process_answers
+      2. After user selects elicitation option 2-9 → Auto-spawn process_elicitation
+      3. After user selects option 1 → Auto-spawn finalize
+
+      **Discovery HALTS in these cases:**
+      1. After displaying questions → Wait for answers
+      2. After displaying summary + menu → Wait for option selection
+
+    critical_enforcement: |
+      **DO NOT:**
+      - Present your own discovery questions (always spawn initialize step)
+      - Skip displaying Task output from process_answers step
+      - Say "waiting for menu above" without actually showing the menu
+      - Require explicit "continue" command to spawn process_answers
+      - Treat discovery like section-based work
+
+      **DO:**
+      - Always spawn discovery agent initialize step for questions
+      - Always display complete Task output for process_answers
+      - Automatically spawn process_answers when user provides answers
+      - Display summary + menu VERBATIM from agent
+      - Recognize discovery's different auto-progression pattern
 
   critical-rules:
     - NEVER do work yourself

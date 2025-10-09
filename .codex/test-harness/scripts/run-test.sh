@@ -49,7 +49,10 @@ else
     echo ""
 
     # Get all branches (local and remote)
-    mapfile -t BRANCHES < <(git branch -a | sed 's/^[* ]*//' | grep -v '^remotes/origin/HEAD' | sed 's|^remotes/origin/||' | sort -u)
+    BRANCHES=()
+    while IFS= read -r branch; do
+        BRANCHES+=("$branch")
+    done < <(git branch -a | sed 's/^[* ]*//' | grep -v '^remotes/origin/HEAD' | sed 's|^remotes/origin/||' | sort -u)
 
     # Display menu
     for i in "${!BRANCHES[@]}"; do
