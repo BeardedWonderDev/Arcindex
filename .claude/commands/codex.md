@@ -169,6 +169,27 @@ command-routing:
          - Command: "chat-mode"
       2. Display orchestrator response verbatim
 
+  test:
+    description: Test harness operations
+    arguments: "[run|analyze|compare|clean] [options]"
+    handler: |
+      1. Parse test subcommand from arguments (run/analyze/compare/clean)
+      2. Validate: .codex/test-harness/ directory exists
+      3. If missing: "Test harness not found. Ensure .codex/test-harness/ directory exists."
+      4. Map subcommand to script:
+         - run → run-test.sh [branch]
+         - analyze → analyze-test.sh [test-dir]
+         - compare → compare-tests.sh
+         - clean → clean-tests.sh
+      5. Construct script path: .codex/test-harness/scripts/{script-name}
+      6. Execute script via Bash tool with remaining arguments
+      7. Display script output verbatim
+
+      Special handling:
+      - run: Pass branch argument if provided, otherwise script prompts interactively
+      - analyze: Pass test-dir if provided, otherwise script auto-detects latest
+      - compare/clean: No arguments needed, scripts handle interactively
+
   help:
     description: Display command reference
     handler: |
@@ -196,6 +217,12 @@ command-routing:
       /codex config ................... Show configuration
       /codex state .................... Display workflow state
       /codex help ..................... This help
+
+      Testing & Quality:
+      /codex test run [branch] ........ Run test from git branch
+      /codex test analyze [dir] ....... Analyze test results
+      /codex test compare ............. Compare multiple test runs
+      /codex test clean ............... Cleanup test directories
 
       Available Workflows:
       - greenfield-swift: New Swift/iOS projects
