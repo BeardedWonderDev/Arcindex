@@ -3,16 +3,8 @@
 /**
  * create-codex-project - CLI entry point for CODEX project initialization
  *
- * Orchestrates:
- * - Fresh installations (copy .codex files to new or existing projects)
- * - Updates (upgrade existing CODEX installations)
- * - Version checking (warn about newer versions)
- * - Interactive workflows (prompts for configuration)
- *
- * Usage:
- *   npx create-codex-project [directory] [options]
- *   npx create-codex-project --update
- *   npx create-codex-project --help
+ * This is a thin wrapper around lib/installer.js and lib/updater.js
+ * Handles: CLI argument parsing, user prompts, banners, error handling
  */
 
 import { Command } from 'commander';
@@ -20,18 +12,12 @@ import chalk from 'chalk';
 import path from 'path';
 import fs from 'fs-extra';
 import inquirer from 'inquirer';
-import ora from 'ora';
 
-// Import lib modules (ES modules)
-import { detectExistingInstallation, detectActiveWorkflow, fetchPackageInfo } from '../lib/detector.js';
-import { checkCompatibility } from '../lib/compatibility-checker.js';
-import { createManifest, readManifest, updateManifest } from '../lib/manifest.js';
-
-// Import lib modules (CommonJS - requires dynamic import or conversion)
-// Note: menu.cjs, state-preserver.cjs use CommonJS, need to be imported differently
-import { createRequire } from 'module';
-const require = createRequire(import.meta.url);
-const menu = require('../lib/menu.cjs');
+// Import lib modules
+import { detectExistingInstallation, fetchPackageInfo } from '../lib/detector.js';
+import * as menu from '../lib/menu.js';
+import { installCodex, showSuccessMessage } from '../lib/installer.js';
+import { updateCodex, checkForUpdates } from '../lib/updater.js';
 
 // Read package.json for version
 const packageJson = JSON.parse(
@@ -52,24 +38,6 @@ function showWelcomeBanner() {
   console.log();
   console.log(chalk.gray('  AI Agent Workflow Orchestration System'));
   console.log(chalk.gray(`  Version: ${CURRENT_VERSION}`));
-  console.log();
-}
-
-/**
- * Show success message after installation
- */
-function showSuccessMessage(projectPath, workflow, testHarness) {
-  console.log();
-  console.log(chalk.bold.green('✓ CODEX Installation Complete!'));
-  console.log();
-  console.log(chalk.cyan('Project:') + chalk.white(` ${projectPath}`));
-  console.log(chalk.cyan('Workflow:') + chalk.white(` ${workflow}`));
-  console.log(chalk.cyan('Test Harness:') + chalk.white(` ${testHarness ? 'Included' : 'Not included'}`));
-  console.log();
-  console.log(chalk.bold('Next Steps:'));
-  console.log(chalk.gray('  1. ') + chalk.white('cd ' + path.basename(projectPath)));
-  console.log(chalk.gray('  2. ') + chalk.white('Review: .codex/README.md'));
-  console.log(chalk.gray('  3. ') + chalk.white('Start workflow: /codex run'));
   console.log();
 }
 
@@ -122,205 +90,6 @@ async function showVersionWarning() {
 }
 
 /**
- * Validate target directory
- * @param {string} targetPath - Path to validate
- * @returns {Promise<Object>} Validation result
- */
-async function validateTarget(targetPath) {
-  try {
-    const exists = await fs.pathExists(targetPath);
-
-    if (!exists) {
-      return {
-        valid: true,
-        exists: false,
-        isEmpty: true,
-        message: 'Directory will be created'
-      };
-    }
-
-    // Check if directory is empty
-    const files = await fs.readdir(targetPath);
-    const isEmpty = files.length === 0;
-
-    return {
-      valid: true,
-      exists: true,
-      isEmpty: isEmpty,
-      message: isEmpty ? 'Directory exists and is empty' : 'Directory exists with files'
-    };
-  } catch (error) {
-    return {
-      valid: false,
-      exists: false,
-      isEmpty: false,
-      message: `Cannot access directory: ${error.message}`,
-      error: error
-    };
-  }
-}
-
-/**
- * Install CODEX to target directory (fresh installation)
- * @param {string} targetPath - Target project directory
- * @param {Object} options - Installation options
- * @returns {Promise<boolean>} Success status
- */
-async function installCodex(targetPath, options = {}) {
-  const spinner = ora('Installing CODEX...').start();
-
-  try {
-    // Ensure target directory exists
-    await fs.ensureDir(targetPath);
-
-    // Determine source .codex directory
-    // When running via npx, source is in node_modules/create-codex-project/.codex
-    // When running locally, source is in the project root
-    const sourceCodexPath = path.join(path.dirname(new URL(import.meta.url).pathname), '..', '.codex');
-
-    // Check if source exists
-    if (!await fs.pathExists(sourceCodexPath)) {
-      throw new Error(`Source .codex directory not found at ${sourceCodexPath}`);
-    }
-
-    // Copy .codex directory
-    const targetCodexPath = path.join(targetPath, '.codex');
-    spinner.text = 'Copying CODEX files...';
-    await fs.copy(sourceCodexPath, targetCodexPath, {
-      overwrite: options.force || false,
-      errorOnExist: false
-    });
-
-    // Copy .claude directory (IDE integration)
-    const sourceClaudePath = path.join(path.dirname(new URL(import.meta.url).pathname), '..', '.claude');
-    if (await fs.pathExists(sourceClaudePath)) {
-      const targetClaudePath = path.join(targetPath, '.claude');
-      spinner.text = 'Setting up IDE integration...';
-      await fs.copy(sourceClaudePath, targetClaudePath, {
-        overwrite: options.force || false,
-        errorOnExist: false
-      });
-    }
-
-    // Create install manifest
-    spinner.text = 'Creating installation manifest...';
-    await createManifest(targetPath, {
-      codex_version: CURRENT_VERSION,
-      schema_version: SCHEMA_VERSION,
-      default_workflow: options.workflow || 'greenfield-generic',
-      test_harness_included: options.testHarness || false,
-      ide_setup: ['claude-code']
-    });
-
-    spinner.succeed('CODEX installation complete!');
-    return true;
-
-  } catch (error) {
-    spinner.fail('Installation failed');
-    console.error(chalk.red('\nError:'), error.message);
-    if (options.verbose) {
-      console.error(chalk.gray(error.stack));
-    }
-    return false;
-  }
-}
-
-/**
- * Update existing CODEX installation
- * @param {string} projectPath - Project directory with existing CODEX
- * @param {Object} options - Update options
- * @returns {Promise<boolean>} Success status
- */
-async function updateCodex(projectPath, options = {}) {
-  const spinner = ora('Updating CODEX...').start();
-
-  try {
-    // Read existing manifest
-    const manifest = await readManifest(projectPath);
-    if (!manifest) {
-      throw new Error('No existing CODEX installation found');
-    }
-
-    const oldVersion = manifest.codex_version;
-
-    // Check compatibility
-    spinner.text = 'Checking compatibility...';
-    const compat = await checkCompatibility(projectPath, CURRENT_VERSION);
-
-    if (!compat.compatible && compat.action === 'BLOCKED') {
-      spinner.fail('Update blocked');
-      console.error(chalk.red('\n' + compat.message));
-      return false;
-    }
-
-    if (compat.requiresConfirmation) {
-      spinner.stop();
-      const confirmed = await menu.promptUpdateConfirmation(
-        compat.currentVersion,
-        compat.targetVersion,
-        false // Active workflow already checked by compatibility checker
-      );
-      if (!confirmed) {
-        console.log(chalk.yellow('Update cancelled by user'));
-        return false;
-      }
-      spinner.start('Updating CODEX...');
-    }
-
-    // Create backup (using state-preserver)
-    spinner.text = 'Creating backup...';
-    const statePreserver = require('../lib/state-preserver.cjs');
-    const backupPath = await statePreserver.createBackup(projectPath, oldVersion);
-    console.log(chalk.gray(`  Backup created: ${path.basename(backupPath)}`));
-
-    // Identify files to preserve
-    spinner.text = 'Identifying files to preserve...';
-    const filesToPreserve = await statePreserver.preserveState(projectPath, manifest);
-
-    // Update .codex files (excluding preserved files)
-    spinner.text = 'Updating CODEX files...';
-    const sourceCodexPath = path.join(path.dirname(new URL(import.meta.url).pathname), '..', '.codex');
-    const targetCodexPath = path.join(projectPath, '.codex');
-
-    // Copy with exclusions for preserved files
-    await fs.copy(sourceCodexPath, targetCodexPath, {
-      overwrite: true,
-      filter: (src, dest) => {
-        const relativePath = path.relative(sourceCodexPath, src);
-        const targetRelative = path.join('.codex', relativePath);
-        return !filesToPreserve.includes(targetRelative);
-      }
-    });
-
-    // Update manifest
-    spinner.text = 'Updating installation manifest...';
-    await updateManifest(projectPath, {
-      codex_version: CURRENT_VERSION,
-      regenerate_files: true,
-      change_summary: `Updated from ${oldVersion} to ${CURRENT_VERSION}`
-    });
-
-    spinner.succeed('CODEX update complete!');
-    console.log();
-    console.log(chalk.cyan('Updated from:') + chalk.white(` ${oldVersion}`));
-    console.log(chalk.cyan('Updated to:') + chalk.white(` ${CURRENT_VERSION}`));
-    console.log();
-    console.log(chalk.gray(`Backup available at: ${path.basename(backupPath)}`));
-    console.log();
-
-    return true;
-
-  } catch (error) {
-    spinner.fail('Update failed');
-    console.error(chalk.red('\nError:'), error.message);
-    if (options.verbose) {
-      console.error(chalk.gray(error.stack));
-    }
-    return false;
-  }
-}
-
-/**
  * Main CLI program
  */
 async function main() {
@@ -364,9 +133,21 @@ async function main() {
       process.exit(1);
     }
 
-    // Run update
-    const success = await updateCodex(projectPath, options);
-    process.exit(success ? 0 : 1);
+    // Call lib/updater.js
+    const result = await updateCodex(projectPath, 'latest', {
+      forceSchema: options.forceSchema || false,
+      noBackup: options.noBackup === false, // Commander negates no-backup
+      verbose: options.verbose || false,
+      skipConfirmation: false
+    });
+
+    if (result.success) {
+      console.log(chalk.green('\n✓ Update completed successfully!'));
+      process.exit(0);
+    } else {
+      console.error(chalk.red('\n✗ Update failed:'), result.message);
+      process.exit(1);
+    }
   }
 
   // INSTALLATION MODE: Fresh install or existing directory
@@ -426,20 +207,26 @@ async function main() {
     }
 
     if (action === 'update') {
-      const success = await updateCodex(targetPath, options);
-      process.exit(success ? 0 : 1);
+      // Call lib/updater.js
+      const result = await updateCodex(targetPath, 'latest', {
+        forceSchema: options.forceSchema || false,
+        noBackup: options.noBackup === false,
+        verbose: options.verbose || false,
+        skipConfirmation: false
+      });
+
+      if (result.success) {
+        console.log(chalk.green('\n✓ Update completed successfully!'));
+        process.exit(0);
+      } else {
+        console.error(chalk.red('\n✗ Update failed:'), result.message);
+        process.exit(1);
+      }
     }
   }
 
   // FRESH INSTALLATION
   showWelcomeBanner();
-
-  // Validate target directory
-  const validation = await validateTarget(targetPath);
-  if (!validation.valid) {
-    console.error(chalk.red('✗ Invalid target directory:'), validation.message);
-    process.exit(1);
-  }
 
   // Prompt for workflow if not provided
   let workflow = options.workflow;
@@ -448,9 +235,9 @@ async function main() {
   }
 
   // Prompt for test harness if not provided
-  let testHarness = options.testHarness;
-  if (testHarness === undefined) {
-    testHarness = await menu.promptTestHarness();
+  let includeTestHarness = options.testHarness;
+  if (includeTestHarness === undefined) {
+    includeTestHarness = await menu.promptTestHarness();
   }
 
   // Confirm installation
@@ -459,7 +246,7 @@ async function main() {
   console.log(chalk.gray('─'.repeat(50)));
   console.log(chalk.cyan('Target:') + '         ' + chalk.white(targetPath));
   console.log(chalk.cyan('Workflow:') + '       ' + chalk.white(workflow));
-  console.log(chalk.cyan('Test Harness:') + '   ' + chalk.white(testHarness ? 'Yes' : 'No'));
+  console.log(chalk.cyan('Test Harness:') + '   ' + chalk.white(includeTestHarness ? 'Yes' : 'No'));
   console.log(chalk.cyan('CODEX Version:') + '  ' + chalk.white(CURRENT_VERSION));
   console.log(chalk.gray('─'.repeat(50)));
   console.log();
@@ -478,18 +265,18 @@ async function main() {
     process.exit(0);
   }
 
-  // Run installation
-  const success = await installCodex(targetPath, {
+  // Call lib/installer.js
+  const result = await installCodex(targetPath, {
     workflow,
-    testHarness,
-    force: options.force,
-    verbose: options.verbose
+    includeTestHarness,
+    verbose: options.verbose || false
   });
 
-  if (success) {
-    showSuccessMessage(targetPath, workflow, testHarness);
+  if (result.success) {
+    showSuccessMessage(targetPath, workflow, includeTestHarness);
     process.exit(0);
   } else {
+    console.error(chalk.red('\n✗ Installation failed:'), result.message);
     process.exit(1);
   }
 }
