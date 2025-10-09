@@ -11,6 +11,7 @@ Current development version (pre-v0.1.0) - Core infrastructure complete, enterin
 
 ### Added
 
+- NPX distribution system: Complete npm package distribution with npx create-codex-project for fresh installations and smart updates - Includes state preservation with automatic backups, schema version protection, interactive workflow selection, compatibility checking, transaction-like updates with rollback on failure, comprehensive manifest system with SHA-256 file hashing, and CLI with 8 core library modules (29 files, 10675 insertions)
 - Test harness command interface: New /codex test command with run/analyze/compare/clean subcommands that map to existing test-harness scripts - Provides comprehensive test harness operations with special handling for branch arguments and auto-detection (1 file, 27 insertions)
 - Test harness infrastructure: Comprehensive testing system with branch isolation, automated analysis, and quality metrics extraction - Enables systematic CODEX workflow validation, branch comparison testing, and regression detection with standardized discovery inputs, test archival, and configurable thresholds (6 files, 922 insertions)
 - Quality gate validation system: Level 0.5 quality gates between elicitation and transformation phases with configurable enforcement modes (strict/conditional/advisory) - Integrates into all workflows with scoring and improvement recommendations at phase transitions (7 files, 680 insertions)
@@ -225,22 +226,21 @@ Current development version (pre-v0.1.0) - Core infrastructure complete, enterin
 
 ## Statistics
 
-- **Total Commits**: 99
-- **Total Lines Added**: ~134,807
-- **Total Lines Deleted**: ~2,325
-- **Net Change**: +132,482 lines
+- **Total Commits**: 102
+- **Total Lines Added**: ~145,482
+- **Total Lines Deleted**: ~2,341
+- **Net Change**: +143,141 lines
 - **Date Range**: 2025-09-23 to 2025-10-09
-- **Files Created/Modified**: ~641 files
+- **Files Created/Modified**: ~670 files
 
 ## Commit Type Distribution
 
-- **Features (feat)**: 21 commits (21.2%)
-- **Fixes (fix)**: 19 commits (19.2%)
-- **Refactoring (refactor)**: 6 commits (6.1%)
-- **Documentation (docs)**: 19 commits (19.2%)
-- **Chore (chore)**: 16 commits (16.2%)
-- **Sync (sync)**: 1 commit (1.0%)
-- **Miscellaneous**: 17 commits (17.2%)
+- **Features (feat)**: 24 commits (23.5%)
+- **Fixes (fix)**: 21 commits (20.6%)
+- **Refactoring (refactor)**: 6 commits (5.9%)
+- **Documentation (docs)**: 19 commits (18.6%)
+- **Chore (chore)**: 27 commits (26.5%)
+- **Miscellaneous**: 5 commits (4.9%)
 
 ## Key Development Themes
 
