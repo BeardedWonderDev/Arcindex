@@ -13,7 +13,7 @@
 **Remaining:** ~48-76 hours to v0.1.0 release (corrected)
 **Theme:** Comprehensive quality gates, feedback loops, and validation infrastructure
 
-**v0.1.0 Status:** Near completion - 5 tasks remaining. Quality gates and test infrastructure significantly advanced with Level 0.5 validation and comprehensive test harness now operational.
+**v0.1.0 Status:** Near completion - 7 tasks remaining. Quality gates and test infrastructure significantly advanced with Level 0.5 validation and comprehensive test harness now operational.
 
 ### Implementation Status (As of 2025-10-08)
 
@@ -153,7 +153,7 @@ The original assessment incorrectly identified state management as "DORMANT" bas
 
 **Automation:**
 - [x] GitHub Actions workflows for changelog, roadmap, and version management
-  - ✅ COMPLETE: All 3 workflows optimized and tested (2025-10-08)
+  - ✅ COMPLETE: All workflows optimized and tested (2025-10-08)
 
 **Testing & Documentation (HIGH PRIORITY):**
 - [ ] Comprehensive end-to-end testing of all workflows - **40% complete, 12-16 hours, Priority: P1**
@@ -346,7 +346,7 @@ Based on comprehensive analysis, 70+ gaps identified across workflows:
 
 ---
 
-**Last Updated:** 2025-10-09 (Progress Update: Quality Gates +20%, Test Harness +20%)
+**Last Updated:** 2025-10-09 (Task count correction: 7 remaining v0.1.0 tasks)
 **Source Documents:**
 - docs/v0.1-Plan/bmad-vs-codex-comprehensive-analysis.md
 - 5-agent parallel review (Core, Workflows, Agents, Templates, State)
