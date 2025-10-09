@@ -11,6 +11,10 @@ Current development version (pre-v0.1.0) - Core infrastructure complete, enterin
 
 ### Added
 
+- AI artifact cleanup workflow with manual trigger support: Automated cleanup system for @claude-artifacts PR analysis with three execution strategies (dry-run, create-pr, push-direct) - Provides flexible artifact management beyond automatic PR-based cleanup with safety features including default safe strategy, explicit opt-in for direct push, and skip CI tags to prevent infinite loops (3 files, 923 insertions, 14 deletions)
+- Quality gate validation system (Level 0.5): Integrated quality gates across all workflows (brownfield, greenfield-generic, greenfield-swift) with configurable enforcement modes (strict/conditional/advisory) - Provides scoring and improvement recommendations at each phase transition between elicitation and transformation (7 files, 680 insertions, 5 deletions)
+- Documentation reorganization and development references: Added .claude/ directory with artifact-policy-reference.md, artifact-exceptions.txt, and development-reference.md; moved user guides to root level; added CLAUDE.md project instructions and CONTRIBUTING.md - Aligns with artifact policy where .codex/ is product code and root-level docs are kept (20 files, 10,909 insertions)
+- Claude workflow routing update: Separated artifact cleanup analysis (@claude-artifacts) from general Claude interactions (@claude) with dedicated ai-artifact-cleanup.yml workflow - Improves workflow clarity and performance with write permissions for exception file updates (2 files, 246 insertions, 9 deletions)
 - GitHub Actions automation workflows: Changelog automation, development history tracking, roadmap updates, and version management using Claude Code GitHub Action - Replaces manual two-commit workflow with automated pipeline that updates CHANGELOG.md, development history, and roadmap on every push to main, reducing commit time by 2-3 minutes and ensuring consistent formatting (5 files, 832 insertions, 164 deletions)
 - Execution learning capture and architect validation infrastructure: Complete Phase 2 Week 5 deliverables with execution learning feedback loop, epic-based learning integration, zero-knowledge architecture testing, and confidence scoring framework - Enables progressive quality improvement across epics through systematic learning capture with .codex/state/execution-reports/ and epic-learnings/ directories (11 files, 2,998 insertions)
 - Project roadmap and comprehensive validation guides: ROADMAP.md with v0.1.0-v0.3.0 plans, operational validation playbook, Level 3-4 testing guides, and Phase 2 completion documentation - Provides clear roadmap for v0.1.0 completion and enables systematic operational validation across 5 test scenarios (5 files, 3,159 insertions)
@@ -61,6 +65,8 @@ Current development version (pre-v0.1.0) - Core infrastructure complete, enterin
 
 ### Changed
 
+- Documentation structure: Consolidated roadmap to ROADMAP.md file - Removed duplicate roadmap sections from CHANGELOG.md and README.md, replacing with references to dedicated ROADMAP.md file for single source of truth (2 files, 6 insertions, 86 deletions)
+- ROADMAP.md assessment: Updated with comprehensive 5-agent deep review findings showing 85% overall completion (corrected from 75%) with critical gaps identified in Archon MCP integration (0%), quality gate wiring (30%), and detailed implementation status table - Documents state management correction from "DORMANT" to "95% Complete" after recognizing empty directories are correct in template repo (1 file, 164 insertions, 28 deletions)
 - Changelog workflow prompt: Simplified from 180-line prescriptive prompt to 32-line goal-oriented approach - Replaces detailed bash commands with high-level tasks, giving Claude freedom to use Read/Grep/Edit or Bash, reducing turn usage and eliminating permission denial loops (1 file, 31 insertions, 130 deletions)
 - Simplified architecture by removing Swift agent dependencies (feature-developer, syntax-reviewer, etc.)
 - Replaced agent-based Level 4 validation with direct command execution (swiftlint, swift test, xcodebuild)
@@ -76,6 +82,9 @@ Current development version (pre-v0.1.0) - Core infrastructure complete, enterin
 
 ### Fixed
 
+- Workflow loop on bot-created PRs: Added skip condition for artifact-cleanup-* branch pattern to prevent infinite loops when manual trigger uses create-pr strategy - Prevents "non-human actor: claude (type: Bot)" error when workflow creates PR that triggers itself (3 files, 37 insertions, 6 deletions)
+- Track progress configuration: Disabled track_progress for workflow_dispatch events since it's only supported for PR-related events (pull_request, issue_comment) - Fixes manual trigger execution that was failing with unsupported event error (1 file, 1 insertion, 1 deletion)
+- Broken file reference in PRP validation: Corrected 3 references from non-existent `.codex/data/prp-quality-checklist.md` to correct location `.codex/checklists/prp-quality-gate.md` in prp-validation-enforcement.md - Task would fail if invoked with incorrect path (2 files, 26 insertions, 22 deletions)
 - GitHub Actions workflow triggers: Replaced unsupported push event with schedule (daily) and workflow_dispatch (manual testing) triggers based on claude-code-action documentation - Resolves 'Unsupported event type: push' error (2 files, 10 insertions, 6 deletions)
 - Workflow allowedTools configuration: Added Read, Edit, Write, and Bash tools (git, grep, awk, date, head, tail, wc, cut, echo) to enable file operations and git commands - Resolves permission denials that prevented Claude from executing workflow tasks (3 files, 3 insertions)
 - Workflow max-turns limits: Increased from 15-20 to 30-40 turns to allow Claude enough time to complete complex changelog operations - Previous runs hit max-turns before completing (3 files, 6 insertions, 6 deletions)
@@ -185,21 +194,21 @@ Current development version (pre-v0.1.0) - Core infrastructure complete, enterin
 
 ## Statistics
 
-- **Total Commits**: 71
-- **Total Lines Added**: ~41,000+
-- **Total Lines Deleted**: ~700
-- **Net Change**: +40,300 lines
+- **Total Commits**: 85
+- **Total Lines Added**: ~53,800+
+- **Total Lines Deleted**: ~950
+- **Net Change**: +52,850 lines
 - **Date Range**: 2025-09-23 to 2025-10-08
-- **Files Created/Modified**: ~240 files
+- **Files Created/Modified**: ~280 files
 
 ## Commit Type Distribution
 
-- **Features (feat)**: 17 commits (23.9%)
-- **Fixes (fix)**: 15 commits (21.1%)
-- **Refactoring (refactor)**: 4 commits (5.6%)
-- **Documentation (docs)**: 15 commits (21.1%)
-- **Chore (chore)**: 3 commits (4.2%)
-- **Miscellaneous**: 17 commits (23.9%)
+- **Features (feat)**: 20 commits (23.5%)
+- **Fixes (fix)**: 18 commits (21.2%)
+- **Documentation (docs)**: 18 commits (21.2%)
+- **Chore (chore)**: 7 commits (8.2%)
+- **Refactoring (refactor)**: 5 commits (5.9%)
+- **Miscellaneous**: 17 commits (20.0%)
 
 ## Key Development Themes
 
