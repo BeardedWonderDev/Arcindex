@@ -37,12 +37,29 @@ echo "Date: $(date)" >> "$RESULTS_FILE"
 
 # Read test metadata if available
 if [ -f "test-metadata.json" ]; then
+    SOURCE_MODE=$(jq -r '.source_mode // "git-archive"' test-metadata.json 2>/dev/null)
     BRANCH=$(jq -r '.branch // "unknown"' test-metadata.json 2>/dev/null)
     COMMIT=$(jq -r '.commit_short // "unknown"' test-metadata.json 2>/dev/null)
     COMMIT_MSG=$(jq -r '.commit_message // "unknown"' test-metadata.json 2>/dev/null)
+    echo "Source Mode: $SOURCE_MODE" >> "$RESULTS_FILE"
     echo "Branch: $BRANCH" >> "$RESULTS_FILE"
     echo "Commit: $COMMIT" >> "$RESULTS_FILE"
     echo "Message: $COMMIT_MSG" >> "$RESULTS_FILE"
+
+    # Warn if local test
+    if [ "$SOURCE_MODE" = "local" ]; then
+        HAS_UNCOMMITTED=$(jq -r '.has_uncommitted_changes // false' test-metadata.json 2>/dev/null)
+        CHANGES_COUNT=$(jq -r '.uncommitted_changes_count // 0' test-metadata.json 2>/dev/null)
+        echo "" >> "$RESULTS_FILE"
+        echo "⚠️  LOCAL TEST WARNING:" >> "$RESULTS_FILE"
+        echo "   This test used uncommitted changes from working tree" >> "$RESULTS_FILE"
+        if [ "$HAS_UNCOMMITTED" = "true" ]; then
+            echo "   $CHANGES_COUNT file(s) had uncommitted changes" >> "$RESULTS_FILE"
+        else
+            echo "   Working tree was clean (testing committed state)" >> "$RESULTS_FILE"
+        fi
+        echo "   Reproducibility is limited - see git-diff.patch if available" >> "$RESULTS_FILE"
+    fi
 fi
 
 echo "" >> "$RESULTS_FILE"
@@ -168,9 +185,28 @@ echo "📄 Summary: ${TEST_DIR}/TEST-RESULT.txt"
 if [ "$FAIL_COUNT" -eq 0 ]; then
     # Determine test base directory from test directory path
     TEST_BASE="$(dirname "$TEST_DIR")"
-    ARCHIVE_DIR="${TEST_BASE}/archive/$(basename $TEST_DIR)"
+
+    # Archive local tests separately
+    if [ "$SOURCE_MODE" = "local" ]; then
+        ARCHIVE_DIR="${TEST_BASE}/archive/local/$(basename $TEST_DIR)"
+        echo ""
+        echo "⚠️  Local test - archiving to separate location:"
+    else
+        ARCHIVE_DIR="${TEST_BASE}/archive/$(basename $TEST_DIR)"
+    fi
+
     mkdir -p "$ARCHIVE_DIR"
     cp -r docs PRPs .codex/state analysis-results.txt TEST-RESULT.txt test-metadata.json "$ARCHIVE_DIR/" 2>/dev/null || true
+
+    # Copy git diff if available (local tests only)
+    if [ -f "git-diff.patch" ]; then
+        cp git-diff.patch "$ARCHIVE_DIR/" 2>/dev/null || true
+    fi
+
     echo "📦 Archived to: $ARCHIVE_DIR"
+
+    if [ "$SOURCE_MODE" = "local" ]; then
+        echo "   Note: Local tests are archived separately from branch tests"
+    fi
 fi
 

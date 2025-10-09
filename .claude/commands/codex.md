@@ -177,7 +177,7 @@ command-routing:
       2. Validate: .codex/test-harness/ directory exists
       3. If missing: "Test harness not found. Ensure .codex/test-harness/ directory exists."
       4. Map subcommand to script:
-         - run → run-test.sh [branch]
+         - run → run-test.sh [--local|branch]
          - analyze → analyze-test.sh [test-dir]
          - compare → compare-tests.sh
          - clean → clean-tests.sh
@@ -186,7 +186,9 @@ command-routing:
       7. Display script output verbatim
 
       Special handling:
-      - run: Pass branch argument if provided, otherwise script prompts interactively
+      - run --local: Test uncommitted changes from working tree (fast iteration)
+      - run [branch]: Test committed code from git branch (reproducible validation)
+      - run (no args): Interactive branch selection menu
       - analyze: Pass test-dir if provided, otherwise script auto-detects latest
       - compare/clean: No arguments needed, scripts handle interactively
 
@@ -219,7 +221,8 @@ command-routing:
       /codex help ..................... This help
 
       Testing & Quality:
-      /codex test run [branch] ........ Run test from git branch
+      /codex test run --local ......... Test uncommitted changes (fast iteration)
+      /codex test run [branch] ........ Test committed branch (reproducible)
       /codex test analyze [dir] ....... Analyze test results
       /codex test compare ............. Compare multiple test runs
       /codex test clean ............... Cleanup test directories

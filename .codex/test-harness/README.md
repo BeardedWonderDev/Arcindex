@@ -31,7 +31,13 @@ The test harness is part of the CODEX system:
 
 ### 1. Run a Test
 
-**From repository root:**
+**Test uncommitted changes (fast iteration):**
+```bash
+.codex/test-harness/scripts/run-test.sh --local
+```
+Use this during development to test your current work without committing.
+
+**Test committed branch (reproducible validation):**
 ```bash
 .codex/test-harness/scripts/run-test.sh main
 .codex/test-harness/scripts/run-test.sh v0.1-implementation
@@ -92,11 +98,63 @@ Shows comparison:
 
 ---
 
-## Branch Testing
+## Testing Modes
 
-### How It Works
+### Local Mode (--local)
 
-Each test creates a **completely isolated environment** with CODEX from the specified branch:
+**Purpose:** Fast iteration during development - test uncommitted changes
+
+**Usage:**
+```bash
+./run-test.sh --local
+```
+
+**What it does:**
+- Copies `.codex/` and `.claude/` from your **working tree** (includes uncommitted changes)
+- Creates test with `taskmaster-local-{branch}-{timestamp}` naming
+- Captures `git diff` for reproducibility
+- Archives to separate `archive/local/` directory
+
+**When to use:**
+- Testing changes before committing
+- Rapid iteration on quality gates
+- Debugging workflow issues
+- Development workflow validation
+
+**Limitations:**
+- ⚠️ Limited reproducibility (working tree state changes)
+- ⚠️ Not suitable for branch comparison
+- ⚠️ Archived separately from branch tests
+
+---
+
+### Branch Mode (git archive)
+
+**Purpose:** Reproducible validation and branch comparison
+
+**Usage:**
+```bash
+./run-test.sh main
+./run-test.sh feature/my-feature
+```
+
+**What it does:**
+- Extracts `.codex/` and `.claude/` from specific **git commit** (git archive)
+- Never touches working tree
+- Full commit traceability
+- Perfect reproducibility
+
+**When to use:**
+- Pre-merge validation
+- Branch quality comparison
+- Regression testing
+- Historical analysis
+
+---
+
+## How Testing Works
+
+Each test creates a **completely isolated environment** outside your repository:
 
 ```
 results/taskmaster-main-20251008-1430/
@@ -138,17 +196,32 @@ cd .codex/test-harness/scripts
 ./compare-tests.sh
 ```
 
-**3. Validate Changes:**
+**3. Rapid Development Iteration:**
 ```bash
-# After making changes, commit to feature branch
-git checkout -b test/my-changes
+# Make changes to quality gates, no commit needed
+# ... edit .codex/agents/quality-gate.md ...
+
+# Test immediately
+./run-test.sh --local
+cd ../codex-tests/taskmaster-local-*
+/codex start greenfield-generic "TaskMaster API"
+
+# Analyze
+.codex/test-harness/scripts/analyze-test.sh
+
+# Make more changes and repeat (no commits!)
+```
+
+**4. Validate Before Committing:**
+```bash
+# After development iteration, commit when ready
 git add .
-git commit -m "Test: Quality gate improvements"
+git commit -m "feat: improve quality gate scoring"
 
-# Test your changes
-.codex/test-harness/scripts/run-test.sh test/my-changes
+# Test committed version
+.codex/test-harness/scripts/run-test.sh HEAD
 
-# Compare to baseline
+# Compare to main
 .codex/test-harness/scripts/run-test.sh main
 .codex/test-harness/scripts/compare-tests.sh
 ```
@@ -323,5 +396,5 @@ Results and archives are gitignored via `.gitignore`:
 
 ---
 
-**Version:** 1.1.0 (Moved to .codex/)
-**Last Updated:** 2025-10-08
+**Version:** 1.2.0 (Added --local mode)
+**Last Updated:** 2025-10-09
