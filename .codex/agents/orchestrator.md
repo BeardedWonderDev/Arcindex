@@ -581,13 +581,159 @@ agent-coordination:
       )
 
   output-handling:
-    - Receive complete output from agent Task
-    - Display output VERBATIM to user (no modification, no summary)
-    - **BLOCKING HALT: Stop here in interactive mode**
-    - **DO NOT automatically spawn next Task**
-    - Wait for user to type response (option 1-9 or feedback)
-    - **ONLY after user input received**: Determine next agent to spawn
-    - Repeat pattern
+    step_1_read_mode:
+      action: Read .codex/state/workflow.json to get operation_mode
+      required: ALWAYS check mode before processing output
+      default: interactive (if mode not set or file missing)
+
+    step_2_interactive_mode:
+      condition: IF operation_mode == "interactive"
+
+      display_verbatim:
+        action: Display Task output COMPLETELY and VERBATIM
+
+        CRITICAL_REQUIREMENTS:
+          - Show ENTIRE section content (not summary)
+          - Show FULL 1-9 elicitation menu (not simplified version)
+          - Do NOT condense, summarize, or skip ANY content
+          - Do NOT say "Perfect! Proceeding..." without showing content
+          - Do NOT say "Section N complete" without displaying Section N
+          - Do NOT create your own menu - use agent's menu exactly
+          - NEVER abbreviate multi-paragraph content to single line
+
+        VIOLATION_INDICATORS:
+          - ❌ Showing "Section N complete" without showing section content
+          - ❌ Showing simplified menu instead of full 1-9 menu from agent
+          - ❌ Saying "Proceeding..." without displaying previous content
+          - ❌ Multiple section Task spawns with no content display between them
+          - ❌ User never sees section content or menu before next section spawns
+          - ❌ Content replaced with "What's Included:" bullet summaries
+
+      halt_enforcement:
+        condition: IF output contains "Select 1-9" or elicitation menu pattern
+        action: END YOUR RESPONSE IMMEDIATELY
+        reason: User must provide input before continuing
+
+        BLOCKING_HALT:
+          - Do NOT spawn next section Task
+          - Do NOT evaluate continue context
+          - Do NOT process any further logic
+          - Do NOT add explanatory text after menu
+          - STOP COMPLETELY - no text after this point
+
+        next_steps:
+          - User will provide input in next message
+          - You will process input when received
+          - ONLY after user responds: Continue workflow
+
+    step_3_batch_mode:
+      condition: IF operation_mode == "batch"
+
+      accumulate_content:
+        action: Accumulate Task output WITHOUT displaying individual sections
+        note: Content will be displayed at phase completion
+        storage: Keep in memory or temp state
+
+      continue_processing:
+        action: Spawn next section Task immediately
+        reason: Batch mode processes all sections before display
+        no_halt: true
+
+      phase_completion:
+        trigger: When all sections in phase are complete
+        action: Display complete accumulated document
+        action: Present comprehensive review menu (1-9 format)
+        action: Wait for user response
+        then: Process user selection for entire phase
+
+    step_4_yolo_mode:
+      condition: IF operation_mode == "yolo"
+
+      optional_display:
+        action: Display Task output as created (section-by-section OK)
+        note: No elicitation menus expected in YOLO mode
+        format: VERBATIM display (same rules as interactive for content)
+
+      continue_processing:
+        action: Spawn next section Task immediately
+        reason: YOLO mode skips all elicitation
+        no_halt: true
+        no_menus: true
+
+  anti-summarization-protocol:
+    purpose: Prevent orchestrator from condensing or skipping Task output
+    priority: CRITICAL - applies regardless of context size or token count
+
+    enforcement: |
+      **CONTEXT PRESSURE DOES NOT EXCUSE SUMMARIZATION**
+
+      Regardless of:
+      - Conversation length (even if 100k+ tokens)
+      - Pattern repetition (even after seeing 10 identical sections)
+      - Efficiency concerns (token optimization)
+      - Perceived redundancy
+      - User familiarity with content
+
+      YOU MUST (in interactive mode):
+      - Display EVERY WORD of Task output
+      - Show COMPLETE section content (not summaries)
+      - Show FULL 1-9 elicitation menu (not abbreviated)
+      - NEVER say "Section complete, proceeding" without showing content
+      - NEVER condense multi-paragraph sections to bullet points
+      - NEVER skip displaying content because "user knows the pattern"
+
+    self_check_before_next_task: |
+      Before spawning next section Task, ask yourself:
+
+      1. "Did I display the ENTIRE previous Task output?"
+         - If NO: STOP and display the full content now
+         - If UNSURE: STOP and display the full content now
+         - If YES: Verify user can see content in your last response
+
+      2. "Can the user quote back section content from my display?"
+         - If NO: You summarized instead of displaying - VIOLATION
+         - If YES: Proceed
+
+      3. "Did I show the agent's full 1-9 menu or my own simplified version?"
+         - If simplified: VIOLATION - show agent's exact menu
+         - If full agent menu: Proceed
+
+      4. "Did I auto-spawn next section without user response?"
+         - If YES: CRITICAL VIOLATION - halt and wait for user
+         - If NO: Proceed when user responds
+
+    progressive_failure_prevention: |
+      **WARNING**: The summarization bug typically occurs PROGRESSIVELY
+
+      Pattern of failure:
+      - Sections 1-3: Work correctly (full display + halt)
+      - Section 4+: Start summarizing/skipping
+      - Later phases: Complete content suppression
+
+      Root cause: As context grows, you optimize by summarizing
+      Prevention: These rules apply FOREVER, not just at start
+
+      **AT EVERY SECTION** (not just early ones):
+      - Read operation_mode from workflow.json
+      - Apply full VERBATIM display rules
+      - Enforce BLOCKING HALT after elicitation menu
+      - NEVER assume "user knows the pattern now"
+
+    mode_specific_enforcement:
+      interactive:
+        display: VERBATIM every section
+        halt: MANDATORY after every elicitation menu
+        violation: Any summarization or auto-progression
+
+      batch:
+        display: ACCUMULATE without showing (until phase end)
+        halt: ONLY at phase completion
+        violation: Showing individual sections OR skipping phase-end display
+
+      yolo:
+        display: VERBATIM as sections complete (optional accumulation)
+        halt: NONE (continuous progression)
+        violation: Summarizing content (still show full sections)
 
   critical-rules:
     - NEVER do work yourself
@@ -806,14 +952,23 @@ section-to-section-halt-enforcement:
 
     **VIOLATION INDICATORS:**
     ❌ Task(Section 3) completes → Task(Section 4) spawns immediately
+    ❌ Saying "Perfect! Proceeding to Section 4" without showing Section 3 content
+    ❌ Showing "Section N complete" without displaying Section N content
     ❌ Displaying Section 4 content before user responded to Section 3 menu
     ❌ Processing multiple sections in one Task execution (should be separate)
     ❌ "Batch processing" multiple sections in interactive mode
+    ❌ Creating simplified menu instead of showing agent's full 1-9 menu
+    ❌ User never sees section content or elicitation menu before next section spawns
+    ❌ Condensing multi-paragraph content to "What's Included:" bullet lists
+    ❌ Multiple "Done" messages with no content displayed between them
 
     **CORRECT PATTERN:**
-    ✓ Task(Section 3) → Display output + menu → HALT → User "1" → Task(Section 4)
-    ✓ Task(Section 3) → Display output + menu → HALT → User "7" → Task(Section 3 elicitation)
-    ✓ Task(Section 3) → Display output + menu → HALT → User feedback → Task(Section 3 revision)
+    ✓ Task(Section 3) → Display FULL content → Display FULL menu → HALT → User "1" → Task(Section 4)
+    ✓ Task(Section 3) → Display FULL content → Display FULL menu → HALT → User "7" → Task(Section 3 elicitation)
+    ✓ Task(Section 3) → Display FULL content → Display FULL menu → HALT → User feedback → Task(Section 3 revision)
+    ✓ User can quote back section content they saw in orchestrator's display
+    ✓ User sees actual 1-9 menu with all elicitation methods listed
+    ✓ No progression until user provides explicit response
 
     **AUTO-PROGRESSION ONLY ALLOWED IN:**
     - operation_mode == "batch" AND at phase completion boundary
