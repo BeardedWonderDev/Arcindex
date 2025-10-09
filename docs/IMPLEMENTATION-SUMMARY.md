@@ -67,13 +67,18 @@ ref: ${{
 }}
 ```
 
-#### Updated Job Condition
+#### Updated Job Condition with Loop Prevention
 ```yaml
 if: |
-  github.event_name == 'pull_request' ||
+  (github.event_name == 'pull_request' && !startsWith(github.head_ref, 'artifact-cleanup-')) ||
   github.event_name == 'workflow_dispatch' ||
   (github.event_name == 'issue_comment' && ...)
 ```
+
+**Loop Prevention:**
+- Skips PRs from branches starting with `artifact-cleanup-`
+- Prevents workflow from triggering on its own cleanup PRs
+- Avoids bot actor errors and infinite loops
 
 ### 4. Intelligent Prompt Routing
 
@@ -90,10 +95,11 @@ Claude prompt now includes:
 | Component | Changes | Lines Modified |
 |-----------|---------|----------------|
 | **Trigger Configuration** | Added workflow_dispatch with 3 inputs | ~20 lines |
-| **Job Condition** | Updated to include manual trigger | ~5 lines |
+| **Job Condition** | Updated to include manual trigger + loop prevention | ~5 lines |
 | **Checkout Step** | Dynamic ref handling for all trigger types | ~3 lines |
 | **Claude Prompt** | Comprehensive mode handling | ~100 lines |
-| **Total** | **Complete manual trigger support** | **~128 lines** |
+| **Loop Prevention** | Skip artifact-cleanup-* branch pattern | ~1 line |
+| **Total** | **Complete manual trigger support** | **~129 lines** |
 
 ---
 
@@ -310,6 +316,7 @@ git push origin main
 | Dynamic checkout | ✅ Complete |
 | Intelligent prompts | ✅ Complete |
 | Skip CI prevention | ✅ Complete |
+| Loop prevention | ✅ Complete |
 | Documentation | ✅ Complete |
 
 ---

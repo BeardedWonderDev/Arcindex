@@ -194,6 +194,30 @@ gh workflow run ai-artifact-cleanup.yml \
 - Evidence-based classification
 - Uncertainty flagged for review
 
+### 5. Loop Prevention
+- PRs from `artifact-cleanup-*` branches are automatically skipped
+- Prevents workflow from re-checking its own cleanup PRs
+- No infinite loops when using `create-pr` strategy
+
+---
+
+## Reserved Branch Prefix
+
+**⚠️ Important:** The branch prefix `artifact-cleanup-*` is reserved for automated cleanup PRs.
+
+**Used by:** Manual trigger with `create-pr` strategy
+
+**Behavior:**
+- Workflow automatically skips PRs from branches starting with `artifact-cleanup-`
+- These PRs contain cleaned artifacts by definition and don't need re-checking
+- Prevents infinite workflow loops
+
+**Branch naming pattern:** `artifact-cleanup-YYYYMMDD-HHMMSS`
+
+**Example:** `artifact-cleanup-20251008-162345`
+
+**Note:** Avoid using this prefix for manual branches. If you need to manually trigger the workflow on a cleanup PR, use the `@claude-artifacts` comment trigger.
+
 ---
 
 ## Common Workflows
