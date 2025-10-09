@@ -11,6 +11,7 @@ Current development version (pre-v0.1.0) - Core infrastructure complete, enterin
 
 ### Added
 
+- PR conflict resolver and idempotent automation workflows: Enhanced changelog automation system with intelligent conflict resolution for automatic CHANGELOG/ROADMAP merge conflicts - Uses Claude Code Action with structural parsing to deduplicate by semantic identity (commit hash, task text), preserves all unique content from both branches, auto-commits resolution to PR branch, and makes all automation workflows idempotent with deduplication before adding new entries (5 files, 294 insertions, 30 deletions)
 - Manual trigger support for AI artifact cleanup workflow: Added workflow_dispatch trigger with three configurable execution strategies (dry-run for testing, create-pr for safe cleanup with review, push-direct for immediate cleanup) - Provides flexible artifact management beyond automatic PR-based cleanup with comprehensive usage documentation, dynamic branch checkout logic, and safety features including default safe strategy and skip CI tags (3 files, 923 insertions, 14 deletions)
 - Claude workflow routing update: Separated artifact cleanup analysis (@claude-artifacts) from general Claude interactions (@claude) with dedicated ai-artifact-cleanup.yml workflow - Improves workflow clarity and performance with write permissions for exception file updates and increased fetch-depth for better artifact analysis context (2 files, 246 insertions, 9 deletions)
 - Quality gate validation system (Level 0.5): Integrated quality gates across all workflows (brownfield, greenfield-generic, greenfield-swift) with configurable enforcement modes (strict/conditional/advisory) - Provides scoring and improvement recommendations at each phase transition between elicitation and transformation with invoke-quality-gate.md helper task and updated validation-gate.md (7 files, 680 insertions, 5 deletions)
@@ -212,7 +213,7 @@ Current development version (pre-v0.1.0) - Core infrastructure complete, enterin
 
 ## Statistics
 
-- **Total Commits**: 89
+- **Total Commits**: 93
 - **Total Lines Added**: 112,408
 - **Total Lines Deleted**: 77,606
 - **Net Change**: +34,802 lines
@@ -221,12 +222,12 @@ Current development version (pre-v0.1.0) - Core infrastructure complete, enterin
 
 ## Commit Type Distribution
 
-- **Features (feat)**: 20 commits (22.5%)
-- **Fixes (fix)**: 18 commits (20.2%)
-- **Documentation (docs)**: 18 commits (20.2%)
-- **Chore (chore)**: 10 commits (11.2%)
-- **Refactoring (refactor)**: 5 commits (5.6%)
-- **Miscellaneous**: 18 commits (20.2%)
+- **Features (feat)**: 21 commits (22.6%)
+- **Fixes (fix)**: 18 commits (19.4%)
+- **Documentation (docs)**: 18 commits (19.4%)
+- **Chore (chore)**: 12 commits (12.9%)
+- **Refactoring (refactor)**: 5 commits (5.4%)
+- **Miscellaneous**: 19 commits (20.4%)
 
 ## Key Development Themes
 
