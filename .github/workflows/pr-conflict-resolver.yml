@@ -1,0 +1,185 @@
+name: PR Conflict Resolver
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths:
+      - 'CHANGELOG.md'
+      - 'ROADMAP.md'
+
+jobs:
+  resolve-conflicts:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+      pull-requests: write
+      id-token: write
+
+    steps:
+      - name: Checkout PR branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Fetch base branch
+        run: |
+          git fetch origin ${{ github.event.pull_request.base.ref }}
+
+      - name: Check for conflicts
+        id: conflict_check
+        run: |
+          # Simulate merge to detect conflicts
+          BASE_SHA=$(git rev-parse origin/${{ github.event.pull_request.base.ref }})
+          HEAD_SHA=$(git rev-parse HEAD)
+
+          # Use git merge-tree to simulate merge
+          MERGE_RESULT=$(git merge-tree $BASE_SHA $HEAD_SHA 2>&1 || true)
+
+          # Check if CHANGELOG.md or ROADMAP.md have conflicts
+          if echo "$MERGE_RESULT" | grep -E "CHANGELOG.md|ROADMAP.md" | grep -q "changed in both"; then
+            echo "has_conflicts=true" >> $GITHUB_OUTPUT
+            echo "⚠️ Conflicts detected in CHANGELOG.md or ROADMAP.md"
+          else
+            echo "has_conflicts=false" >> $GITHUB_OUTPUT
+            echo "✅ No conflicts detected"
+          fi
+
+      - name: Resolve conflicts intelligently
+        if: steps.conflict_check.outputs.has_conflicts == 'true'
+        id: resolve
+        uses: anthropics/claude-code-action@v1
+        continue-on-error: true
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+
+          prompt: |
+            Intelligently merge CHANGELOG.md and ROADMAP.md from base and head branches to resolve conflicts.
+
+            **Context:**
+            - Base branch (target): ${{ github.event.pull_request.base.ref }}
+            - Head branch (PR): ${{ github.event.pull_request.head.ref }}
+            - PR #${{ github.event.pull_request.number }}
+            - Files to merge: CHANGELOG.md, ROADMAP.md
+
+            **Tasks:**
+
+            1. **Fetch both versions:**
+               ```bash
+               # Get base versions
+               git show origin/${{ github.event.pull_request.base.ref }}:CHANGELOG.md > /tmp/changelog_base.md
+               git show origin/${{ github.event.pull_request.base.ref }}:ROADMAP.md > /tmp/roadmap_base.md
+
+               # Get head versions (current)
+               cp CHANGELOG.md /tmp/changelog_head.md
+               cp ROADMAP.md /tmp/roadmap_head.md
+               ```
+
+            2. **Merge CHANGELOG.md intelligently:**
+
+               a. **[Unreleased] section:**
+                  - Extract all entries from both base and head versions
+                  - Deduplicate by commit hash (7-char hash after "- ")
+                  - Group into categories: Added (feat:), Fixed (fix:), Changed (refactor:/perf:/docs:)
+                  - Within each category: newest commits first
+                  - Skip: chore:, test:, style:
+
+               b. **Development History section:**
+                  - Extract all "### Week of YYYY-MM-DD" sections from both
+                  - For duplicate weeks (same date):
+                    * Combine all commit lists from both versions
+                    * Deduplicate by commit hash
+                    * Merge focus lines - combine unique themes from both
+                    * Recalculate commit count
+                  - For unique weeks: keep as-is from respective version
+                  - Sort: newest weeks first
+
+               c. **Statistics section:**
+                  - Recalculate from current HEAD:
+                    * Total Commits: `git rev-list --count HEAD`
+                    * Date Range: `git log --format=%cd --date=short | tail -1` to `git log --format=%cd --date=short | head -1`
+                    * Type Distribution: count each type (feat, fix, refactor, docs, perf, test, chore, style)
+
+            3. **Merge ROADMAP.md intelligently:**
+
+               a. **Task completion (checkbox state):**
+                  - For each task line, compare base vs head
+                  - If either has [x]: use [x] (completed state wins)
+                  - If both have [ ]: use [ ]
+                  - Deduplicate: if exact same task text appears multiple times, keep one with most advanced state
+
+               b. **New tasks:**
+                  - Tasks only in head: include them
+                  - Tasks only in base: include them
+                  - Maintain section structure and ordering
+
+               c. **Version notes and status:**
+                  - If both have "v0.1.0 Status" notes: merge intelligently
+                  - Update task completion counts if needed
+
+            4. **Validate merged output:**
+               - Verify markdown structure is valid
+               - Check all expected sections present
+               - Verify no duplicate commit hashes
+               - Verify no duplicate week sections
+               - Verify no duplicate tasks
+
+            5. **Write merged files and commit:**
+               ```bash
+               # Write the merged versions
+               # (Claude Code will write CHANGELOG.md and ROADMAP.md with merged content)
+
+               git config user.name "github-actions[bot]"
+               git config user.email "github-actions[bot]@users.noreply.github.com"
+               git add CHANGELOG.md ROADMAP.md
+               git commit -m "chore: resolve changelog/roadmap conflicts [bot]" -m "Intelligent merge of base and PR branch versions" -m "PR #${{ github.event.pull_request.number }}"
+               git push origin ${{ github.event.pull_request.head.ref }}
+               ```
+
+            **Important:**
+            - Use structural parsing, not line-by-line diff
+            - Preserve all unique content from both branches
+            - Deduplicate by semantic identity (commit hash = same commit, task text = same task)
+            - Maintain proper markdown formatting
+            - If base file is missing a section that head has: keep head's section
+            - If head file is missing a section that base has: add base's section
+
+          claude_args: |
+            --max-turns 40
+            --model claude-sonnet-4-5-20250929
+            --allowedTools "Read,Edit,Write,Bash(git:*),Bash(grep:*),Bash(awk:*),Bash(sort:*),Bash(uniq:*),Bash(cp:*),Bash(cat:*),Bash(wc:*),Bash(head:*),Bash(tail:*)"
+
+      - name: Comment on PR if resolution failed
+        if: steps.conflict_check.outputs.has_conflicts == 'true' && steps.resolve.outcome == 'failure'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `⚠️ **Automatic conflict resolution failed**
+
+            The PR Conflict Resolver attempted to merge CHANGELOG.md and ROADMAP.md but encountered an error.
+
+            **Next steps:**
+            1. Review the workflow logs for details
+            2. Manually resolve conflicts in CHANGELOG.md and/or ROADMAP.md
+            3. Push the resolution to this PR branch
+
+            **Manual resolution tips:**
+            - For duplicate commit entries: keep one, remove duplicates
+            - For duplicate week sections: combine commits, merge focus lines
+            - For ROADMAP tasks: if both mark [x], keep [x]
+
+            [View workflow run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})`
+            })
+
+      - name: Success message
+        if: steps.conflict_check.outputs.has_conflicts == 'true' && steps.resolve.outcome == 'success'
+        run: |
+          echo "✅ Successfully resolved conflicts in CHANGELOG.md and ROADMAP.md"
+          echo "📝 Changes committed and pushed to PR branch"

@@ -2,7 +2,7 @@ name: Changelog Automation
 
 on:
   schedule:
-    - cron: '0 0 * * *'  # Daily at midnight UTC
+    - cron: '0 8 * * *'  # Daily at midnight PST (08:00 UTC)
   workflow_dispatch:  # Manual trigger for testing
   pull_request:
     types: [closed]
@@ -54,9 +54,28 @@ jobs:
 
             **Tasks:**
 
-            1. **Find new commits:** Read CHANGELOG.md Development History section, find the most recent commit hash (first 7-char hash starting with "- "). Get all commits since that hash using git log.
+            1. **Deduplicate existing content (idempotent safety):**
 
-            2. **Update [Unreleased] section:** For each new commit:
+               Before making any changes, scan CHANGELOG.md for duplicate entries:
+
+               a. Extract all commit hashes from [Unreleased] section and Development History
+               b. Check for duplicates:
+                  ```bash
+                  grep -oP '- \K[a-f0-9]{7}' CHANGELOG.md | sort | uniq -d
+                  ```
+               c. If duplicates found in [Unreleased]: keep first occurrence, remove others
+               d. If duplicate week sections found (same "Week of YYYY-MM-DD"):
+                  - Consolidate into one section
+                  - Combine commit lists
+                  - Merge focus lines (unique themes only)
+                  - Update commit count
+               e. If duplicate hashes within Development History weeks: keep first occurrence
+
+               This ensures the file is clean before adding new content.
+
+            2. **Find new commits:** Read CHANGELOG.md Development History section, find the most recent commit hash (first 7-char hash starting with "- "). Get all commits since that hash using git log.
+
+            3. **Update [Unreleased] section:** For each new commit:
                - Skip if type is "chore:", "test:", or "style:"
                - Add to appropriate category: "feat:" → Added, "fix:" → Fixed, "refactor:/perf:" → Changed, "docs:" → Changed
                - Format: `- {Component}: {Description} - {Details} ({N} files, {N} insertions)`
@@ -64,12 +83,12 @@ jobs:
                - Place newest entries at top of each category
                - Use git show --stat to get file/line counts
 
-            3. **Update Statistics section (at bottom of file):**
+            4. **Update Statistics section (at bottom of file):**
                - Total Commits: count with git rev-list --count HEAD
                - Date Range: first and last commit dates
                - Commit Type Distribution: count each type (feat, fix, refactor, docs, perf, test, chore, style), calculate percentages
 
-            4. **Commit and push:**
+            5. **Commit and push:**
                ```bash
                git config user.name "github-actions[bot]"
                git config user.email "github-actions[bot]@users.noreply.github.com"

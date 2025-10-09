@@ -80,15 +80,34 @@ EOF
    - Files changed
    - Lines added/removed
 
-## Phase 4: Next Steps
+## Phase 4: Auto-push and Workflow Trigger
 
-8. Ask if I want to push to remote.
+8. Automatically push to remote:
 
-**When you push to main:**
-- ✅ GitHub Action will automatically update CHANGELOG.md [Unreleased] section
-- ✅ GitHub Action will automatically update Statistics (commit counts, percentages)
-- ✅ Daily GitHub Action will update Development History (weekly grouping with focus lines)
-- ✅ GitHub Action will update ROADMAP.md task completion status
+```bash
+BRANCH=$(git branch --show-current)
+git push origin $BRANCH
+```
+
+9. Trigger changelog/roadmap automation workflows on current branch:
+
+```bash
+gh workflow run changelog-automation.yml --ref $BRANCH
+gh workflow run development-history.yml --ref $BRANCH
+gh workflow run roadmap-update.yml --ref $BRANCH
+```
+
+10. Confirm completion:
+   - Show commit hash and branch
+   - Confirm push succeeded
+   - Confirm workflows triggered (show command output)
+   - Display message: "✅ Workflows running on branch: $BRANCH. CHANGELOG.md and ROADMAP.md will be updated shortly."
+
+**Branch-aware automation:**
+- ✅ Feature branches: Workflows update your branch's CHANGELOG.md and ROADMAP.md
+- ✅ When creating PR: Conflict resolver automatically merges any conflicts
+- ✅ Main branch: Workflows run on merge and daily at midnight PST via schedule
+- ✅ No manual conflict resolution needed - intelligent deduplication handles everything
 
 **To skip changelog automation:**
 Add `[skip changelog]` to your commit message.

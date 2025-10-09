@@ -2,7 +2,7 @@ name: Development History Update
 
 on:
   schedule:
-    - cron: '0 0 * * *'  # Daily at midnight UTC
+    - cron: '0 8 * * *'  # Daily at midnight PST (08:00 UTC)
   workflow_dispatch:  # Manual trigger
 
 jobs:
@@ -54,24 +54,44 @@ jobs:
 
             **Tasks:**
 
-            1. **Find new commits:** Read CHANGELOG.md Development History section, find the most recent commit hash (first 7-char hash in a line starting with "- "). Get all commits since that hash using git log.
+            1. **Deduplicate existing content (idempotent safety):**
 
-            2. **Group commits by week (Monday-Sunday):** For each new commit, determine which week it belongs to. Calculate the Monday date for that week.
+               Before adding new commits, clean any existing duplicates:
 
-            3. **Update Development History section:**
+               a. Extract all week sections from Development History
+               b. Check for duplicate "Week of YYYY-MM-DD" headers:
+                  ```bash
+                  grep "^### Week of" CHANGELOG.md | sort | uniq -d
+                  ```
+               c. For each week with duplicate headers:
+                  - Combine all commit lists from duplicate sections
+                  - Deduplicate commit hashes (keep first occurrence)
+                  - Merge focus lines (combine unique themes, avoid duplicates)
+                  - Recalculate commit count
+                  - Replace all duplicates with single consolidated section
+               d. Within each week section, check for duplicate commit hashes:
+                  - If same hash appears multiple times, keep first occurrence
+
+               This ensures the file structure is clean before adding new content.
+
+            2. **Find new commits:** Read CHANGELOG.md Development History section, find the most recent commit hash (first 7-char hash in a line starting with "- "). Get all commits since that hash using git log.
+
+            3. **Group commits by week (Monday-Sunday):** For each new commit, determine which week it belongs to. Calculate the Monday date for that week.
+
+            4. **Update Development History section:**
                - Create or update week sections: `### Week of YYYY-MM-DD (X commits)`
                - Add each commit as: `- {hash}: {type}: {description} ({YYYY-MM-DD})`
                - Ordering: Newest weeks first, newest commits first within each week
                - Place new/updated weeks at TOP of Development History section
 
-            4. **Generate Focus lines:** For each week section being created/updated:
+            5. **Generate Focus lines:** For each week section being created/updated:
                - Analyze commit messages in that week
                - Identify 2-3 main themes based on commit types and keywords
                - Weight important commits more (feat > fix > refactor > docs)
                - Format as: `**Focus:** theme1, theme2, theme3`
                - Use lowercase, gerund/noun phrases (e.g., "quality validation enhancements")
 
-            5. **Commit and push:**
+            6. **Commit and push:**
                ```bash
                git config user.name "github-actions[bot]"
                git config user.email "github-actions[bot]@users.noreply.github.com"
