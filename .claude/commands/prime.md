@@ -18,7 +18,7 @@ The use 7 parralel sub-agents to complete each of the following simultanulously:
 
 - Read the files in the .codex directory to understand what we have implemented so far and think hard to get a complete understanding of how the codex project works.
 
-- Review the CHANGELOG.md to understand recent changes and updates to the project.
+- Review the CHANGELOG.md to understand recent changes and updates to the project as well as checking the git log for any changes not reflected in CHANGELOG.md
 
 Consolidate your findings from all the sub-agents and explain back to me:
 - Project structure

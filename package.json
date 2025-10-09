@@ -1,0 +1,48 @@
+{
+  "name": "create-codex-project",
+  "version": "0.1.0",
+  "description": "AI agent workflow orchestration system - Project initialization tool",
+  "author": "BeardedWonder",
+  "license": "MIT",
+  "type": "module",
+  "bin": {
+    "create-codex-project": "./bin/create-codex-project.js"
+  },
+  "files": [
+    "bin",
+    "lib",
+    ".codex",
+    ".claude/commands/codex.md"
+  ],
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "chalk": "^5.3.0",
+    "commander": "^11.1.0",
+    "inquirer": "^9.2.12",
+    "fs-extra": "^11.2.0",
+    "ora": "^7.0.1",
+    "glob": "^10.3.10",
+    "semver": "^7.5.4",
+    "js-yaml": "^4.1.0",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {},
+  "keywords": [
+    "codex",
+    "ai-agent",
+    "workflow",
+    "orchestration",
+    "automation",
+    "cli",
+    "scaffolding"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/BeardedWonder/CODEX"
+  },
+  "codex": {
+    "schemaVersion": 1
+  }
+}

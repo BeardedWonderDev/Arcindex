@@ -104,21 +104,72 @@ CODEX orchestrates specialized AI agents through a systematic workflow with buil
 
 ### Installation
 
-1. Clone the CODEX repository into your project
-   ```sh
-   git clone https://github.com/BeardedWonder/CODEX.git
-   cd CODEX
-   ```
+#### Quick Start (Recommended)
 
-2. Verify CODEX is available
-   ```sh
-   /codex help
-   ```
+```bash
+npx create-codex-project@latest my-project
+```
 
-3. (Optional) Run health check to validate system
-   ```sh
-   /codex start health-check
-   ```
+This will:
+- Create a new directory with CODEX installed
+- Set up workflows, agents, and templates
+- Configure Claude Code integration
+- Create initial configuration
+
+#### Installation Options
+
+**Interactive Mode** (recommended):
+```bash
+npx create-codex-project@latest my-project
+```
+You'll be prompted for:
+- Default workflow preference
+- Test harness inclusion
+
+**Non-Interactive Mode**:
+```bash
+npx create-codex-project@latest my-project --workflow greenfield-generic --test-harness
+```
+
+#### Updating CODEX
+
+From within your CODEX project directory:
+```bash
+npx create-codex-project@latest --update
+```
+
+The updater will:
+- Check compatibility
+- Preserve your state and configuration
+- Create automatic backups
+- Block breaking changes without confirmation
+
+#### System Requirements
+
+- **Claude Code CLI** (required)
+- **Node.js** 18.0.0 or higher
+- **50MB** disk space
+- **Internet connection** (for initial install)
+
+#### Troubleshooting
+
+**"I'm getting an old version!"**
+
+npx caches packages for 24 hours. To force latest:
+```bash
+npx create-codex-project@latest my-project
+```
+
+**"Update blocked: Breaking changes detected"**
+
+This means the schema version changed. See [MIGRATION.md](MIGRATION.md) for manual migration steps.
+
+**"Active workflow detected"**
+
+Complete or cancel your current workflow before upgrading:
+```bash
+/codex status
+```
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
