@@ -65,6 +65,7 @@ Current development version (pre-v0.1.0) - Core infrastructure complete, enterin
 
 ### Changed
 
+- Distribution strategy: Comprehensive research on distribution methods including package managers, binary downloads, Docker, Git templates, and multi-platform automation with strategic recommendation for hybrid approach (Template via npx + CLI via npm/Homebrew/Scoop) - Supports v0.1 release planning with detailed analysis of npm vs npx trade-offs, real-world case studies (GitHub CLI, Deno, Stripe CLI, Vercel), and GoReleaser automation guidance (4 files, 4980 insertions)
 - Documentation structure: Reorganized with user guides moved to root level, .claude/ development references added, and docs/ research/testing directories created - Aligns with artifact policy where .codex/ is product code and detailed guides are artifacts (20 files, 10909 insertions)
 - Test harness results storage: Moved from in-repo to external ../codex-tests/ directory - Prevents git pollution, enables branch isolation without conflicts, and simplifies test management (7 files, 767 insertions)
 - Roadmap consolidation: Removed duplicate roadmap sections from CHANGELOG.md and README.md - Single source of truth in ROADMAP.md (2 files, 6 insertions, 86 deletions)
@@ -207,22 +208,22 @@ Current development version (pre-v0.1.0) - Core infrastructure complete, enterin
 
 ## Statistics
 
-- **Total Commits**: 88
-- **Total Lines Added**: ~54,000+
+- **Total Commits**: 91
+- **Total Lines Added**: ~59,000+
 - **Total Lines Deleted**: ~1,100
-- **Net Change**: +52,900 lines
+- **Net Change**: +57,900 lines
 - **Date Range**: 2025-09-23 to 2025-10-09
-- **Files Created/Modified**: ~270 files
+- **Files Created/Modified**: ~274 files
 
 ## Commit Type Distribution
 
-- **Features (feat)**: 20 commits (22.7%)
-- **Fixes (fix)**: 17 commits (19.3%)
-- **Refactoring (refactor)**: 6 commits (6.8%)
-- **Documentation (docs)**: 18 commits (20.5%)
-- **Chore (chore)**: 9 commits (10.2%)
+- **Features (feat)**: 20 commits (22.0%)
+- **Fixes (fix)**: 17 commits (18.7%)
+- **Refactoring (refactor)**: 6 commits (6.6%)
+- **Documentation (docs)**: 19 commits (20.9%)
+- **Chore (chore)**: 11 commits (12.1%)
 - **Sync (sync)**: 1 commit (1.1%)
-- **Miscellaneous**: 17 commits (19.3%)
+- **Miscellaneous**: 17 commits (18.7%)
 
 ## Key Development Themes
 
