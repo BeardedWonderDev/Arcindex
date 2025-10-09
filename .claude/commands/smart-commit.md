@@ -12,6 +12,48 @@ type = "feat", "fix", "docs", "style", "refactor", "perf", "test", "chore"
 
 **Note:** Changelog, statistics, and development history are now automatically updated by GitHub Actions after you push to main.
 
+## Phase 0: Pre-Flight Sync
+
+1. Check for remote commits and wait for any running workflows:
+
+```bash
+BRANCH=$(git branch --show-current)
+git fetch origin $BRANCH
+BEHIND=$(git rev-list --count HEAD..origin/$BRANCH 2>/dev/null || echo "0")
+
+if [ "$BEHIND" -gt 0 ]; then
+  echo "⬇️  Remote has $BEHIND new commit(s) from previous workflows..."
+
+  # Check if workflows are still running
+  CHANGELOG_STATUS=$(gh run list --workflow=changelog-automation.yml --branch=$BRANCH --limit=1 --json status --jq '.[0].status' 2>/dev/null || echo "completed")
+  HISTORY_STATUS=$(gh run list --workflow=development-history.yml --branch=$BRANCH --limit=1 --json status --jq '.[0].status' 2>/dev/null || echo "completed")
+  ROADMAP_STATUS=$(gh run list --workflow=roadmap-update.yml --branch=$BRANCH --limit=1 --json status --jq '.[0].status' 2>/dev/null || echo "completed")
+
+  # Wait for any in-progress workflows
+  if [ "$CHANGELOG_STATUS" != "completed" ] || [ "$HISTORY_STATUS" != "completed" ] || [ "$ROADMAP_STATUS" != "completed" ]; then
+    echo "⏳ Waiting for workflows to complete before syncing..."
+
+    while true; do
+      CHANGELOG_STATUS=$(gh run list --workflow=changelog-automation.yml --branch=$BRANCH --limit=1 --json status --jq '.[0].status' 2>/dev/null || echo "completed")
+      HISTORY_STATUS=$(gh run list --workflow=development-history.yml --branch=$BRANCH --limit=1 --json status --jq '.[0].status' 2>/dev/null || echo "completed")
+      ROADMAP_STATUS=$(gh run list --workflow=roadmap-update.yml --branch=$BRANCH --limit=1 --json status --jq '.[0].status' 2>/dev/null || echo "completed")
+
+      if [ "$CHANGELOG_STATUS" = "completed" ] && [ "$HISTORY_STATUS" = "completed" ] && [ "$ROADMAP_STATUS" = "completed" ]; then
+        echo "✅ All workflows completed"
+        break
+      fi
+
+      echo "   Changelog: $CHANGELOG_STATUS | History: $HISTORY_STATUS | Roadmap: $ROADMAP_STATUS"
+      sleep 10
+    done
+  fi
+
+  # Pull and rebase workflow commits
+  git pull --rebase origin $BRANCH
+  echo "✅ Local branch synchronized"
+fi
+```
+
 ## Phase 1: Analyze Changes
 
 1. Check the current git status and analyze what changed:
@@ -100,8 +142,9 @@ gh workflow run roadmap-update.yml --ref $BRANCH
 10. Confirm completion:
    - Show commit hash and branch
    - Confirm push succeeded
-   - Confirm workflows triggered (show command output)
-   - Display message: "✅ Workflows running on branch: $BRANCH. CHANGELOG.md and ROADMAP.md will be updated shortly."
+   - Confirm workflows triggered
+   - Display message: "✅ Workflows triggered on branch: $BRANCH. Updates will run asynchronously."
+   - Note: "Next /smart-commit will auto-sync workflow commits before starting."
 
 **Branch-aware automation:**
 - ✅ Feature branches: Workflows update your branch's CHANGELOG.md and ROADMAP.md
