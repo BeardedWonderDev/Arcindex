@@ -4,16 +4,10 @@
 echo "📊 CODEX Test Comparison"
 echo ""
 
-# Find harness directory and external test location
+# Find harness directory
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 HARNESS_DIR="$(dirname "$SCRIPT_DIR")"
-
-# Determine external test directory location
-CODEX_DIR="$(dirname "$HARNESS_DIR")"
-REPO_ROOT="$(dirname "$CODEX_DIR")"
-PARENT_DIR="$(dirname "$REPO_ROOT")"
-TEST_BASE="${PARENT_DIR}/codex-tests"
-ARCHIVE_DIR="${TEST_BASE}/archive"
+ARCHIVE_DIR="${HARNESS_DIR}/archive"
 
 if [ ! -d "$ARCHIVE_DIR" ] || [ -z "$(ls -A $ARCHIVE_DIR 2>/dev/null)" ]; then
     echo "No archived tests found. Run and analyze tests first."

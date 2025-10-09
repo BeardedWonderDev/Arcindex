@@ -117,41 +117,15 @@ echo "  📍 Commit: $COMMIT_SHORT - $COMMIT_MSG"
 echo ""
 
 # ============================================================================
-# 4. CREATE TEST DIRECTORY (External to Repo)
+# 4. CREATE TEST DIRECTORY
 # ============================================================================
 
 echo "📁 Creating test directory..."
 
-# Determine parent directory (one level up from repo root)
-PARENT_DIR="$(dirname "$REPO_ROOT")"
-TEST_BASE="${PARENT_DIR}/codex-tests"
-
-# Validate we're not creating tests in system directories
-case "$TEST_BASE" in
-    / | /usr | /usr/* | /etc | /etc/* | /bin | /bin/* | /System | /System/*)
-        echo "❌ Cannot create tests in system directory: $TEST_BASE"
-        exit 1
-        ;;
-esac
-
-# Verify parent directory is writable
-if [ ! -w "$PARENT_DIR" ]; then
-    echo "❌ Parent directory not writable: $PARENT_DIR"
-    echo "   Cannot create test base at: $TEST_BASE"
-    exit 1
-fi
-
-# Create test base directory if it doesn't exist
-mkdir -p "$TEST_BASE" || {
-    echo "❌ Failed to create test base directory: $TEST_BASE"
-    echo "   Ensure parent directory is writable"
-    exit 1
-}
-
 # Sanitize branch name for directory (replace / with -)
 BRANCH_SAFE=$(echo "$BRANCH" | tr '/' '-')
 TEST_ID="taskmaster-${BRANCH_SAFE}-$(date +%Y%m%d-%H%M)"
-TEST_DIR="${TEST_BASE}/${TEST_ID}"
+TEST_DIR="${HARNESS_DIR}/results/${TEST_ID}"
 
 mkdir -p "$TEST_DIR" || {
     echo "❌ Failed to create test directory: $TEST_DIR"
@@ -159,7 +133,6 @@ mkdir -p "$TEST_DIR" || {
 }
 
 echo "  ✅ Created: $TEST_DIR"
-echo "  📍 Location: Outside repo (${TEST_BASE})"
 echo ""
 
 # ============================================================================

@@ -10,15 +10,9 @@ if [ -z "$1" ]; then
     SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
     HARNESS_DIR="$(dirname "$SCRIPT_DIR")"
 
-    # Determine external test directory location
-    CODEX_DIR="$(dirname "$HARNESS_DIR")"
-    REPO_ROOT="$(dirname "$CODEX_DIR")"
-    PARENT_DIR="$(dirname "$REPO_ROOT")"
-    TEST_BASE="${PARENT_DIR}/codex-tests"
-
-    TEST_DIR=$(ls -td "${TEST_BASE}"/taskmaster-* 2>/dev/null | head -1)
+    TEST_DIR=$(ls -td "${HARNESS_DIR}"/results/taskmaster-* 2>/dev/null | head -1)
     if [ -z "$TEST_DIR" ]; then
-        echo "❌ No test results found in $TEST_BASE"
+        echo "❌ No test results found."
         echo "   Run a test first: ${HARNESS_DIR}/scripts/run-test.sh"
         exit 1
     fi
@@ -166,9 +160,9 @@ echo "📄 Summary: ${TEST_DIR}/TEST-RESULT.txt"
 
 # Archive if passed
 if [ "$FAIL_COUNT" -eq 0 ]; then
-    # Determine test base directory from test directory path
-    TEST_BASE="$(dirname "$TEST_DIR")"
-    ARCHIVE_DIR="${TEST_BASE}/archive/$(basename $TEST_DIR)"
+    # Determine harness directory from test directory path
+    HARNESS_DIR="$(dirname "$(dirname "$TEST_DIR")")"
+    ARCHIVE_DIR="${HARNESS_DIR}/archive/$(basename $TEST_DIR)"
     mkdir -p "$ARCHIVE_DIR"
     cp -r docs PRPs .codex/state analysis-results.txt TEST-RESULT.txt test-metadata.json "$ARCHIVE_DIR/" 2>/dev/null || true
     echo "📦 Archived to: $ARCHIVE_DIR"
