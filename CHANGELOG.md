@@ -11,6 +11,9 @@ Current development version (pre-v0.1.0) - Core infrastructure complete, enterin
 
 ### Added
 
+- Test harness local testing mode: New --local flag for run-test.sh enabling rapid iteration by testing uncommitted changes without git operations - Supports fast development cycles with working tree validation before committing, documented in /codex help with clear distinction between --local (uncommitted) vs branch (committed) testing modes (4 files, 391 insertions, 81 deletions)
+- Investigation artifacts documentation: Working notes and design documents from orchestrator modularization analysis including investigation index, design analysis, summary findings, quick reference guide, implementation checklist, and protocol update notes - Documents design rationale for protocol extraction and Task output handling mechanism for future maintenance (6 files, 1832 insertions)
+- V0.1.0 implementation status report: Comprehensive 2,160-line analysis covering all planned v0.1.0 phases with 64% completion status, critical findings, blockers, and actionable recommendations - Includes phase-by-phase analysis with detailed checkmarks, compliance assessment, undocumented work identification, and complete roadmap with 7-11 day timeline (1 file, 2160 insertions)
 - NPX distribution system: Complete npm package distribution with npx create-codex-project for fresh installations and smart updates - Includes state preservation with automatic backups, schema version protection, interactive workflow selection, compatibility checking, transaction-like updates with rollback on failure, comprehensive manifest system with SHA-256 file hashing, and CLI with 8 core library modules (29 files, 10675 insertions)
 - Test harness command interface: New /codex test command with run/analyze/compare/clean subcommands that map to existing test-harness scripts - Provides comprehensive test harness operations with special handling for branch arguments and auto-detection (1 file, 27 insertions)
 - Test harness infrastructure: Comprehensive testing system with branch isolation, automated analysis, and quality metrics extraction - Enables systematic CODEX workflow validation, branch comparison testing, and regression detection with standardized discovery inputs, test archival, and configurable thresholds (6 files, 922 insertions)
@@ -67,6 +70,8 @@ Current development version (pre-v0.1.0) - Core infrastructure complete, enterin
 
 ### Changed
 
+- Orchestrator architecture: Modularized orchestrator with protocol-based task delegation extracting command handling logic into 8 dedicated protocol tasks - Reduced orchestrator from 986 to 113 lines (88% reduction) with protocols for workflow-start, workflow-continue, workflow-status, agent-spawning, output-handling, anti-summarization, mode-display, and mode-switch - Follows "thin orchestrator, thick protocols" pattern for improved maintainability and reusability (9 files, 2289 insertions, 1419 deletions)
+- Smart-commit sync strategy: Optimized sync logic moving from pre-commit to post-commit phase with safety checks - Detects unstaged changes before push, only syncs when working directory is clean, waits for in-progress workflows before pull/rebase, prevents push failures from workflow commit conflicts (1 file, 71 insertions, 57 deletions)
 - NPX installer architecture: Migrated to pure ES modules and eliminated code duplication with thin CLI wrapper pattern - Fixed inquirer.prompt error through ES module conversion (6 .cjs→.js files), removed duplicate installCodex/updateCodex/showSuccessMessage functions (233 lines), corrected .claude directory copying (now only codex.md), fixed documentation files bug, improved success message with missing "claude" command step and correct workflow start command (10 files, 131 insertions, 338 deletions)
 - Distribution strategy: Comprehensive research on distribution methods including package managers, binary downloads, Docker, Git templates, and multi-platform automation with strategic recommendation for hybrid approach (Template via npx + CLI via npm/Homebrew/Scoop) - Supports v0.1 release planning with detailed analysis of npm vs npx trade-offs, real-world case studies (GitHub CLI, Deno, Stripe CLI, Vercel), and GoReleaser automation guidance (4 files, 4980 insertions)
 - Documentation structure: Reorganized with user guides moved to root level, .claude/ development references added, and docs/ research/testing directories created - Aligns with artifact policy where .codex/ is product code and detailed guides are artifacts (20 files, 10909 insertions)
@@ -88,6 +93,7 @@ Current development version (pre-v0.1.0) - Core infrastructure complete, enterin
 
 ### Fixed
 
+- Smart-commit push failures: Enhanced /smart-commit with pre-flight sync in Phase 0 that fetches remote, checks for workflow commits, monitors running workflows and waits for completion, then pulls and rebases workflow commits before proceeding - Prevents push failures when workflows from previous commits create additional commits that need synchronization (1 file, 45 insertions, 2 deletions)
 - Orchestrator discovery flow and test script reliability: Enhanced discovery-phase-handling with multi-step agent pattern, enforced proper Task output display without summarizing, documented auto-progression vs HALT rules, and added self-check validation for discovery outputs - Also fixed test scripts with clean-tests.sh preserving directory structure and run-test.sh using proper mapfile alternative for branch array population (3 files, 134 insertions, 9 deletions)
 - Architect agent silent file creation failure: Standardized template format from nested output.filename to flat output_file structure, added mandatory file operation enforcement to all document-creating agents (analyst, PM, architect), and clarified flat-structure-only requirement in create-doc.md - Prevents silent file creation failures across entire document workflow chain where operations would fail silently while workflow state was optimistically updated (7 files, 19 insertions, 15 deletions)
 - Orchestrator content suppression: Fixed progressive bug where orchestrator stops displaying section content after analyst phase sections 3-4 - Added mode-aware output handling with anti-summarization protocol, VERBATIM display requirements, and BLOCKING HALT after elicitation menus (1 file, 165 insertions, 10 deletions)
@@ -240,7 +246,7 @@ Current development version (pre-v0.1.0) - Core infrastructure complete, enterin
 
 ## Statistics
 
-- **Total Commits**: 108
+- **Total Commits**: 115
 - **Total Lines Added**: ~145,613
 - **Total Lines Deleted**: ~2,679
 - **Net Change**: +142,934 lines
@@ -249,12 +255,12 @@ Current development version (pre-v0.1.0) - Core infrastructure complete, enterin
 
 ## Commit Type Distribution
 
-- **Features (feat)**: 22 commits (20.4%)
-- **Fixes (fix)**: 19 commits (17.6%)
-- **Refactoring (refactor)**: 7 commits (6.5%)
-- **Documentation (docs)**: 19 commits (17.6%)
-- **Chore (chore)**: 23 commits (21.3%)
-- **Miscellaneous**: 18 commits (16.7%)
+- **Features (feat)**: 23 commits (20.0%)
+- **Fixes (fix)**: 20 commits (17.4%)
+- **Refactoring (refactor)**: 9 commits (7.8%)
+- **Documentation (docs)**: 21 commits (18.3%)
+- **Chore (chore)**: 24 commits (20.9%)
+- **Miscellaneous**: 18 commits (15.7%)
 
 ## Key Development Themes
 
