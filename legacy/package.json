@@ -44,5 +44,10 @@
   },
   "codex": {
     "schemaVersion": 1
+  },
+  "scripts": {
+    "bmad:refresh": "bmad-method install -f -i codex",
+    "bmad:list": "bmad-method list:agents",
+    "bmad:validate": "bmad-method validate"
   }
 }
