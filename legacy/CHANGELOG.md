@@ -11,6 +11,7 @@ Current development version (pre-v0.1.0) - Core infrastructure complete, enterin
 
 ### Added
 
+<<<<<<< HEAD:legacy/CHANGELOG.md
 - Test harness local testing mode: New --local flag for run-test.sh enabling rapid iteration by testing uncommitted changes without git operations - Supports fast development cycles with working tree validation before committing, documented in /codex help with clear distinction between --local (uncommitted) vs branch (committed) testing modes (4 files, 391 insertions, 81 deletions)
 - Investigation artifacts documentation: Working notes and design documents from orchestrator modularization analysis including investigation index, design analysis, summary findings, quick reference guide, implementation checklist, and protocol update notes - Documents design rationale for protocol extraction and Task output handling mechanism for future maintenance (6 files, 1832 insertions)
 - V0.1.0 implementation status report: Comprehensive 2,160-line analysis covering all planned v0.1.0 phases with 64% completion status, critical findings, blockers, and actionable recommendations - Includes phase-by-phase analysis with detailed checkmarks, compliance assessment, undocumented work identification, and complete roadmap with 7-11 day timeline (1 file, 2160 insertions)
@@ -20,6 +21,13 @@ Current development version (pre-v0.1.0) - Core infrastructure complete, enterin
 - Quality gate validation system: Level 0.5 quality gates between elicitation and transformation phases with configurable enforcement modes (strict/conditional/advisory) - Integrates into all workflows with scoring and improvement recommendations at phase transitions (7 files, 680 insertions)
 - AI artifact cleanup workflow: Dedicated workflow for @claude-artifacts PR analysis with artifact policy enforcement - Separates artifact cleanup from general Claude interactions for improved clarity and performance (2 files, 246 insertions)
 - Development references: Comprehensive .claude/ directory with artifact-policy-reference.md, development-reference.md, and artifact-exceptions.txt - Provides detailed guidance for AI workflows and artifact management (3 files, 1118 insertions)
+=======
+- PR conflict resolver and idempotent automation workflows: Enhanced changelog automation system with intelligent conflict resolution for automatic CHANGELOG/ROADMAP merge conflicts - Uses Claude Code Action with structural parsing to deduplicate by semantic identity (commit hash, task text), preserves all unique content from both branches, auto-commits resolution to PR branch, and makes all automation workflows idempotent with deduplication before adding new entries (5 files, 294 insertions, 30 deletions)
+- Manual trigger support for AI artifact cleanup workflow: Added workflow_dispatch trigger with three configurable execution strategies (dry-run for testing, create-pr for safe cleanup with review, push-direct for immediate cleanup) - Provides flexible artifact management beyond automatic PR-based cleanup with comprehensive usage documentation, dynamic branch checkout logic, and safety features including default safe strategy and skip CI tags (3 files, 923 insertions, 14 deletions)
+- Claude workflow routing update: Separated artifact cleanup analysis (@claude-artifacts) from general Claude interactions (@claude) with dedicated ai-artifact-cleanup.yml workflow - Improves workflow clarity and performance with write permissions for exception file updates and increased fetch-depth for better artifact analysis context (2 files, 246 insertions, 9 deletions)
+- Quality gate validation system (Level 0.5): Integrated quality gates across all workflows (brownfield, greenfield-generic, greenfield-swift) with configurable enforcement modes (strict/conditional/advisory) - Provides scoring and improvement recommendations at each phase transition between elicitation and transformation with invoke-quality-gate.md helper task and updated validation-gate.md (7 files, 680 insertions, 5 deletions)
+- Documentation reorganization and development references: Added .claude/ directory with artifact-policy-reference.md, artifact-exceptions.txt, and development-reference.md; moved user guides to root level; added CLAUDE.md project instructions and CONTRIBUTING.md - Aligns with artifact policy where .codex/ is product code and root-level docs are kept (20 files, 10,909 insertions)
+>>>>>>> main:CHANGELOG.md
 - GitHub Actions automation workflows: Changelog automation, development history tracking, roadmap updates, and version management using Claude Code GitHub Action - Replaces manual two-commit workflow with automated pipeline that updates CHANGELOG.md, development history, and roadmap on every push to main, reducing commit time by 2-3 minutes and ensuring consistent formatting (5 files, 832 insertions, 164 deletions)
 - Execution learning capture and architect validation infrastructure: Complete Phase 2 Week 5 deliverables with execution learning feedback loop, epic-based learning integration, zero-knowledge architecture testing, and confidence scoring framework - Enables progressive quality improvement across epics through systematic learning capture with .codex/state/execution-reports/ and epic-learnings/ directories (11 files, 2,998 insertions)
 - Project roadmap and comprehensive validation guides: ROADMAP.md with v0.1.0-v0.3.0 plans, operational validation playbook, Level 3-4 testing guides, and Phase 2 completion documentation - Provides clear roadmap for v0.1.0 completion and enables systematic operational validation across 5 test scenarios (5 files, 3,159 insertions)
@@ -70,6 +78,7 @@ Current development version (pre-v0.1.0) - Core infrastructure complete, enterin
 
 ### Changed
 
+<<<<<<< HEAD:legacy/CHANGELOG.md
 - Orchestrator architecture: Modularized orchestrator with protocol-based task delegation extracting command handling logic into 8 dedicated protocol tasks - Reduced orchestrator from 986 to 113 lines (88% reduction) with protocols for workflow-start, workflow-continue, workflow-status, agent-spawning, output-handling, anti-summarization, mode-display, and mode-switch - Follows "thin orchestrator, thick protocols" pattern for improved maintainability and reusability (9 files, 2289 insertions, 1419 deletions)
 - Smart-commit sync strategy: Optimized sync logic moving from pre-commit to post-commit phase with safety checks - Detects unstaged changes before push, only syncs when working directory is clean, waits for in-progress workflows before pull/rebase, prevents push failures from workflow commit conflicts (1 file, 71 insertions, 57 deletions)
 - NPX installer architecture: Migrated to pure ES modules and eliminated code duplication with thin CLI wrapper pattern - Fixed inquirer.prompt error through ES module conversion (6 .cjs→.js files), removed duplicate installCodex/updateCodex/showSuccessMessage functions (233 lines), corrected .claude directory copying (now only codex.md), fixed documentation files bug, improved success message with missing "claude" command step and correct workflow start command (10 files, 131 insertions, 338 deletions)
@@ -78,6 +87,10 @@ Current development version (pre-v0.1.0) - Core infrastructure complete, enterin
 - Test harness results storage: Moved from in-repo to external ../codex-tests/ directory - Prevents git pollution, enables branch isolation without conflicts, and simplifies test management (7 files, 767 insertions)
 - Roadmap consolidation: Removed duplicate roadmap sections from CHANGELOG.md and README.md - Single source of truth in ROADMAP.md (2 files, 6 insertions, 86 deletions)
 - GitHub Actions workflow routing: Updated Claude workflow to exclude @claude-artifacts mentions and grant write permissions - Routed to dedicated ai-artifact-cleanup workflow (2 files, 28 modifications)
+=======
+- ROADMAP.md assessment: Updated with comprehensive 5-agent deep review findings showing 85% overall completion (corrected from 75%) with critical gaps identified in Archon MCP integration (0%), quality gate wiring (30%), and detailed implementation status table - Documents state management correction from "DORMANT" to "95% Complete" after recognizing empty directories are correct in template repo, adds review history section tracking analytical errors and corrections (1 file, 164 insertions, 28 deletions)
+- Documentation structure: Consolidated roadmap to ROADMAP.md file - Removed duplicate roadmap sections from CHANGELOG.md and README.md, replacing with references to dedicated ROADMAP.md file for single source of truth (2 files, 6 insertions, 86 deletions)
+>>>>>>> main:CHANGELOG.md
 - Changelog workflow prompt: Simplified from 180-line prescriptive prompt to 32-line goal-oriented approach - Replaces detailed bash commands with high-level tasks, giving Claude freedom to use Read/Grep/Edit or Bash, reducing turn usage and eliminating permission denial loops (1 file, 31 insertions, 130 deletions)
 - Simplified architecture by removing Swift agent dependencies (feature-developer, syntax-reviewer, etc.)
 - Replaced agent-based Level 4 validation with direct command execution (swiftlint, swift test, xcodebuild)
@@ -93,11 +106,17 @@ Current development version (pre-v0.1.0) - Core infrastructure complete, enterin
 
 ### Fixed
 
+<<<<<<< HEAD:legacy/CHANGELOG.md
 - Smart-commit push failures: Enhanced /smart-commit with pre-flight sync in Phase 0 that fetches remote, checks for workflow commits, monitors running workflows and waits for completion, then pulls and rebases workflow commits before proceeding - Prevents push failures when workflows from previous commits create additional commits that need synchronization (1 file, 45 insertions, 2 deletions)
 - Orchestrator discovery flow and test script reliability: Enhanced discovery-phase-handling with multi-step agent pattern, enforced proper Task output display without summarizing, documented auto-progression vs HALT rules, and added self-check validation for discovery outputs - Also fixed test scripts with clean-tests.sh preserving directory structure and run-test.sh using proper mapfile alternative for branch array population (3 files, 134 insertions, 9 deletions)
 - Architect agent silent file creation failure: Standardized template format from nested output.filename to flat output_file structure, added mandatory file operation enforcement to all document-creating agents (analyst, PM, architect), and clarified flat-structure-only requirement in create-doc.md - Prevents silent file creation failures across entire document workflow chain where operations would fail silently while workflow state was optimistically updated (7 files, 19 insertions, 15 deletions)
 - Orchestrator content suppression: Fixed progressive bug where orchestrator stops displaying section content after analyst phase sections 3-4 - Added mode-aware output handling with anti-summarization protocol, VERBATIM display requirements, and BLOCKING HALT after elicitation menus (1 file, 165 insertions, 10 deletions)
 - Broken file reference: Corrected prp-validation-enforcement.md references from non-existent .codex/data/prp-quality-checklist.md to correct .codex/checklists/prp-quality-gate.md - Task would fail if invoked with incorrect path (2 files, 26 insertions, 22 deletions)
+=======
+- Broken file reference in PRP validation: Corrected 3 references from non-existent `.codex/data/prp-quality-checklist.md` to correct location `.codex/checklists/prp-quality-gate.md` in prp-validation-enforcement.md - Task would fail if invoked with incorrect path, ROADMAP.md assessment updated to reflect files actually exist (2 files, 26 insertions, 22 deletions)
+- Workflow loop on bot-created PRs: Added skip condition for artifact-cleanup-* branch pattern to prevent infinite loops when manual trigger uses create-pr strategy - Prevents "non-human actor: claude (type: Bot)" error when workflow creates PR that triggers itself, documents reserved branch prefix in usage guide (3 files, 37 insertions, 6 deletions)
+- Track progress configuration: Disabled track_progress for workflow_dispatch events since it's only supported for PR-related events (pull_request, issue_comment) - Fixes manual trigger execution that was failing with unsupported event error, uses conditional expression based on event type (1 file, 1 insertion, 1 deletion)
+>>>>>>> main:CHANGELOG.md
 - GitHub Actions workflow triggers: Replaced unsupported push event with schedule (daily) and workflow_dispatch (manual testing) triggers based on claude-code-action documentation - Resolves 'Unsupported event type: push' error (2 files, 10 insertions, 6 deletions)
 - Workflow allowedTools configuration: Added Read, Edit, Write, and Bash tools (git, grep, awk, date, head, tail, wc, cut, echo) to enable file operations and git commands - Resolves permission denials that prevented Claude from executing workflow tasks (3 files, 3 insertions)
 - Workflow max-turns limits: Increased from 15-20 to 30-40 turns to allow Claude enough time to complete complex changelog operations - Previous runs hit max-turns before completing (3 files, 6 insertions, 6 deletions)
@@ -121,6 +140,7 @@ Current development version (pre-v0.1.0) - Core infrastructure complete, enterin
 
 ## Development History
 
+<<<<<<< HEAD:legacy/CHANGELOG.md
 ### Week of 2025-10-06 (63 commits)
 **Focus:** orchestrator refactoring, smart-commit optimization, test harness development, npx distribution automation, quality validation enhancements
 
@@ -157,12 +177,36 @@ Current development version (pre-v0.1.0) - Core infrastructure complete, enterin
 - 8f3a499: sync: pull .github/ and smart-commit.md from main (2025-10-08)
 - 77677fd: refactor: move test harness results to external directory (2025-10-08)
 - 75d4ed3: feat: add CODEX test harness with branch isolation and automated analysis (2025-10-08)
+=======
+### Week of 2025-10-06 (46 commits)
+**Focus:** artifact cleanup automation, documentation reorganization, quality gate validation
+
+- a9986f6: chore: update changelog development history [skip ci] (2025-10-09)
+- 1fa246e: chore: update roadmap progress [skip ci] (2025-10-09)
+- b3f311b: chore: update changelog [unreleased] and statistics [skip ci] (2025-10-09)
+- 165dfe3: chore: update changelog development history [skip ci] (2025-10-09)
+- 9a08d38: Merge branch 'main' of https://github.com/BeardedWonderDev/CODEX (2025-10-08)
+- 90ddcc5: feat: add PR conflict resolver and idempotent automation workflows (2025-10-08)
+- 7d8739e: chore: update changelog development history [skip ci] (2025-10-09)
+- b30538a: chore: update changelog [unreleased] and statistics [skip ci] (2025-10-09)
+- 6c74424: Merge pull request #3 from BeardedWonderDev/artifact-cleanup-20251009-000435 (2025-10-08)
+- f67e508: chore: update roadmap progress [skip ci] (2025-10-09)
+- d9a25d6: chore: update changelog [unreleased] and statistics [skip ci] (2025-10-09)
+- fb2663e: chore: remove AI workflow artifacts [bot] (2025-10-09)
+- 82441dc: fix: prevent workflow loop on bot-created artifact cleanup PRs (2025-10-08)
+- 9aa7058: fix: disable track_progress for workflow_dispatch events (2025-10-08)
+- 10b772e: feat: add manual trigger support to AI artifact cleanup workflow (2025-10-08)
+>>>>>>> main:CHANGELOG.md
 - 90381d4: docs: reorganize documentation structure and add development references (2025-10-08)
 - bd0c1ba: feat: add AI artifact cleanup workflow and update Claude workflow routing (2025-10-08)
 - 33a93c1: feat: add quality gate validation system (Level 0.5) to all workflows (2025-10-08)
 - 151e404: fix: correct broken file reference and update ROADMAP assessment (2025-10-08)
 - 7331a45: docs: update ROADMAP.md with comprehensive 5-agent deep review findings (2025-10-08)
 - f9f8e1a: docs: consolidate roadmap to ROADMAP.md file (2025-10-08)
+<<<<<<< HEAD:legacy/CHANGELOG.md
+=======
+- 1d2a754: chore: update changelog development history [skip ci] (2025-10-08)
+>>>>>>> main:CHANGELOG.md
 - 9567fa6: chore: update roadmap progress [skip ci] (2025-10-08)
 - 0267609: refactor: simplify roadmap and development history workflow prompts (2025-10-08)
 - 491480f: chore: increase changelog workflow max-turns to 50 for clean completion (2025-10-08)
@@ -246,6 +290,7 @@ Current development version (pre-v0.1.0) - Core infrastructure complete, enterin
 
 ## Statistics
 
+<<<<<<< HEAD:legacy/CHANGELOG.md
 - **Total Commits**: 115
 - **Total Lines Added**: ~145,613
 - **Total Lines Deleted**: ~2,679
@@ -261,6 +306,23 @@ Current development version (pre-v0.1.0) - Core infrastructure complete, enterin
 - **Documentation (docs)**: 21 commits (18.3%)
 - **Chore (chore)**: 24 commits (20.9%)
 - **Miscellaneous**: 18 commits (15.7%)
+=======
+- **Total Commits**: 94
+- **Total Lines Added**: 112,408
+- **Total Lines Deleted**: 77,606
+- **Net Change**: +34,802 lines
+- **Date Range**: 2025-09-23 to 2025-10-09
+- **Files Created/Modified**: ~280 files
+
+## Commit Type Distribution
+
+- **Features (feat)**: 21 commits (22.6%)
+- **Fixes (fix)**: 18 commits (19.4%)
+- **Documentation (docs)**: 18 commits (19.4%)
+- **Chore (chore)**: 13 commits (13.8%)
+- **Refactoring (refactor)**: 5 commits (5.4%)
+- **Miscellaneous**: 19 commits (20.4%)
+>>>>>>> main:CHANGELOG.md
 
 ## Key Development Themes
 
