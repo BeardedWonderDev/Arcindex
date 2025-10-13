@@ -11,6 +11,16 @@ from typing import Dict, Optional, Tuple
 
 import click
 
+try:
+    from prompt_toolkit import PromptSession
+    from prompt_toolkit.key_binding import KeyBindings
+
+    PROMPT_TOOLKIT_AVAILABLE = True
+except ImportError:  # pragma: no cover - optional dependency fallback
+    PROMPT_TOOLKIT_AVAILABLE = False
+    PromptSession = None  # type: ignore
+    KeyBindings = None  # type: ignore
+
 from arcindex.orchestrator import OrchestratorController
 from arcindex.tools import ElicitationOption, current_timestamp
 
@@ -88,27 +98,38 @@ def start(
     click.echo(summary_markdown)
     click.echo()
 
-    options = controller.elicitation_options()
-    menu_text = controller.elicitation_menu()
-    click.echo(menu_text)
-
-    selection = elicitation_choice or _prompt_elicitation_selection()
-    while selection != 1:
-        click.echo(
-            "Advanced elicitation automation will arrive in a later phase. "
-            "Enter '1' once you are satisfied with the summary."
+    run_elicitation = False
+    manual_choice = elicitation_choice
+    if manual_choice is None:
+        run_elicitation = click.confirm(
+            "Open advanced elicitation options before finalising discovery?",
+            default=False,
         )
-        selection = _prompt_elicitation_selection()
+    else:
+        run_elicitation = manual_choice != 1
 
-    selected_label = _lookup_option_label(options, selection)
-    controller.record_elicitation_history(
-        state,
-        selection_number=selection,
-        selection_label=selected_label,
-        timestamp=current_timestamp(),
-        user_feedback=None,
-        applied_changes=None,
-    )
+    if run_elicitation:
+        options = controller.elicitation_options()
+        menu_text = controller.elicitation_menu()
+        click.echo(menu_text)
+
+        selection = manual_choice or _prompt_elicitation_selection()
+        while selection != 1:
+            click.echo(
+                "Advanced elicitation automation will arrive in a later phase. "
+                "Enter '1' once you are satisfied with the summary."
+            )
+            selection = _prompt_elicitation_selection()
+
+        selected_label = _lookup_option_label(options, selection)
+        controller.record_elicitation_history(
+            state,
+            selection_number=selection,
+            selection_label=selected_label,
+            timestamp=current_timestamp(),
+            user_feedback=None,
+            applied_changes=None,
+        )
 
     controller.finalise_discovery(state, current_timestamp())
 
@@ -147,27 +168,37 @@ def _load_answers(
         raw = answers_file.read_text(encoding="utf-8")
         return dict(controller.parse_answers(raw))
 
-    click.echo("\nEnter responses for each question. Press ENTER on an empty line to move on.\n")
+    click.echo(
+        "\nEnter responses for each question. Press ENTER to accept the answer. "
+        "Use Shift+ENTER for a newline if supported by your terminal.\n"
+    )
     answers: Dict[str, str] = {}
     for question, prompt in controller.discovery_questionnaire(project_name):
         click.echo(f"{question.number}. {prompt}")
-        response = _prompt_multiline()
+        response = _prompt_answer()
         answers[question.key] = response
         click.echo()
     return answers
 
 
-def _prompt_multiline() -> str:
-    lines = []
-    while True:
+def _prompt_answer() -> str:
+    if PROMPT_TOOLKIT_AVAILABLE:
+        bindings = KeyBindings()
+
+        @bindings.add("enter")
+        def _(event) -> None:  # type: ignore[no-redef]
+            if event.key_sequence and event.key_sequence[0].data == '':
+                event.app.current_buffer.validate_and_handle()
+            else:
+                event.current_buffer.insert_text('\n')
+
+        session = PromptSession(multiline=True, key_bindings=bindings)
         try:
-            line = input("> ").rstrip()
+            return session.prompt("> ").strip()
         except EOFError:
-            break
-        if not line:
-            break
-        lines.append(line)
-    return "\n".join(lines).strip()
+            return ""
+    # Fallback: single-line prompt
+    return click.prompt(">", default="", show_default=False).strip()
 
 
 def _prompt_elicitation_selection() -> int:

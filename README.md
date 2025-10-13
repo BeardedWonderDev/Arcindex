@@ -182,12 +182,10 @@ The CLI writes `workflow.json` and `discovery-summary.json` to the configured st
 Use the built-in harness to create disposable sandboxes so you can experiment without touching the main project tree:
 
 ```bash
-arcindex/test-harness/scripts/run-test.sh --local
-# or test a different branch
-arcindex/test-harness/scripts/run-test.sh --branch main
+arcindex/test-harness/scripts/run-test.sh
 ```
 
-Each run produces a new folder under `arcindex/test-harness/results/arcindex-<mode>-<timestamp>/` containing a clean copy of the code and a pre-filled `discovery-inputs.txt`. Follow the printed instructions to install dependencies and run `arcindex start ...` inside the sandbox. Delete the folder when you're done.
+Each run produces a new folder under `arcindex/test-harness/results/arcindex-local-<timestamp>/` containing a clean copy of the code and a pre-filled `discovery-inputs.txt`. Follow the printed instructions to install dependencies and run `arcindex start ...` inside the sandbox. Delete the folder when you're done.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 

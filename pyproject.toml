@@ -13,6 +13,7 @@ authors = [{ name = "Arcindex Team" }]
 dependencies = [
     "click>=8.1",
     "pyyaml>=6.0",
+    "prompt_toolkit>=3.0",
 ]
 
 [project.optional-dependencies]
