@@ -1,0 +1,577 @@
+# <!-- Powered by CODEX™ Core -->
+template:
+  id: codex-architecture-template-v1
+  name: CODEX System Architecture Document
+  version: 1.0
+  output_file: "docs/architecture.md"
+
+workflow:
+  mode: interactive
+  elicitation: advanced-elicitation
+
+context-integration:
+  - source: docs/project-brief.md
+    purpose: Understand business context and constraints
+    required: true
+  - source: docs/prd.md
+    purpose: Extract technical requirements and user stories
+    required: true
+  - source: .codex/state/workflow.json
+    purpose: Maintain workflow state
+    required: false
+
+sections:
+  - id: overview
+    title: Architecture Overview
+    instruction: |
+      Provide high-level system architecture overview.
+      Connect technical decisions to business requirements.
+      Include architecture diagram (C4 Level 1 - System Context).
+    sections:
+      - id: system-context
+        title: System Context
+        type: structured
+        instruction: Define system boundaries and external interactions
+        components:
+          - Core System Description
+          - External Systems and Integrations
+          - User Types and Access Patterns
+          - High-Level Data Flows
+      - id: architecture-goals
+        title: Architecture Goals & Principles
+        type: bullet-list
+        instruction: Key architectural drivers from business requirements
+        examples:
+          - "Scalability: Support 10,000 concurrent users within 6 months"
+          - "Modularity: Enable feature teams to work independently"
+          - "Security: Zero-trust architecture with defense in depth"
+      - id: constraints
+        title: Constraints & Assumptions
+        type: structured-list
+        categories:
+          - Business Constraints (budget, timeline, team size)
+          - Technical Constraints (platform, legacy systems)
+          - Regulatory Constraints (compliance, data residency)
+
+  - id: technology-stack
+    title: Technology Stack
+    instruction: |
+      Define technology choices with rationale.
+      Link each choice to specific requirements.
+      Consider team expertise and ecosystem.
+    elicit: true
+    sections:
+      - id: platform-selection
+        title: Platform & Framework Selection Rationale
+        type: table
+        instruction: |
+          Provide detailed rationale for each technology choice.
+          CRITICAL: Exact versions required (not ranges like "^1.2.0").
+          Document alternatives considered and explicit trade-offs.
+        columns: [Layer, Technology, Version, Rationale, Alternatives Considered, Trade-offs]
+        rows:
+          - Frontend
+          - Backend
+          - Database
+          - Caching
+          - Infrastructure
+          - DevOps
+          - Monitoring
+      - id: third-party-services
+        title: Third-Party Services
+        type: structured-list
+        template: |
+          Service: [Name]
+          Purpose: [What it provides]
+          Integration: [How it connects]
+          Fallback: [Backup plan if service fails]
+          Cost Model: [Pricing structure]
+      - id: development-tools
+        title: Development & Build Tools
+        type: structured-list
+        categories:
+          - IDE and Development Environment
+          - Build and Compilation Tools
+          - Testing Frameworks
+          - CI/CD Pipeline
+          - Monitoring and Observability
+
+  - id: component-architecture
+    title: Component Architecture
+    instruction: |
+      Detail internal system components and their interactions.
+      Use C4 Level 2 (Container Diagram) approach.
+      Define clear boundaries and responsibilities.
+    elicit: true
+    sections:
+      - id: component-map
+        title: Component Map
+        type: hierarchical-list
+        instruction: Break down system into major components/services
+        template: |
+          Component: [Name]
+          Type: [Service/Library/Module]
+          Responsibility: [Single sentence description]
+          Dependencies: [Other components it depends on]
+          Interface: [API/Protocol/Events]
+          Technology: [Specific tech stack for this component]
+      - id: data-architecture
+        title: Data Architecture
+        type: structured
+        components:
+          - Entity Relationship Model
+          - Data Storage Strategy (SQL/NoSQL/Hybrid)
+          - Caching Strategy
+          - Data Synchronization Approach
+          - Backup and Recovery Plan
+      - id: api-design
+        title: API Design
+        type: structured
+        instruction: Define API architecture and standards
+        components:
+          - API Style (REST/GraphQL/gRPC)
+          - Authentication & Authorization
+          - Versioning Strategy
+          - Rate Limiting & Quotas
+          - Error Handling Standards
+          - Documentation Approach
+
+  - id: frontend-architecture
+    title: Frontend Architecture
+    skip_if: Backend-only project (no UI component)
+    instruction: |
+      Define frontend architecture, state management, and component patterns.
+      Only required for projects with user interface components.
+      Skip this section for backend-only services.
+    elicit: true
+    sections:
+      - id: ui-framework
+        title: UI Framework & Libraries
+        type: structured
+        instruction: Define core frontend technology stack
+        components:
+          - Framework Selection (React, Vue, Angular, SwiftUI, UIKit, etc.)
+          - State Management Library (Redux, MobX, Zustand, Combine, etc.)
+          - Component Library/Design System (Material-UI, Tailwind, SwiftUI Views, etc.)
+          - Routing Strategy (React Router, Vue Router, Navigation patterns)
+          - Build & Bundle Configuration (Webpack, Vite, Xcode, etc.)
+      - id: component-architecture
+        title: Component Architecture
+        type: structured
+        instruction: Define how UI components are organized and interact
+        components:
+          - Component Hierarchy (Parent-child relationships, composition patterns)
+          - Reusable Component Patterns (Atomic design, compound components, etc.)
+          - State Management Patterns (Local state, global state, derived state)
+          - Data Fetching Strategy (Server state, client state, loading/error states)
+          - Error Boundary Implementation (Error handling in UI layer)
+      - id: frontend-data-flow
+        title: Frontend Data Flow
+        type: structured
+        instruction: Define how data flows through the frontend
+        components:
+          - API Integration Approach (REST client, GraphQL client, API layer abstraction)
+          - Caching Strategy (Client-side cache, SWR, React Query, etc.)
+          - Optimistic Updates (UI updates before server confirmation)
+          - Real-time Data Handling (WebSockets, SSE, polling strategies)
+          - Offline Support (If required - service workers, local storage, sync)
+
+  - id: implementation-design
+    title: Implementation Design Patterns
+    instruction: |
+      Define patterns and conventions for implementation.
+      Provide enough detail for consistent development.
+      Include code organization and project structure.
+    elicit: true
+    sections:
+      - id: project-structure
+        title: Project Structure
+        type: code-block
+        language: tree
+        instruction: Define directory structure and organization
+        example: |
+          src/
+          ├── app/            # Application entry points
+          ├── features/       # Feature modules
+          ├── core/          # Core business logic
+          ├── infrastructure/# External services
+          ├── shared/        # Shared utilities
+          └── tests/         # Test suites
+      - id: design-patterns
+        title: Design Patterns
+        type: structured-list
+        instruction: Key patterns to be used throughout implementation
+        categories:
+          - Architectural Patterns (MVC, MVVM, Clean Architecture)
+          - Behavioral Patterns (Observer, Strategy, Command)
+          - Structural Patterns (Adapter, Facade, Decorator)
+          - Concurrency Patterns (Actor, Producer-Consumer)
+      - id: coding-standards
+        title: Coding Standards
+        type: structured-list
+        categories:
+          - Naming Conventions
+          - Error Handling Approach
+          - Logging Standards
+          - Documentation Requirements
+          - Testing Requirements
+      - id: error-handling-patterns
+        title: Error Handling Patterns
+        type: structured
+        instruction: |
+          Define comprehensive error handling strategy across all layers.
+          Include classification, propagation, retry logic, and user-facing messaging.
+        components:
+          - Error Classification (By severity - CRITICAL/ERROR/WARNING/INFO, By recoverability - Recoverable vs Fatal, By source - User error vs System error vs External service error)
+          - Error Propagation Strategy (How errors bubble up through layers, Error transformation between layers, Context preservation in error chain, Structured error responses)
+          - Retry Logic & Backoff (Exponential backoff strategy for transient failures, Maximum retry attempts per operation type, Circuit breaker pattern for distributed systems, Idempotency requirements for retryable operations)
+          - User-Facing Error Messages (Error message templates by type, Localization strategy for errors, PII handling in error messages, Actionable guidance in error responses)
+          - Error Logging & Monitoring (Structured logging format for errors, Error correlation IDs and tracing, Alert thresholds and escalation, Error rate monitoring and dashboards)
+          - Rollback & Recovery Procedures (Transaction rollback strategies, Data consistency after errors, Compensating transactions, Manual intervention procedures for critical errors)
+
+  - id: testing-strategy
+    title: Testing Strategy
+    instruction: |
+      Define comprehensive testing approach at all levels with coverage targets.
+      Ensure testing strategy enables confident deployments and rapid iteration.
+    elicit: true
+    sections:
+      - id: test-levels
+        title: Test Levels
+        type: structured
+        instruction: Define testing approach for each level
+        components:
+          - Unit Testing (Framework - Jest, XCTest, pytest, etc., Coverage target - typically 80%+, Patterns - AAA, Given-When-Then)
+          - Integration Testing (Strategy - API contract tests, Database integration, Service integration, Scope - Component interactions, Tools - Supertest, Integration test frameworks)
+          - End-to-End Testing (Tools - Cypress, Playwright, Selenium, XCUITest, Critical user paths - Login, core workflows, Happy path + edge cases)
+          - Performance Testing (Benchmarks - Response time targets, Load testing - Concurrent users, tools, Stress testing - Breaking points)
+          - Security Testing (OWASP compliance - Top 10 vulnerabilities, Vulnerability scanning - SAST/DAST tools, Penetration testing - If required for compliance)
+      - id: test-infrastructure
+        title: Test Infrastructure
+        type: structured
+        instruction: Define testing infrastructure and tooling
+        components:
+          - Test Framework Setup (Unit test runner configuration, Integration test environment setup, E2E test infrastructure)
+          - Mocking Strategy (API mocking approach, Database mocking/seeding, External service mocking, Time/randomness mocking)
+          - Test Data Management (Test data generation strategy, Fixtures and seed data, Data cleanup between tests, PII handling in tests)
+          - CI/CD Integration (Test execution in pipeline, Parallel test execution, Test result reporting, Failure handling and retries)
+          - Test Reporting (Coverage reports, Test result dashboards, Flaky test detection, Performance test trends)
+      - id: coverage-requirements
+        title: Coverage Requirements
+        type: structured
+        instruction: Define test coverage expectations and targets
+        components:
+          - Unit Test Coverage Target (Typically 80%+ for new code, Line coverage vs branch coverage, Exceptions for trivial code)
+          - Critical Path Coverage (100% coverage for payment flows, 100% coverage for authentication/authorization, 100% coverage for security-sensitive features, 100% coverage for data integrity operations)
+          - Integration Test Coverage (All API endpoints tested, All database operations tested, All external integrations tested, Error scenarios covered)
+          - Acceptance Criteria Validation (Every story AC has automated test, Tests map directly to user requirements, Tests serve as living documentation)
+
+  - id: security-architecture
+    title: Security Architecture
+    instruction: |
+      Define security measures at every layer.
+      Address OWASP Top 10 and platform-specific concerns.
+      Include threat model and mitigation strategies.
+    sections:
+      - id: security-layers
+        title: Security Layers
+        type: table
+        columns: [Layer, Security Measures, Implementation, Monitoring]
+        rows:
+          - Network
+          - Application
+          - Data
+          - Identity
+      - id: threat-model
+        title: Threat Model
+        type: table
+        columns: [Threat, Category, Likelihood, Impact, Mitigation]
+        instruction: Use STRIDE or similar framework
+      - id: compliance
+        title: Compliance & Privacy
+        type: checklist
+        instruction: Regulatory and compliance requirements
+        options: [GDPR, CCPA, HIPAA, SOC2, PCI-DSS, App Store Guidelines]
+
+  - id: infrastructure-deployment
+    title: Infrastructure & Deployment
+    instruction: |
+      Define deployment architecture and operations.
+      Include scaling strategy and disaster recovery.
+    elicit: true
+    sections:
+      - id: deployment-architecture
+        title: Deployment Architecture
+        type: structured
+        components:
+          - Environment Strategy (Dev/Staging/Prod)
+          - Container/Serverless Strategy
+          - Load Balancing Approach
+          - Auto-scaling Rules
+          - Geographic Distribution
+      - id: monitoring-observability
+        title: Monitoring & Observability
+        type: structured-list
+        categories:
+          - Metrics Collection
+          - Log Aggregation
+          - Distributed Tracing
+          - Alerting Rules
+          - Performance Monitoring
+      - id: disaster-recovery
+        title: Disaster Recovery
+        type: structured
+        components:
+          - RTO/RPO Targets
+          - Backup Strategy
+          - Failover Procedures
+          - Data Recovery Plan
+          - Incident Response Process
+
+  - id: migration-evolution
+    title: Migration & Evolution Strategy
+    condition: Brownfield project or future phases planned
+    instruction: |
+      Define migration path from current state.
+      Plan for future evolution and technical debt management.
+    sections:
+      - id: migration-plan
+        title: Migration Plan
+        type: phased-list
+        template: |
+          Phase: [Number/Name]
+          Duration: [Estimated time]
+          Components: [What gets migrated]
+          Risk: [Migration risks]
+          Rollback: [Rollback strategy]
+      - id: evolution-roadmap
+        title: Evolution Roadmap
+        type: timeline
+        instruction: Future architectural improvements and scaling plans
+      - id: technical-debt
+        title: Technical Debt Management
+        type: structured-list
+        categories:
+          - Known Compromises
+          - Future Refactoring
+          - Upgrade Path
+          - Deprecation Plan
+
+  - id: appendices
+    title: Appendices
+    sections:
+      - id: architecture-decisions
+        title: Architecture Decision Records (ADRs)
+        type: structured-list
+        template: |
+          ADR-[Number]: [Title]
+          Status: [Proposed/Accepted/Deprecated]
+          Context: [Why this decision was needed]
+          Decision: [What was decided]
+          Consequences: [Implications of this decision]
+      - id: reference-architectures
+        title: Reference Architectures
+        type: bullet-list
+        instruction: Similar systems or patterns used as reference
+      - id: glossary
+        title: Technical Glossary
+        type: definition-list
+        instruction: Define all technical terms and acronyms
+
+  - id: architecture-confidence
+    title: Architecture Confidence Assessment
+    instruction: |
+      Self-assess the architecture quality and completeness.
+      Scores below 70 should trigger architecture review.
+      Known gaps must be addressed before PRP creation.
+    sections:
+      - id: confidence-scores
+        title: Confidence Scores
+        type: structured
+        instruction: Rate confidence in each dimension (0-100 scale)
+        components:
+          - Requirements Coverage [0-100] (Percentage of PRD requirements fully addressed in architecture)
+          - Technical Feasibility [0-100] (Confidence that this architecture is implementable with available resources and technology)
+          - Scalability Confidence [0-100] (Confidence that system will scale to meet stated performance and user load requirements)
+          - Security Confidence [0-100] (Confidence that all security requirements and best practices are adequately addressed)
+          - Testability Confidence [0-100] (Confidence that architecture supports comprehensive automated testing at all levels)
+          - Overall Architecture Score [0-100] (Average of above five scores - auto-calculated)
+      - id: gaps-and-risks
+        title: Known Gaps & Risk Factors
+        type: structured
+        instruction: Document unresolved questions and top architectural risks
+        components:
+          - Known Gaps (List any unresolved architectural questions or areas needing further investigation)
+          - Top 3 Architectural Risks (Identify the three highest-impact risks with brief mitigation approaches)
+          - Dependencies on External Decisions (List any architecture decisions blocked by external factors or pending decisions)
+          - Recommended Next Steps (Actions needed to address gaps and de-risk architecture before implementation)
+
+  - id: prp-creation-guidance
+    title: PRP Creation Guidance
+    instruction: |
+      Provide specific guidance for PRP creators on implementing this architecture.
+      This section bridges architecture and implementation, enabling one-pass PRP success.
+    elicit: false
+    sections:
+      - id: critical-sections-for-prps
+        title: Critical Architecture Sections for PRPs
+        type: structured-list
+        instruction: |
+          List specific architecture sections with page/line references that PRP creators must review.
+          Be explicit about where to find implementation details.
+        template: |
+          - Section [Number]: [Section Name] → [What it provides for implementation]
+            - Lines/Pages: [Specific reference]
+            - Critical for: [Which stories/features]
+            - Key Details: [What implementer needs to extract]
+        examples:
+          - "Section 3.2: Database Schema (lines 145-178) → Data model definitions"
+          - "Section 4.1: API Design (lines 201-245) → Request/response schemas"
+          - "Section 5.3: Authentication Flow (lines 312-340) → Security implementation"
+
+      - id: implementation-priorities-epic-based
+        title: Implementation Priorities (Epic-Based)
+        type: structured-list
+        instruction: |
+          Break down implementation by epic with specific architecture sections to reference.
+          Enable just-in-time PRP creation per epic.
+        template: |
+          Epic [Number]: [Epic Name]
+          Priority: [High/Medium/Low]
+          Architecture Sections:
+            - [Section references specific to this epic]
+          Foundation Requirements:
+            - [Core infrastructure needed before this epic]
+          Dependencies:
+            - [Other epics or systems this depends on]
+        examples:
+          - "Epic 1: Core Authentication"
+          - "  - Sections: 3.1 (User Model), 4.2 (Auth API), 5.3 (Security)"
+          - "  - Foundation: Database setup, API framework, session management"
+          - "  - Dependencies: None (foundational epic)"
+
+      - id: architectural-constraints
+        title: Architectural Constraints for Implementation
+        type: structured-list
+        instruction: |
+          List architectural constraints and their implementation implications.
+          These are non-negotiable decisions that constrain implementation approaches.
+        template: |
+          Constraint: [Architectural decision or limitation]
+          Implication: [How this affects implementation]
+          Rationale: [Why this constraint exists]
+          Examples: [Concrete implementation examples]
+        examples:
+          - "Must use PostgreSQL 14+: Affects data models, migrations, connection pooling"
+          - "API must be RESTful: No GraphQL, affects endpoint design and versioning"
+          - "Frontend must work offline: Requires local state, sync strategy, conflict resolution"
+
+      - id: pattern-examples
+        title: Implementation Pattern Examples
+        type: structured-list
+        instruction: |
+          Provide specific file references for each major pattern type.
+          These serve as concrete examples for PRP creators to reference.
+        categories:
+          Component Patterns:
+            - "Example: [Specific file path and lines]"
+            - "Pattern: [What pattern it demonstrates]"
+            - "Use for: [Which features should follow this pattern]"
+          API Patterns:
+            - "Example: [Specific file path and lines]"
+            - "Pattern: [Request/response structure, error handling, validation]"
+            - "Use for: [Which endpoints should follow this pattern]"
+          Data Access Patterns:
+            - "Example: [Specific file path and lines]"
+            - "Pattern: [Repository pattern, ORM usage, query optimization]"
+            - "Use for: [Which data operations should follow this pattern]"
+          Test Patterns:
+            - "Example: [Specific file path and lines]"
+            - "Pattern: [Unit test structure, fixtures, mocks]"
+            - "Use for: [Which components should follow this testing approach]"
+        examples:
+          - "Component: src/components/UserProfile/index.tsx (props, state, styling)"
+          - "API: src/api/users/createUser.ts (validation, error handling, response)"
+          - "Data: src/repositories/UserRepository.ts (query patterns, transactions)"
+          - "Test: tests/unit/services/UserService.test.ts (fixtures, mocks, assertions)"
+
+      - id: known-gotchas
+        title: Known Gotchas for Implementation
+        type: structured-list
+        instruction: |
+          Document technology-specific gotchas and workarounds.
+          These prevent common pitfalls during implementation.
+        template: |
+          Technology/Library: [Specific technology]
+          Gotcha: [Specific issue to avoid]
+          Workaround: [How to handle it correctly]
+          Example: [Code example or reference]
+        examples:
+          - "React 18: useEffect cleanup required for async operations"
+          - "PostgreSQL: Use parameterized queries to prevent SQL injection"
+          - "JWT: Store tokens in httpOnly cookies, not localStorage"
+          - "TypeScript: Use strict mode, avoid 'any' type"
+
+      - id: validation-command-examples
+        title: Validation Command Examples
+        type: structured-list
+        instruction: |
+          Provide working validation commands for each validation level.
+          These commands should be copy-pasteable for PRP validation sections.
+        categories:
+          Level 1 (Syntax/Style):
+            - "Command: [Exact command to run]"
+            - "Expected Output: [What success looks like]"
+            - "Common Issues: [What might fail and why]"
+          Level 2 (Unit Tests):
+            - "Command: [Exact command to run]"
+            - "Coverage Target: [Minimum coverage percentage]"
+            - "Test Structure: [Where tests should be located]"
+          Level 3 (Integration Tests):
+            - "Command: [Exact command to run]"
+            - "Environment Setup: [What needs to be running]"
+            - "Test Data: [How to set up test data]"
+          Level 4 (Domain Validation):
+            - "Command: [Domain-specific validation]"
+            - "Success Criteria: [What validates successful implementation]"
+        examples:
+          - "Level 1: npm run lint && npm run typecheck"
+          - "Level 2: npm test -- --coverage --coverageThreshold=80"
+          - "Level 3: docker-compose up -d && npm run test:integration"
+          - "Level 4: npm run test:e2e -- --spec=user-authentication"
+
+      - id: epic-learning-integration
+        title: Epic Learning Integration Points
+        type: text
+        instruction: |
+          For Epic 2+ architectures, document how Epic 1 learnings were applied.
+          This creates a feedback loop for continuous improvement.
+        template: |
+          If this is Epic 2 or later:
+
+          **Learnings Applied from Previous Epic:**
+          - [Pattern that worked well in Epic 1, now applied here]
+          - [Issue discovered in Epic 1, now addressed in this architecture]
+          - [Gotcha from Epic 1 implementation, documented in Known Gotchas above]
+
+          **Architecture Adjustments Based on Implementation Insights:**
+          - [How actual implementation informed this architecture]
+          - [Technology decisions refined based on Epic 1 experience]
+
+validation:
+  completeness-check:
+    - All PRD requirements addressed
+    - Technology choices justified
+    - Security measures comprehensive
+    - Scalability approach defined
+    - Development patterns documented
+  handoff-readiness:
+    - Sufficient detail for PRP creation
+    - Implementation patterns clear
+    - Testing approach defined
+    - Deployment strategy documented
+  zero-knowledge-test:
+    - New developer can understand system
+    - All design decisions explained
+    - No implicit assumptions
+    - Complete context provided

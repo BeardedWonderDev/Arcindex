@@ -1,0 +1,217 @@
+# <!-- Powered by CODEX™ Core -->
+template:
+  id: codex-prd-template-v1
+  name: CODEX Product Requirements Document
+  version: 1.0
+output_file: "docs/prd.md"
+
+workflow:
+  mode: interactive
+  elicitation: advanced-elicitation
+
+context-integration:
+  - source: docs/project-brief.md
+    purpose: Extract business context, goals, and constraints
+    required: true
+  - source: .codex/state/workflow.json
+    purpose: Maintain workflow state and context
+    required: false
+
+sections:
+  - id: executive-summary
+    title: Executive Summary
+    instruction: |
+      Synthesize key insights from project brief into concise executive summary.
+      Include: Problem statement, target market, key differentiators, success metrics.
+      This section provides quick context for all stakeholders.
+    sections:
+      - id: product-vision
+        title: Product Vision
+        type: paragraph
+        instruction: One compelling paragraph describing the product's ultimate goal and impact
+      - id: value-proposition
+        title: Value Proposition
+        type: bullet-list
+        instruction: 3-5 key value points that differentiate this product
+      - id: success-metrics
+        title: Success Metrics
+        type: table
+        columns: [Metric, Target, Measurement Method, Timeline]
+        instruction: Quantifiable success criteria from project brief
+
+  - id: requirements
+    title: Requirements
+    instruction: |
+      Define comprehensive functional and non-functional requirements.
+      Reference project brief for business requirements and constraints.
+      Ensure requirements are testable and traceable.
+    elicit: true
+    sections:
+      - id: functional
+        title: Functional Requirements
+        type: numbered-list
+        prefix: FR
+        instruction: Each requirement must be specific, measurable, and testable
+        validation:
+          - Each requirement has acceptance criteria
+          - Requirements map to user stories
+          - Priority levels assigned (P0-P3)
+        examples:
+          - "FR1: [P0] User authentication via OAuth 2.0 with support for Google and Apple providers"
+          - "FR2: [P1] Real-time data synchronization across devices with conflict resolution"
+      - id: non-functional
+        title: Non-Functional Requirements
+        type: numbered-list
+        prefix: NFR
+        instruction: Performance, security, scalability, and operational requirements
+        categories:
+          - Performance (response time, throughput)
+          - Security (authentication, encryption, compliance)
+          - Scalability (user load, data volume)
+          - Reliability (uptime, recovery)
+          - Usability (accessibility, learning curve)
+        examples:
+          - "NFR1: [P0] 99.9% uptime SLA for production environment"
+          - "NFR2: [P0] Response time < 200ms for 95% of API requests"
+
+  - id: user-stories
+    title: User Stories and Epics
+    instruction: |
+      Create user stories grouped by epics. Each story must have:
+      - Clear actor and goal
+      - Acceptance criteria
+      - Priority and effort estimate
+      - Dependencies on other stories
+    elicit: true
+    sections:
+      - id: epics
+        title: Epic Breakdown
+        type: hierarchical-list
+        instruction: Group related user stories into epics for development planning
+        template: |
+          Epic: [Epic Name]
+          Goal: [Business goal this epic achieves]
+          Stories:
+            - As a [user type], I want [goal] so that [benefit]
+              AC: [Acceptance criteria]
+              Priority: [P0-P3]
+              Effort: [XS/S/M/L/XL]
+      - id: mvp-scope
+        title: MVP Scope Definition
+        type: checklist
+        instruction: Identify which epics and stories are in MVP vs. future phases
+
+  - id: technical-specifications
+    title: Technical Specifications
+    instruction: |
+      Define technical requirements and constraints.
+      This section bridges to architecture phase.
+      Focus on requirements, not implementation details.
+    elicit: true
+    sections:
+      - id: platform-requirements
+        title: Platform Requirements
+        type: structured-list
+        categories:
+          - Target Platforms (iOS versions, devices, etc.)
+          - Development Constraints
+          - Deployment Environment
+          - Third-party Dependencies
+      - id: integration-requirements
+        title: Integration Requirements
+        type: table
+        columns: [System, Purpose, Protocol, Authentication, Data Format]
+        instruction: External systems and APIs that must be integrated
+      - id: data-requirements
+        title: Data Requirements
+        type: structured-list
+        instruction: Data models, storage requirements, retention policies
+        categories:
+          - Core Entities and Relationships
+          - Storage Requirements
+          - Privacy and Compliance
+          - Backup and Recovery
+
+  - id: ui-ux-requirements
+    title: UI/UX Requirements
+    condition: Product has user interface
+    instruction: |
+      Define user experience requirements without implementation details.
+      Focus on user goals, flows, and interaction patterns.
+    elicit: true
+    sections:
+      - id: user-personas
+        title: User Personas
+        type: structured-list
+        template: |
+          Persona: [Name]
+          Role: [User type]
+          Goals: [What they want to achieve]
+          Pain Points: [Current frustrations]
+          Technical Proficiency: [Low/Medium/High]
+      - id: user-flows
+        title: Core User Flows
+        type: hierarchical-list
+        instruction: Map out critical user journeys from entry to goal completion
+      - id: accessibility
+        title: Accessibility Requirements
+        type: checklist
+        options: [WCAG 2.1 AA, VoiceOver Support, Dynamic Type, Dark Mode, Reduce Motion]
+      - id: localization
+        title: Localization Requirements
+        type: structured-list
+        categories:
+          - Supported Languages
+          - Regional Variations
+          - RTL Support
+          - Date/Time/Currency Formats
+
+  - id: risk-analysis
+    title: Risk Analysis
+    instruction: |
+      Identify and mitigate project risks early.
+      Consider technical, business, and operational risks.
+    sections:
+      - id: risk-matrix
+        title: Risk Matrix
+        type: table
+        columns: [Risk, Probability, Impact, Mitigation Strategy, Owner]
+        instruction: Document all identified risks with mitigation plans
+      - id: dependencies
+        title: External Dependencies
+        type: structured-list
+        instruction: Third-party services, APIs, or resources that could impact delivery
+      - id: assumptions
+        title: Assumptions and Constraints
+        type: bullet-list
+        instruction: Document all assumptions made during requirements gathering
+
+  - id: appendices
+    title: Appendices
+    sections:
+      - id: glossary
+        title: Glossary
+        type: definition-list
+        instruction: Define all technical terms and acronyms used
+      - id: changelog
+        title: Change Log
+        type: table
+        columns: [Date, Version, Changes, Author, Approval]
+        instruction: Track all versions and approvals of this PRD
+      - id: references
+        title: References
+        type: bullet-list
+        instruction: Link to project brief, research docs, competitor analysis, etc.
+
+validation:
+  completeness-check:
+    - All requirements have acceptance criteria
+    - User stories cover all functional requirements
+    - Non-functional requirements are measurable
+    - MVP scope is clearly defined
+    - Risk mitigation strategies identified
+  handoff-readiness:
+    - Architecture team has sufficient technical context
+    - Design team has clear UI/UX requirements
+    - Development team can estimate from user stories
+    - QA team can create test plans from acceptance criteria

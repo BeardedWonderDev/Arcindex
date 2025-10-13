@@ -1,0 +1,17 @@
+A RESTful API for task management with user authentication. Users should be able to register, login, and manage their tasks (create, view, update, delete). Tasks should be assignable to other users. Include basic task filtering by status.
+
+Developers building applications who need a task management backend API
+
+Need a simple, well-tested task API for integration into other apps
+
+API functional with auth, CRUD works, tests pass, under 4 hours to build
+
+User registration and JWT login, task CRUD operations, task assignment, task filtering, RESTful design with proper status codes
+
+Python with FastAPI, SQLite database, JWT auth, OpenAPI documentation, comprehensive tests
+
+MVP implementable in one 4-hour session
+
+None - greenfield project
+
+Authentication must work, all CRUD operations must be tested, RESTful conventions must be followed

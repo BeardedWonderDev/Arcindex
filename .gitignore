@@ -387,3 +387,8 @@ $RECYCLE.BIN/
 # End of https://www.toptal.com/developers/gitignore/api/visualstudiocode,macos,go,linux,nextjs,node,swift,windows,xcode
 
 # Custom rules (everything added below won't be overriden by 'Generate .gitignore File' if you use 'Update' option)
+
+# Test Harness - Exclude test results and archives
+.codex/test-harness/results/
+.codex/test-harness/archive/
+# BMAD (local only)

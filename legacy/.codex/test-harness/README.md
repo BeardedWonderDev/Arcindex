@@ -1,0 +1,400 @@
+# CODEX Test Harness
+
+Automated testing for CODEX workflow system with branch isolation.
+
+## Location
+
+The test harness is part of the CODEX system:
+```
+.codex/test-harness/     # Inside your CODEX repository
+```
+
+## Directory Structure
+
+```
+.codex/test-harness/
+├── scripts/              # Executable scripts
+│   ├── run-test.sh      # Start a new test
+│   ├── analyze-test.sh  # Analyze test results
+│   └── compare-tests.sh # Compare multiple runs
+├── templates/            # Test inputs
+│   └── discovery-inputs.txt
+├── results/              # Active test runs (gitignored)
+│   └── taskmaster-{branch}-{timestamp}/
+└── archive/              # Completed tests (gitignored)
+    └── taskmaster-{branch}-{timestamp}/
+```
+
+---
+
+## Quick Start
+
+### 1. Run a Test
+
+**Test uncommitted changes (fast iteration):**
+```bash
+.codex/test-harness/scripts/run-test.sh --local
+```
+Use this during development to test your current work without committing.
+
+**Test committed branch (reproducible validation):**
+```bash
+.codex/test-harness/scripts/run-test.sh main
+.codex/test-harness/scripts/run-test.sh v0.1-implementation
+.codex/test-harness/scripts/run-test.sh feature/quality-gates
+```
+
+**Interactive (prompts for branch):**
+```bash
+.codex/test-harness/scripts/run-test.sh
+
+# Shows menu:
+📋 Available branches:
+  1) main
+  2) v0.1-implementation
+Enter branch name or number [2]: _
+```
+
+### 2. Execute CODEX Workflow
+
+```bash
+# The script tells you the exact path - copy it
+cd .codex/test-harness/results/taskmaster-{branch}-{timestamp}
+
+# Start CODEX workflow
+/codex start greenfield-generic "TaskMaster API"
+
+# When prompted, copy-paste answers from discovery-inputs.txt
+cat discovery-inputs.txt
+```
+
+### 3. Analyze Results
+
+After CODEX completes:
+
+```bash
+.codex/test-harness/scripts/analyze-test.sh
+```
+
+This automatically:
+- Extracts epic/story structure
+- Pulls quality scores
+- Tracks branch and commit info
+- Calculates pass/fail
+- Archives if passed
+
+### 4. Compare Multiple Runs
+
+```bash
+.codex/test-harness/scripts/compare-tests.sh
+```
+
+Shows comparison:
+```
+| Test ID | Branch | Commit | PM | Arch | PRP | Epics | Stories | Result |
+|---------|--------|--------|----|----- |-----|-------|---------|--------|
+| taskmaster-main-1430 | main | a1b2c3d | 87 | 91 | 89 | 2 | 10 | ✅ PASS |
+```
+
+---
+
+## Testing Modes
+
+### Local Mode (--local)
+
+**Purpose:** Fast iteration during development - test uncommitted changes
+
+**Usage:**
+```bash
+./run-test.sh --local
+```
+
+**What it does:**
+- Copies `.codex/` and `.claude/` from your **working tree** (includes uncommitted changes)
+- Creates test with `taskmaster-local-{branch}-{timestamp}` naming
+- Captures `git diff` for reproducibility
+- Archives to separate `archive/local/` directory
+
+**When to use:**
+- Testing changes before committing
+- Rapid iteration on quality gates
+- Debugging workflow issues
+- Development workflow validation
+
+**Limitations:**
+- ⚠️ Limited reproducibility (working tree state changes)
+- ⚠️ Not suitable for branch comparison
+- ⚠️ Archived separately from branch tests
+
+---
+
+### Branch Mode (git archive)
+
+**Purpose:** Reproducible validation and branch comparison
+
+**Usage:**
+```bash
+./run-test.sh main
+./run-test.sh feature/my-feature
+```
+
+**What it does:**
+- Extracts `.codex/` and `.claude/` from specific **git commit** (git archive)
+- Never touches working tree
+- Full commit traceability
+- Perfect reproducibility
+
+**When to use:**
+- Pre-merge validation
+- Branch quality comparison
+- Regression testing
+- Historical analysis
+
+---
+
+## How Testing Works
+
+Each test creates a **completely isolated environment** outside your repository:
+
+```
+results/taskmaster-main-20251008-1430/
+├── .codex/                    # Complete CODEX system from 'main' branch
+├── .claude/commands/codex.md  # /codex command from 'main' branch
+├── .claude/agents/            # Agent definitions (if exist)
+├── test-metadata.json         # Branch, commit, timestamp
+└── discovery-inputs.txt       # Standardized test inputs
+```
+
+**Benefits:**
+- ✅ Test any branch without affecting your working tree
+- ✅ Compare branches side-by-side
+- ✅ Test multiple branches concurrently
+- ✅ Full traceability (branch + commit tracked)
+
+### Use Cases
+
+**1. Test Before Merging:**
+```bash
+cd .codex/test-harness/scripts
+
+# Test feature branch
+./run-test.sh feature/new-quality-gates
+
+# Compare to main
+./run-test.sh main
+
+# Review comparison
+./compare-tests.sh
+```
+
+**2. Regression Testing:**
+```bash
+# Test current branch
+./run-test.sh v0.1-implementation
+
+# Compare to previous test
+./compare-tests.sh
+```
+
+**3. Rapid Development Iteration:**
+```bash
+# Make changes to quality gates, no commit needed
+# ... edit .codex/agents/quality-gate.md ...
+
+# Test immediately
+./run-test.sh --local
+cd ../codex-tests/taskmaster-local-*
+/codex start greenfield-generic "TaskMaster API"
+
+# Analyze
+.codex/test-harness/scripts/analyze-test.sh
+
+# Make more changes and repeat (no commits!)
+```
+
+**4. Validate Before Committing:**
+```bash
+# After development iteration, commit when ready
+git add .
+git commit -m "feat: improve quality gate scoring"
+
+# Test committed version
+.codex/test-harness/scripts/run-test.sh HEAD
+
+# Compare to main
+.codex/test-harness/scripts/run-test.sh main
+.codex/test-harness/scripts/compare-tests.sh
+```
+
+---
+
+## What Gets Tested
+
+### Functionality
+- ✅ Epic/story structure generated by CODEX
+- ✅ Quality gate scores (PM, Architect, PRP)
+- ✅ Epic learning integration
+- ✅ Document completeness
+- ✅ Workflow state management
+
+### Quality Metrics
+- **PM Quality Score** - PRD completeness and structure
+- **Architect Quality Score** - Architecture design quality
+- **PRP Quality Score** - Implementation guide quality
+- **Epic Count** - How CODEX divided functionality
+- **Story Count** - Number of user stories created
+
+---
+
+## Success Criteria
+
+### Pass Thresholds
+- PM Quality Score ≥ 80
+- Architect Quality Score ≥ 85
+- Test completes without errors
+
+### Result Categories
+- **✅ PASS** - All criteria met (0 failures)
+- **⚠️ CONDITIONAL** - Minor issues (1 failure)
+- **❌ FAIL** - Multiple failures (2+ failures)
+
+---
+
+## Files Generated
+
+### Each Test Creates
+
+**Test Configuration:**
+- `test-metadata.json` - Branch, commit, timestamp
+- `discovery-inputs.txt` - Standardized test inputs
+- `README-TEST.md` - Test documentation
+
+**CODEX Outputs:**
+- `docs/project-brief.md` - Business analysis
+- `docs/prd.md` - Product requirements
+- `docs/architecture.md` - Technical design
+- `PRPs/*.md` - Implementation guides
+- `.codex/state/workflow.json` - Workflow state with quality scores
+
+**Test Results:**
+- `analysis-results.txt` - Detailed analysis
+- `TEST-RESULT.txt` - Quick summary
+
+### Archived Tests
+
+Passed tests are automatically archived to `archive/taskmaster-{branch}-{timestamp}/`
+
+---
+
+## Test Inputs
+
+### Standardized Discovery Answers
+
+Located in `templates/discovery-inputs.txt`:
+
+```
+Q1: RESTful API for task management with user authentication...
+Q2: Developers building applications...
+Q3: Need a simple, well-tested task API...
+Q4: API functional with auth, CRUD works, tests pass...
+Q5: User registration and JWT login, task CRUD operations...
+Q6: Python with FastAPI, SQLite database, JWT auth...
+Q7: MVP implementable in one 4-hour session
+Q8: None - greenfield project
+Q9: Authentication must work, all CRUD operations tested...
+```
+
+These inputs are consistent across all test runs, ensuring comparable results.
+
+---
+
+## Troubleshooting
+
+### Branch doesn't exist
+```
+❌ Branch 'feature/typo' does not exist
+```
+**Fix:** Check branch name spelling
+
+### .codex/ not found in branch
+```
+❌ Failed to extract .codex/ from branch develop
+```
+**Fix:** Test a different branch with CODEX implementation
+
+### Can't find previous tests
+```
+No archived tests found.
+```
+**Fix:** Run at least one test that passes before using compare-tests.sh
+
+---
+
+## Advanced Usage
+
+### Test Specific Commit
+```bash
+# Tag a specific commit
+git tag test-commit-v1 <commit-hash>
+
+# Test that commit
+.codex/test-harness/scripts/run-test.sh test-commit-v1
+```
+
+### Compare Feature vs Main
+```bash
+cd .codex/test-harness/scripts
+
+# Run both tests
+./run-test.sh main
+./run-test.sh feature/my-feature
+
+# Compare results
+./compare-tests.sh
+```
+
+### Concurrent Testing
+```bash
+# Terminal 1
+.codex/test-harness/scripts/run-test.sh main
+cd .codex/test-harness/results/taskmaster-main-...
+/codex start greenfield-generic "TaskMaster API"
+
+# Terminal 2 (simultaneously)
+.codex/test-harness/scripts/run-test.sh develop
+cd .codex/test-harness/results/taskmaster-develop-...
+/codex start greenfield-generic "TaskMaster API"
+```
+
+---
+
+## Architecture Note
+
+The test harness is part of `.codex/` because:
+- ✅ It's CODEX development infrastructure
+- ✅ It tests CODEX functionality
+- ✅ It evolves with CODEX
+- ✅ Different branches can have different test harness versions
+- ✅ Self-extracting: testing a branch extracts that branch's test harness
+
+**Git Configuration:**
+Results and archives are gitignored via `.gitignore`:
+```
+.codex/test-harness/results/
+.codex/test-harness/archive/
+```
+
+---
+
+## Tips
+
+1. **Test regularly** - Run tests after significant changes
+2. **Compare branches** - Always compare feature branches to main
+3. **Track trends** - Use compare-tests.sh to spot quality degradation
+4. **Archive results** - Keep archived tests for historical comparison
+5. **Document anomalies** - Note unusual results in test metadata
+
+---
+
+**Version:** 1.2.0 (Added --local mode)
+**Last Updated:** 2025-10-09
