@@ -1,0 +1,41 @@
+[build-system]
+requires = ["setuptools>=67.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "arcindex"
+version = "0.0.1"
+description = "Arcindex CLI runtime scaffolding for the OpenAI Codex SDK migration."
+readme = "README.md"
+requires-python = ">=3.9"
+license = "MIT"
+authors = [{ name = "Arcindex Team" }]
+dependencies = [
+    "click>=8.1",
+    "pyyaml>=6.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4",
+    "ruff>=0.4.0",
+    "mypy>=1.8",
+]
+
+[project.scripts]
+arcindex = "arcindex.cli:main"
+
+[tool.setuptools]
+packages = ["arcindex"]
+
+[tool.pytest.ini_options]
+testpaths = ["arcindex/tests"]
+addopts = "-q"
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.mypy]
+python_version = "3.11"
+strict = false

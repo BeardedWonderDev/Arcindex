@@ -10,7 +10,7 @@ Use this file to prime Codex CLI before taking actions in the repository. It sum
 - **Vision at Completion:** A self-contained CLI that orchestrates end-to-end software delivery by coordinating specialized agents (discovery → QA), capturing elicitation inputs, enforcing evidence-based quality gates, and generating implementation-ready artifacts that enable one-pass execution across multiple languages.
 - **Lineage:** Builds on the BMAD Method (multi-agent planning, elicitation standards, checklist rigor) and the PRP system (context-rich implementation prompts) that informed the original CODEX implementation.
 - **Goal:** Rebuild the legacy CODEX orchestration platform as a Python CLI powered by the OpenAI Codex SDK, preserving quality gates, elicitation, and multi-agent workflow coordination while modernizing the runtime and SDK abstraction.
-- **Current Phase:** Migration Phase 0 (scaffolding `codex-sdk/`, Python environment, tooling baseline). Discovery orchestrator work begins in Phase 1.
+- **Current Phase:** Migration Phase 0 (scaffolding `arcindex/`, Python environment, tooling baseline). Discovery orchestrator work begins in Phase 1.
 
 ---
 
@@ -18,7 +18,7 @@ Use this file to prime Codex CLI before taking actions in the repository. It sum
 
 | Path | Purpose | Notes |
 |------|---------|-------|
-| `codex-sdk/` | Future home of the new CLI runtime, orchestrator, agents, tools, configs, tests | Mostly scaffolding during Phase 0 |
+| `arcindex/` | Future home of the new CLI runtime, orchestrator, agents, tools, configs, tests | Mostly scaffolding during Phase 0 |
 | `legacy/` | Archived CODEX implementation (reference only) | Contains `.codex/`, `.bmad-core/`, docs, PRPs, test harness |
 | `MIGRATION-PLAN.md` | Source of truth for phased rebuild | Review before scoping tasks |
 | `README.md` | Public-facing overview updated for Arcindex | Mirrors legacy structure with new status |
@@ -56,7 +56,7 @@ Reference `MIGRATION-PLAN.md` for the full roadmap through Phase 7.
 
 ---
 
-## 5. Working with Codex CLI
+## 5. Working with Arcindex CLI
 
 1. **Initialize Session**
    - Read this file.
@@ -72,7 +72,8 @@ Reference `MIGRATION-PLAN.md` for the full roadmap through Phase 7.
    - Adapt structures for Python modules, YAML configs, or JSON state as appropriate.
 
 4. **Testing Philosophy**
-   - Create lightweight unit tests as you build out `codex-sdk/`.
+   - Create lightweight unit tests as you build out `arcindex/`.
+   - Use `arcindex/test-harness/scripts/run-test.sh` to spin up disposable sandboxes for manual validation.
    - End-to-end harness will be reintroduced once discovery orchestrator is running.
 
 5. **Logging Decisions**
@@ -101,7 +102,7 @@ These are the target personas the SDK will expose; keep them in mind as you defi
 
 ## 7. Contribution Checklist
 
-Before finishing a Codex CLI session:
+Before finishing an Arcindex CLI session:
 
 - [ ] Updated or confirmed relevant sections of README / migration plan / this guide.
 - [ ] Added or adjusted SDK scaffolding according to the active phase.

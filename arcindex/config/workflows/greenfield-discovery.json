@@ -1,0 +1,13 @@
+{
+  "workflow_id": "greenfield-discovery",
+  "version": "0.0.1-phase0",
+  "description": "Placeholder discovery workflow stub. Populated fully during Phase 1.",
+  "phases": [
+    {
+      "phase": "project_discovery",
+      "agent": "discovery",
+      "status": "scaffolding",
+      "notes": "Questions, elicitation menus, and quality gates will be ported from legacy/.codex/workflows/greenfield-generic.yaml."
+    }
+  ]
+}

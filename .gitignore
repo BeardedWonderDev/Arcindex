@@ -391,4 +391,7 @@ $RECYCLE.BIN/
 # Test Harness - Exclude test results and archives
 .codex/test-harness/results/
 .codex/test-harness/archive/
+# Arcindex Test Harness artifacts
+arcindex/test-harness/results/
+arcindex/test-harness/archive/
 # BMAD (local only)

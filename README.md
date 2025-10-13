@@ -99,8 +99,8 @@ The migration is captured in detail inside [`MIGRATION-PLAN.md`](MIGRATION-PLAN.
 |-------|--------|-------|
 | Repository restructure | ✅ | Legacy CODEX archived under `legacy/`; root prepared for SDK build |
 | Migration plan | ✅ | Phased strategy documented in `MIGRATION-PLAN.md` |
-| SDK scaffolding | 🚧 | Phase 0: scaffolding `codex-sdk/`, CLI entry point, tooling baseline |
-| Discovery orchestration | ⚪ | Phase 1: implement orchestrator loop, discovery agent, state persistence |
+| SDK scaffolding | ✅ | Phase 0: scaffolding `arcindex/`, CLI entry point, tooling baseline |
+| Discovery orchestration | 🚧 | Phase 1: CLI-based discovery workflow available; analyst handoff queued |
 | Analyst/PM/Architect phases | ⚪ | Planned follow-on phases after discovery parity |
 | PRP & QA automation | ⚪ | Targeted for later migration phases (5–6) |
 | Documentation refresh | 🚧 | README updated; deeper docs follow as phases land |
@@ -131,9 +131,11 @@ Arcindex is currently in early migration. Until the new CLI is shipped, setup fo
    python -m venv .venv
    source .venv/bin/activate
    ```
-3. **Install development requirements** *(placeholder – will be finalized during Phase 0)*
+3. **Install development requirements**
    ```bash
-   pip install -r codex-sdk/requirements-dev.txt
+   pip install -r arcindex/requirements-dev.txt
+   # or, if you prefer editable installs:
+   pip install -e '.[dev]'
    ```
 4. **Review the migration plan**
    ```bash
@@ -151,20 +153,41 @@ Arcindex is currently in early migration. Until the new CLI is shipped, setup fo
 
 ## Usage
 
-Usage examples will land as each migration phase completes. Planned CLI invocation pattern:
+### Run the Discovery Workflow
+
+1. **Install the project locally** (editable mode recommended):
+   ```bash
+   pip install -e '.[dev]'
+   ```
+
+2. **Create an answers file** with responses to the nine discovery questions (numbered `1.` through `9.`).
+
+3. **Start the CLI**:
+   ```bash
+   arcindex start --project-name "Arcindex" --answers-file path/to/answers.txt --elicitation-choice 1
+   ```
+
+   If you prefer not to install the package, set `PYTHONPATH=.` and run `python3 -m arcindex.cli ...` instead.
+
+4. **Optional flags**:
+   - `--config` – point to a custom runtime configuration file.
+   - `--mode` – override the operation mode (`interactive`, `batch`, or `yolo`).
+   - `--answers-file` – provide a numbered answers file to skip interactive prompts.
+   - `--elicitation-choice` – non-interactive selection for the elicitation menu (default is `1`).
+
+The CLI writes `workflow.json` and `discovery-summary.json` to the configured state directory, ready for the analyst phase in the upcoming milestone.
+
+### Spin Up an Isolated Test Workspace
+
+Use the built-in harness to create disposable sandboxes so you can experiment without touching the main project tree:
 
 ```bash
-# Initialize a new workflow (planned Phase 1 milestone)
-python -m codex_sdk.cli start greenfield-discovery --project "Example App"
-
-# Resume a workflow from state (future milestone)
-python -m codex_sdk.cli resume --workflow-id WF-2025-001
-
-# Run validation gates (future milestone)
-python -m codex_sdk.cli validate --phase architecture
+arcindex/test-harness/scripts/run-test.sh --local
+# or test a different branch
+arcindex/test-harness/scripts/run-test.sh --branch main
 ```
 
-A dedicated section with real command examples will be added once the discovery orchestrator is functional.
+Each run produces a new folder under `arcindex/test-harness/results/arcindex-<mode>-<timestamp>/` containing a clean copy of the code and a pre-filled `discovery-inputs.txt`. Follow the printed instructions to install dependencies and run `arcindex start ...` inside the sandbox. Delete the folder when you're done.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -190,7 +213,7 @@ As phases complete, this section will expand with concrete capabilities and link
 ## Roadmap
 
 - [x] Repository restructure and migration plan
-- [ ] Phase 0: Scaffold `codex-sdk/`, Python environment, lint/test tooling
+- [ ] Phase 0: Scaffold `arcindex/`, Python environment, lint/test tooling
 - [ ] Phase 1: Discovery orchestrator MVP (CLI entry point, state persistence, elicitation)
 - [ ] Phase 2: Analyst phase integration with gating and artifact generation
 - [ ] Phase 3: Product management phase (PRD generation, checklist enforcement)

@@ -1,0 +1,9 @@
+1. Arcindex Testing Workspace
+2. Arcindex is a CLI orchestrator that coordinates multi-agent workflows for software delivery, ensuring discovery data is captured and downstream phases have consistent context.
+3. Engineering teams and product leaders who need structured, repeatable delivery workflows with clear quality gates.
+4. Internal interviews with pilot teams; plan to run five workflow retrospectives to validate goals before expanding.
+5. Legacy CODEX scripts, bespoke Jira processes, and ad-hoc prompt libraries used by different teams today.
+6. Rising demand for AI-assisted delivery tooling that enforces evidence-based gates and maintains zero-knowledge restart capability.
+7. Python 3.11+, Click-based CLI, JSON state persistence, optional OpenAI SDK integration.
+8. Git for exporting state, optional links to internal knowledge bases, future integration with ticketing systems.
+9. Success measured by reduced onboarding time (<30 minutes) and end-to-end workflow completion within a single coordinator session.

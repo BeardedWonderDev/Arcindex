@@ -1,0 +1,20 @@
+# Placeholder runtime configuration for Arcindex.
+#
+# Phase 1 will port the full schema from legacy/.codex/config/codex-config.yaml and
+# introduce stricter validation. For now we capture the key sections so dependent
+# code has predictable anchors.
+
+system:
+  version: "0.0.1-phase1"
+  default_workflow: "greenfield-discovery"
+
+workflows:
+  directory: "./workflows"
+
+state:
+  persistence: "../state"
+  workflow_template: "../state/workflow_template.json"
+
+elicitation:
+  default_mode: "interactive"
+  methods_source: "../../legacy/.codex/data/elicitation-methods.md"  # TODO: migrate in Phase 1

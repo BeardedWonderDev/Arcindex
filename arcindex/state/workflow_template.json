@@ -1,0 +1,79 @@
+{
+  "workflow_id": "",
+  "workflow_type": "",
+  "project_name": null,
+  "current_phase": "discovery",
+  "completed_phases": [],
+  "operation_mode": "interactive",
+  "mode_initialized_at": null,
+  "project_discovery": {
+    "project_name": null,
+    "project_concept": null,
+    "existing_inputs": null,
+    "discovery_timestamp": null,
+    "discovery_completed": false,
+    "discovery_summary_path": null,
+    "project_scope": null,
+    "target_users": null,
+    "user_research_status": null,
+    "competitive_landscape": null,
+    "market_opportunities": null,
+    "technical_constraints": null,
+    "integration_requirements": null,
+    "success_criteria": null,
+    "business_goals": null
+  },
+  "agent_context": {
+    "current_agent": "discovery",
+    "transformation_history": [],
+    "last_transformation": null
+  },
+  "elicitation_history": [],
+  "elicitation_required": {
+    "discovery": true,
+    "analyst": true,
+    "pm": true,
+    "architect": true,
+    "prp_creator": true,
+    "dev": false,
+    "qa": false
+  },
+  "elicitation_completed": {
+    "discovery": false,
+    "analyst": false,
+    "pm": false,
+    "architect": false,
+    "prp_creator": false,
+    "dev": false,
+    "qa": false
+  },
+  "documents": {},
+  "context_checkpoints": [],
+  "validation_results": {},
+  "quality_gate_results": {
+    "discovery": null,
+    "analyst": null,
+    "pm": null,
+    "architect": null,
+    "prp": null
+  },
+  "quality_scores": {},
+  "validation_evidence": {
+    "discovery": [],
+    "analyst": [],
+    "pm": [],
+    "architect": [],
+    "prp": []
+  },
+  "violation_log": [],
+  "feedback_requests": [],
+  "failure_escalations": [],
+  "epic_learnings": {
+    "current_epic": null,
+    "learnings": []
+  },
+  "execution_reports": [],
+  "started_at": null,
+  "last_updated": null,
+  "status": "inactive"
+}

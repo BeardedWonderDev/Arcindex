@@ -19,7 +19,7 @@ This document captures the end-to-end plan for porting CODEX from the legacy Cla
 - Keep repo root clean for the new SDK:
   - `.git/`, `.github/` (issue templates), `.gitignore`, `.npmignore`
   - `LICENSE`, `README.md`
-  - New SDK implementation (to be scaffolded under `codex-sdk/`)
+  - New SDK implementation (to be scaffolded under `arcindex/`)
 
 ---
 
@@ -27,12 +27,12 @@ This document captures the end-to-end plan for porting CODEX from the legacy Cla
 
 - **Interface:** CLI-based runner built with Python (`click` or `argparse`).
 - **Core components:**
-  - `codex-sdk/orchestrator/`: workflow controller (`controller.py`, `state.py`).
-  - `codex-sdk/agents/`: per-persona assistant configs (YAML/JSON).
-  - `codex-sdk/tools/`: SDK function-call implementations for reusable tasks.
-  - `codex-sdk/resources/`: templates, checklists, elicitation methods.
-  - `codex-sdk/config/`: workflow definitions (`config/workflows/`) and runtime settings.
-  - `codex-sdk/tests/`: harness adapters and unit/integration tests.
+  - `arcindex/orchestrator/`: workflow controller (`controller.py`, `state.py`).
+  - `arcindex/agents/`: per-persona assistant configs (YAML/JSON).
+  - `arcindex/tools/`: SDK function-call implementations for reusable tasks.
+  - `arcindex/resources/`: templates, checklists, elicitation methods.
+  - `arcindex/config/`: workflow definitions (`config/workflows/`) and runtime settings.
+  - `arcindex/tests/`: harness adapters and unit/integration tests.
 - **State management:** JSON store (initially) mirroring legacy `workflow.json`, with future option to migrate to DB or vector store.
 - **Test harness:** Update existing scripts to call the new CLI; reuse result comparison patterns.
 
@@ -42,19 +42,27 @@ This document captures the end-to-end plan for porting CODEX from the legacy Cla
 
 ### Phase 0 – Foundations
 
-1. Scaffold the new directory structure under `codex-sdk/`.
+1. Scaffold the new directory structure under `arcindex/`.
 2. Set up Python environment (`pyproject.toml` / `requirements.txt`) and lint/test tooling.
-3. Draft initial runtime config (`codex-sdk/config/runtime.yaml`) and workflow stub (`codex-sdk/config/workflows/greenfield-discovery.json`).
+3. Draft initial runtime config (`arcindex/config/runtime.yaml`) and workflow stub (`arcindex/config/workflows/greenfield-discovery.json`).
+4. Provide a lightweight test harness (`arcindex/test-harness/`) to spin up isolated workspaces for manual validation.
 
 ### Phase 1 – Minimal Orchestrator (Discovery Only)
 
 1. Implement orchestrator core:
-   - Load workflow config and state snapshot.
-   - Register discovery assistant with the Codex SDK.
-   - Handle tool calls and basic elicitation flow.
-2. Port “project discovery” tools (document creation, elicitation options) from legacy tasks into `codex-sdk/tools/`.
-3. Create CLI entry point (`codex-sdk/cli.py`) that starts a discovery run.
-4. Write smoke tests covering discovery end-to-end via the CLI.
+   - Load workflow config and runtime state snapshot.
+   - Register the discovery assistant with the Codex SDK.
+   - Mirror legacy `/codex start` behavior (verbatim question display, menu echo) using the output-handling rules from `legacy/.codex/tasks/protocols/workflow-start.md`.
+   - Handle tool calls and basic elicitation flow, respecting interactive/batch/yolo modes.
+2. Recreate discovery state management:
+   - Port the logic from `legacy/.codex/tasks/state-manager.md` so the Python runtime can initialize and update `workflow.json` based on the template in `legacy/.codex/state/workflow.json.template`.
+   - Persist discovery summaries via a new module equivalent to `legacy/.codex/tasks/persist-discovery-summary.md`, writing the same nine-field schema to `arcindex/state/discovery-summary.json`.
+3. Port discovery tooling into the SDK:
+   - Implement advanced elicitation menus (option 1 = proceed, 1–9 numbering) using `legacy/.codex/tasks/advanced-elicitation.md` plus the methods catalog in `legacy/.codex/data/elicitation-methods.md`.
+   - Bring forward any discovery-specific tasks or helpers referenced by the agent definition.
+4. Create CLI entry point (`arcindex/cli.py`) that exposes `start`/`continue` commands and enforces the same UX contract described in the legacy orchestrator (`legacy/.codex/agents/orchestrator.md`).
+5. Introduce a lightweight quality gate runner capable of executing `legacy/.codex/checklists/discovery-quality-gate.md` against the new state files.
+6. Write smoke tests covering discovery end-to-end via the CLI, including fixtures that compare discovery summaries against legacy outputs.
 
 ### Phase 2 – Analyst Phase Integration
 
@@ -62,6 +70,13 @@ This document captures the end-to-end plan for porting CODEX from the legacy Cla
 2. Extend workflow config to include discovery→analyst handoff with gating.
 3. Enhance orchestrator to manage multi-phase state, enforce elicitation, and log violations.
 4. Update tests to validate both phases and ensure documents match golden fixtures.
+
+### Legacy Reference Alignment (Phase 0–1)
+
+- Reuse BMAD orchestration patterns (`legacy/.bmad-core/agents/bmad-orchestrator.md`) to shape CLI help output, numbered menu presentation, and transformation affordances.
+- Cross-check SDK document tooling against BMAD’s template workflow (`legacy/.bmad-core/tasks/create-doc.md`) to keep elicitation, rationale, and permission handling consistent.
+- Preserve document and shard expectations called out in `legacy/.bmad-core/core-config.yaml` so later phases can reason over PRD/architecture file locations without rework.
+- Treat BMAD knowledge base assets (`legacy/.bmad-core/data/`) as the source for expanded elicitation or guidance features once the discovery MVP is stable.
 
 ### Phase 3 – Product Management Phase
 
@@ -104,7 +119,7 @@ This document captures the end-to-end plan for porting CODEX from the legacy Cla
 
 - Update `.codex/test-harness/` scripts (when migrated) to call the new CLI.
 - Maintain golden copies of generated docs to compare against legacy outputs during each phase.
-- Add unit tests per tool in `codex-sdk/tests/tools/` and integration tests per workflow in `codex-sdk/tests/workflows/`.
+- Add unit tests per tool in `arcindex/tests/tools/` and integration tests per workflow in `arcindex/tests/workflows/`.
 - Track KPIs (validation scores, elicitation compliance) by parsing state snapshots in tests.
 
 ---
@@ -127,8 +142,7 @@ This document captures the end-to-end plan for porting CODEX from the legacy Cla
 
 ## 7. Next Actions
 
-1. Create `codex-sdk/` scaffold with empty orchestrator, agents, tools, config, tests.
-2. Establish Python environment and initial dependency list.
-3. Migrate discovery assets (templates, checklists) from `legacy/` into `codex-sdk/resources/`.
-4. Implement minimal orchestrator loop and discovery assistant registration.
-
+1. Catalogue analyst assistant prompts, templates, and quality gates from the legacy system for Phase 2 porting.
+2. Design the multi-phase state extensions required for discovery→analyst handoff (elicitation history, document tracking, gating).
+3. Prototype analyst workflow definitions under `arcindex/config/workflows/` and align CLI ergonomics for transitioning phases.
+4. Expand the test suite with fixtures that validate analyst outputs against golden references once the phase lands.
