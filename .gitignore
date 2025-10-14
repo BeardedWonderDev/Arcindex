@@ -245,6 +245,7 @@ dist
 ### Python ###
 # Byte-compiled / optimized / DLL files
 __pycache__/
+runs/
 *.py[cod]
 *$py.class
 

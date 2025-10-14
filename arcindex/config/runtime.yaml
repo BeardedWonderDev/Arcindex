@@ -15,6 +15,9 @@ state:
   persistence: "../state"
   workflow_template: "../state/workflow_template.json"
 
+runs:
+  root: "../runs"
+
 elicitation:
   default_mode: "interactive"
   methods_source: "../../legacy/.codex/data/elicitation-methods.md"  # TODO: migrate in Phase 1

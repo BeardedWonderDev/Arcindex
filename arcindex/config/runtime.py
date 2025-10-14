@@ -51,6 +51,13 @@ class ElicitationSettings:
 
 
 @dataclass
+class RunsSettings:
+    """Run directory configuration."""
+
+    root: Path
+
+
+@dataclass
 class RuntimeConfig:
     """Resolved runtime configuration."""
 
@@ -58,6 +65,7 @@ class RuntimeConfig:
     system: SystemSettings
     workflows: WorkflowsSettings
     state: StateSettings
+    runs: RunsSettings
     elicitation: ElicitationSettings
 
 
@@ -73,6 +81,7 @@ def load_runtime_config(path: Path) -> RuntimeConfig:
     system = _parse_system_settings(data.get("system", {}))
     workflows = _parse_workflows_settings(base, data.get("workflows", {}))
     state = _parse_state_settings(base, data.get("state", {}))
+    runs = _parse_runs_settings(base, data.get("runs", {}))
     elicitation = _parse_elicitation_settings(base, data.get("elicitation", {}))
 
     return RuntimeConfig(
@@ -80,6 +89,7 @@ def load_runtime_config(path: Path) -> RuntimeConfig:
         system=system,
         workflows=workflows,
         state=state,
+        runs=runs,
         elicitation=elicitation,
     )
 
@@ -132,3 +142,11 @@ def _parse_elicitation_settings(base: Path, data: Mapping[str, Any]) -> Elicitat
         methods_path = (base / str(methods_source)).resolve()
     return ElicitationSettings(default_mode=default_mode, methods_source=methods_path)
 
+
+def _parse_runs_settings(base: Path, data: Mapping[str, Any]) -> RunsSettings:
+    root = data.get("root")
+    if root is None:
+        msg = "Runtime config must define runs.root."
+        raise ValueError(msg)
+    runs_root = (base / str(root)).resolve()
+    return RunsSettings(root=runs_root)

@@ -3,6 +3,7 @@
 from .runtime import (
     ElicitationSettings,
     RuntimeConfig,
+    RunsSettings,
     StateSettings,
     SystemSettings,
     WorkflowsSettings,
@@ -12,6 +13,7 @@ from .runtime import (
 __all__ = [
     "ElicitationSettings",
     "RuntimeConfig",
+    "RunsSettings",
     "StateSettings",
     "SystemSettings",
     "WorkflowsSettings",
