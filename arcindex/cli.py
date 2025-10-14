@@ -91,35 +91,26 @@ def start(
     if project_name and "project_name" not in answers:
         answers["project_name"] = project_name
 
-    summary_path = controller.persist_summary(state, answers, timestamp)
     summary_markdown = controller.summary_markdown(answers, project_name)
 
     click.echo("\n✅ Discovery answers captured.\n")
     click.echo(summary_markdown)
     click.echo()
 
-    run_elicitation = False
-    manual_choice = elicitation_choice
-    if manual_choice is None:
-        run_elicitation = click.confirm(
-            "Open advanced elicitation options before finalising discovery?",
-            default=False,
-        )
-    else:
-        run_elicitation = manual_choice != 1
+    options = controller.elicitation_options()
+    menu_text = controller.elicitation_menu()
+    selection = elicitation_choice
 
-    if run_elicitation:
-        options = controller.elicitation_options()
-        menu_text = controller.elicitation_menu()
+    while True:
         click.echo(menu_text)
 
-        selection = manual_choice or _prompt_elicitation_selection()
-        while selection != 1:
-            click.echo(
-                "Advanced elicitation automation will arrive in a later phase. "
-                "Enter '1' once you are satisfied with the summary."
-            )
+        if selection is None:
             selection = _prompt_elicitation_selection()
+        else:
+            click.echo(f"Selection: {selection}")
+
+        if selection == 1:
+            break
 
         selected_label = _lookup_option_label(options, selection)
         controller.record_elicitation_history(
@@ -131,6 +122,13 @@ def start(
             applied_changes=None,
         )
 
+        click.echo(
+            "🔁 Discovery elicitation methods are not yet automated; summary remains unchanged."
+        )
+        click.echo(summary_markdown)
+        selection = None
+
+    summary_path = controller.persist_summary(state, answers, timestamp)
     controller.finalise_discovery(state, current_timestamp())
 
     click.echo("\n✅ Discovery phase complete!")
