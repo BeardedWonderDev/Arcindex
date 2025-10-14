@@ -14,6 +14,8 @@ from typing import Any, Dict, List, Mapping, MutableMapping, Optional, Sequence,
 
 from arcindex.tools import ElicitationMenu, QualityGateResult, record_quality_gate_placeholder
 
+SUMMARY_FILENAME = "discovery-summary.json"
+
 DISCOVERY_CHECKLIST_PATH = "legacy/.codex/checklists/discovery-quality-gate.md"
 
 
@@ -211,8 +213,10 @@ def build_discovery_summary_markdown(
 def persist_discovery_summary(
     state: MutableMapping[str, Any],
     answers: Mapping[str, str],
-    state_dir: Path,
+    primary_dir: Path,
     timestamp: str,
+    *,
+    legacy_dir: Optional[Path] = None,
 ) -> Path:
     """
     Persist discovery insights to a JSON file and update the workflow state.
@@ -220,10 +224,16 @@ def persist_discovery_summary(
     Returns the path to the saved summary file.
     """
     summary_data = _build_summary_payload(state, answers, timestamp)
-    state_dir.mkdir(parents=True, exist_ok=True)
-    summary_path = state_dir / "discovery-summary.json"
+    primary_dir.mkdir(parents=True, exist_ok=True)
+    summary_path = primary_dir / SUMMARY_FILENAME
     with summary_path.open("w", encoding="utf-8") as handle:
         json.dump(summary_data, handle, indent=2, sort_keys=True)
+
+    if legacy_dir is not None and legacy_dir != primary_dir:
+        legacy_dir.mkdir(parents=True, exist_ok=True)
+        legacy_summary = legacy_dir / SUMMARY_FILENAME
+        with legacy_summary.open("w", encoding="utf-8") as handle:
+            json.dump(summary_data, handle, indent=2, sort_keys=True)
 
     project_discovery = state.setdefault("project_discovery", {})
     project_discovery.update(

@@ -110,6 +110,7 @@ def start(
             click.echo(f"📝 Artifact saved: {artifact_type} → {path}")
 
     run_context = runner.create_run(subscribers=[_event_printer])
+    controller.bind_run_directory(run_context.artifact_store.run_directory, state)
 
     summary_markdown = controller.summary_markdown(answers, project_name)
 

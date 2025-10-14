@@ -67,6 +67,7 @@ def test_runner_complete_discovery_emits_events(tmp_path: Path) -> None:
 
     events: list[dict] = []
     context = runner.create_run(subscribers=[events.append])
+    controller.bind_run_directory(context.artifact_store.run_directory, state)
     # Generate summary (streams token events if subscribers care).
     controller.summary_markdown(answers, "Arcindex")
 
@@ -87,6 +88,11 @@ def test_runner_complete_discovery_emits_events(tmp_path: Path) -> None:
 
     workflow = json.loads(controller.config.state.workflow_path.read_text())
     assert workflow["current_phase"] == "analyst"
+
+    run_state_path = context.artifact_store.run_directory / "workflow.json"
+    assert run_state_path.exists()
+    run_summary = context.artifact_store.run_directory / "discovery-summary.json"
+    assert run_summary.exists()
 
     event_types = {event["event"] for event in events}
     assert {"phase", "artifact", "end"}.issubset(event_types)

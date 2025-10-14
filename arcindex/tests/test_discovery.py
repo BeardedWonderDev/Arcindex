@@ -55,14 +55,18 @@ def test_persist_discovery_summary_updates_state(tmp_path: Path) -> None:
         "success_criteria": "Completion rate",
     }
 
+    legacy_dir = tmp_path / "legacy"
     summary_path = persist_discovery_summary(
         state,
         answers,
         tmp_path,
         "2024-01-01T00:00:00Z",
+        legacy_dir=legacy_dir,
     )
 
     assert summary_path.exists()
+    legacy_summary = legacy_dir / "discovery-summary.json"
+    assert legacy_summary.exists()
     project_discovery = state["project_discovery"]
     assert project_discovery["project_scope"] == "Concept"
     assert project_discovery["target_users"] == "Engineers"

@@ -88,6 +88,13 @@ def test_cli_start_smoke(tmp_path: Path) -> None:
     assert workflow["current_phase"] == "analyst"
     assert workflow["project_discovery"]["project_name"] == "Arcindex"
 
+    run_state_path = runs_dir / run_id / "workflow.json"
+    assert run_state_path.exists()
+    run_summary_path = runs_dir / run_id / "discovery-summary.json"
+    assert run_summary_path.exists()
+    legacy_summary = state_dir / "discovery-summary.json"
+    assert legacy_summary.exists()
+
     events_path = runs_dir / run_id / "logs" / "events.ndjson"
     assert events_path.exists()
     assert events_path.read_text(encoding="utf-8").strip()

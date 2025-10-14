@@ -267,8 +267,8 @@ Schemas locked down, documentation reflects full workflow, packages/containers b
 
 ## Immediate Focus (Right now)
 
-1. **Stand up the event emitter and artifact store** so discovery runs produce `runs/<run_id>/logs/events.ndjson` and artifact directories.
-2. **Wrap the discovery agent with the new BaseAgent** to call the Codex SDK for summaries and port the advanced elicitation task catalog.
-3. **Bring the runner + streaming CLI online** so `arcindex start …` uses the event pipeline and the upcoming SSE bridge can tap the same stream.
+1. **Migrate workflow state into run directories** so snapshots write to `runs/<run_id>/workflow.json` and the legacy `arcindex/state` path becomes a compatibility shim. Include a migration helper and tests that verify state + summaries survive the move.
+2. **Draft the FastAPI bridge skeleton** (`bridge/app.py`, `bridge/adapter.py`) that exposes `POST /jobs`, `GET /events/{run_id}` (SSE), and `POST /cancel/{run_id}` backed by the new runner. Provide smoketests that stream discovery events.
+3. **Refresh docs and harness instructions** (README, MIGRATION-PLAN updates, `test-harness/README`) to highlight run-scoped artifacts/events and how external tools should consume them.
 
-Once these items are complete and tested, Phase 0 can be marked fully stable and the team can proceed confidently into the modernization tasks outlined above.
+Once these items are complete and tested, the discovery orchestrator will be fully modernized and ready for Phase 1’s bridge integration work.

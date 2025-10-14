@@ -14,6 +14,7 @@ from pathlib import Path
 from typing import Any, Mapping, MutableMapping, Optional
 
 STATE_FILENAME = "workflow.json"
+SUMMARY_FILENAME = "discovery-summary.json"
 
 
 class WorkflowStateError(RuntimeError):
@@ -37,34 +38,62 @@ class WorkflowInitializationParams:
 class WorkflowStateStore:
     """Read/write access to the workflow state JSON file."""
 
-    def __init__(self, state_dir: Path, template_path: Path) -> None:
-        self._state_dir = state_dir
+    def __init__(self, legacy_dir: Path, template_path: Path) -> None:
+        self._legacy_dir = legacy_dir
+        self._active_dir = legacy_dir
         self._template_path = template_path
-        self._state_path = state_dir / STATE_FILENAME
 
     @property
     def path(self) -> Path:
         """Return the location of the workflow state file."""
-        return self._state_path
+        return self._active_dir / STATE_FILENAME
+
+    @property
+    def legacy_directory(self) -> Path:
+        """Return the legacy state directory."""
+        return self._legacy_dir
+
+    @property
+    def current_directory(self) -> Path:
+        """Directory where the active run persists state."""
+        return self._active_dir
+
+    def bind_run_directory(self, run_dir: Path) -> None:
+        """Point the active state directory at the run-scoped path."""
+        self._active_dir = run_dir
 
     def exists(self) -> bool:
         """True if a workflow state file already exists."""
-        return self._state_path.exists()
+        if self.path.exists():
+            return True
+        return (self._legacy_dir / STATE_FILENAME).exists()
 
     def load(self) -> MutableMapping[str, Any]:
         """Load the workflow state."""
-        if not self.exists():
+        active_path = self.path
+        if active_path.exists():
+            with active_path.open("r", encoding="utf-8") as handle:
+                return json.load(handle)
+
+        legacy_path = self._legacy_dir / STATE_FILENAME
+        if not legacy_path.exists():
             raise WorkflowStateNotInitialized(
                 "Workflow state has not been initialized yet."
             )
-        with self._state_path.open("r", encoding="utf-8") as handle:
+        with legacy_path.open("r", encoding="utf-8") as handle:
             return json.load(handle)
 
     def save(self, state: Mapping[str, Any]) -> None:
         """Persist the workflow state."""
-        self._state_dir.mkdir(parents=True, exist_ok=True)
-        with self._state_path.open("w", encoding="utf-8") as handle:
+        self._active_dir.mkdir(parents=True, exist_ok=True)
+        with self.path.open("w", encoding="utf-8") as handle:
             json.dump(state, handle, indent=2, sort_keys=True)
+
+        if self._active_dir != self._legacy_dir:
+            self._legacy_dir.mkdir(parents=True, exist_ok=True)
+            legacy_path = self._legacy_dir / STATE_FILENAME
+            with legacy_path.open("w", encoding="utf-8") as handle:
+                json.dump(state, handle, indent=2, sort_keys=True)
 
     def initialize(self, params: WorkflowInitializationParams) -> MutableMapping[str, Any]:
         """

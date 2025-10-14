@@ -41,6 +41,8 @@ class OrchestratorController:
             runtime_config.state.workflow_template,
         )
         self._discovery_agent = DiscoveryAgent()
+        self._legacy_state_dir = runtime_config.state.persistence
+        self._current_run_dir: Optional[Path] = None
 
     def configure_run_context(
         self,
@@ -53,6 +55,16 @@ class OrchestratorController:
         """
         self._discovery_agent.bind_emitter(emitter)
         self._discovery_agent.bind_artifact_store(artifact_store)
+        if artifact_store is not None:
+            self._current_run_dir = artifact_store.run_directory
+
+    def bind_run_directory(self, run_dir: Path, state: Mapping[str, Any]) -> None:
+        """
+        Persist workflow state into the run directory while retaining legacy compatibility.
+        """
+        self._current_run_dir = run_dir
+        self._state_store.bind_run_directory(run_dir)
+        self._state_store.save(state)
 
     @classmethod
     def from_config_path(cls, config_path: Path) -> "OrchestratorController":
@@ -123,12 +135,15 @@ class OrchestratorController:
         project_name: Optional[str],
     ) -> DiscoveryResult:
         """Persist discovery summary data and update the state."""
+        primary_dir = self._state_store.current_directory
+        legacy_dir = self._state_store.legacy_directory
         result = self._discovery_agent.persist_summary(
             state,
             answers,
-            self._config.state.persistence,
+            primary_dir,
             project_name=project_name,
             timestamp=timestamp,
+            legacy_dir=legacy_dir,
         )
         self._state_store.save(state)
         return result

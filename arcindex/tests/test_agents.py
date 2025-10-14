@@ -7,12 +7,11 @@ from arcindex.artifacts import ArtifactStore
 
 
 def test_discovery_agent_persist_summary_with_artifact(tmp_path: Path) -> None:
-    state_dir = tmp_path / "state"
-    state_dir.mkdir()
-
     runs_root = tmp_path / "runs"
     store = ArtifactStore(run_id="run-test", runs_root=runs_root)
     agent = DiscoveryAgent(artifact_store=store)
+    state_dir = store.run_directory
+    legacy_dir = tmp_path / "legacy-state"
 
     state = {"workflow_id": "arcindex-1", "workflow_type": "greenfield-discovery"}
     answers = {
@@ -33,6 +32,7 @@ def test_discovery_agent_persist_summary_with_artifact(tmp_path: Path) -> None:
         state_dir,
         project_name="Arcindex",
         timestamp="2025-10-14T00:00:00Z",
+        legacy_dir=legacy_dir,
     )
 
     assert result.summary_markdown.startswith("📋 Discovery Summary")
@@ -45,3 +45,5 @@ def test_discovery_agent_persist_summary_with_artifact(tmp_path: Path) -> None:
     assert artifact.path == expected_artifact_path
     assert artifact.path.exists()
     assert artifact.path.read_text(encoding="utf-8").startswith("📋 Discovery Summary")
+    legacy_summary = legacy_dir / "discovery-summary.json"
+    assert legacy_summary.exists()

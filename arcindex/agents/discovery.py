@@ -48,6 +48,7 @@ class DiscoveryAgent(BaseAgent):
         state_dir: Path,
         project_name: Optional[str] = None,
         timestamp: Optional[str] = None,
+        legacy_dir: Optional[Path] = None,
     ) -> DiscoveryResult:
         """
         Persist discovery outputs to disk and, when available, the artifact store.
@@ -58,7 +59,13 @@ class DiscoveryAgent(BaseAgent):
         )
 
         ts = timestamp or current_timestamp()
-        summary_path = persist_discovery_summary(state, answers, state_dir, ts)
+        summary_path = persist_discovery_summary(
+            state,
+            answers,
+            state_dir,
+            ts,
+            legacy_dir=legacy_dir,
+        )
 
         # Store a markdown version for downstream consumption.
         summary_markdown = build_discovery_summary_markdown(answers, project_name)
