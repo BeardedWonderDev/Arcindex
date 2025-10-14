@@ -11,16 +11,15 @@ import json
 from pathlib import Path
 from typing import Any, Mapping, MutableMapping, Optional, Tuple
 
+from arcindex.agents import DiscoveryAgent, DiscoveryResult
 from arcindex.config import RuntimeConfig, load_runtime_config
 from arcindex.orchestrator.discovery import (
     DISCOVERY_CHECKLIST_PATH,
-    build_discovery_summary_markdown,
     build_elicitation_menu,
     format_discovery_questions,
     get_discovery_questionnaire,
     initialise_quality_gate,
     parse_discovery_answers,
-    persist_discovery_summary,
 )
 from arcindex.state import WorkflowInitializationParams, WorkflowStateError, WorkflowStateStore
 from arcindex.tools import (
@@ -41,6 +40,19 @@ class OrchestratorController:
             runtime_config.state.persistence,
             runtime_config.state.workflow_template,
         )
+        self._discovery_agent = DiscoveryAgent()
+
+    def configure_run_context(
+        self,
+        *,
+        emitter: Optional["EventEmitter"] = None,
+        artifact_store: Optional["ArtifactStore"] = None,
+    ) -> None:
+        """
+        Attach streaming and persistence infrastructure for the active run.
+        """
+        self._discovery_agent.bind_emitter(emitter)
+        self._discovery_agent.bind_artifact_store(artifact_store)
 
     @classmethod
     def from_config_path(cls, config_path: Path) -> "OrchestratorController":
@@ -108,16 +120,18 @@ class OrchestratorController:
         state: MutableMapping[str, Any],
         answers: Mapping[str, str],
         timestamp: str,
-    ) -> Path:
+        project_name: Optional[str],
+    ) -> DiscoveryResult:
         """Persist discovery summary data and update the state."""
-        summary_path = persist_discovery_summary(
+        result = self._discovery_agent.persist_summary(
             state,
             answers,
             self._config.state.persistence,
-            timestamp,
+            project_name=project_name,
+            timestamp=timestamp,
         )
         self._state_store.save(state)
-        return summary_path
+        return result
 
     def summary_markdown(
         self,
@@ -125,7 +139,7 @@ class OrchestratorController:
         project_name: Optional[str],
     ) -> str:
         """Build the human-readable discovery summary."""
-        return build_discovery_summary_markdown(answers, project_name)
+        return self._discovery_agent.build_summary_markdown(answers, project_name)
 
     def elicitation_menu(self) -> str:
         """Return the formatted elicitation menu."""

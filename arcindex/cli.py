@@ -128,7 +128,8 @@ def start(
         click.echo(summary_markdown)
         selection = None
 
-    summary_path = controller.persist_summary(state, answers, timestamp)
+    result = controller.persist_summary(state, answers, timestamp, project_name)
+    summary_path = result.summary_path
     controller.finalise_discovery(state, current_timestamp())
 
     click.echo("\n✅ Discovery phase complete!")
