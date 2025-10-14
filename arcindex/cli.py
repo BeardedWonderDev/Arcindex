@@ -170,7 +170,7 @@ def _load_answers(
 
     click.echo(
         "\nEnter responses for each question. Press ENTER to accept the answer. "
-        "Use Ctrl+ENTER for a newline if needed.\n"
+        "Use Ctrl+J to insert a newline if needed.\n"
     )
     answers: Dict[str, str] = {}
     for question, prompt in controller.discovery_questionnaire(project_name):
@@ -189,7 +189,6 @@ def _prompt_answer() -> str:
         def _(event) -> None:  # type: ignore[no-redef]
             event.app.current_buffer.validate_and_handle()
 
-        @bindings.add("c-enter", eager=True)
         @bindings.add("c-j", eager=True)
         def _(event) -> None:  # type: ignore[no-redef]
             event.current_buffer.insert_text("\n")
