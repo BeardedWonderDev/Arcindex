@@ -86,4 +86,5 @@ Next steps:
     --elicitation-choice 1
 
 When you're finished, remove the workspace by deleting the directory.
+Artifacts and event logs will be written under runs/<run_id>/ within the workspace.
 EOF

@@ -30,8 +30,13 @@ class JobRequest(BaseModel):
     elicitation_choice: int = 1
 
 
-def create_app(runtime_config_path: Path) -> FastAPI:
+def _default_runtime_config() -> Path:
+    return Path(__file__).resolve().parent.parent / "arcindex" / "config" / "runtime.yaml"
+
+
+def create_app(runtime_config_path: Optional[Path] = None) -> FastAPI:
     """Construct the FastAPI application."""
+    runtime_config_path = runtime_config_path or _default_runtime_config()
     app = FastAPI(title="Arcindex Bridge", version="0.1.0")
     settings = BridgeSettings(runtime_config=runtime_config_path)
     manager = RunJobManager(settings.runtime_config)

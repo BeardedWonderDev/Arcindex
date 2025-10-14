@@ -145,7 +145,7 @@ Arcindex is currently in early migration. Until the new CLI is shipped, setup fo
    - Align contributions with the roadmap in the next section.
    - Open design notes or draft specs before large changes.
 
-> The CLI is not yet wired end-to-end. Watch the roadmap for Phase 1 completion to begin running discovery workflows.
+> The discovery workflow is available today. Additional personas (analyst, PM, architect, etc.) arrive in subsequent phases.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -171,7 +171,18 @@ arcindex start --project-name "Arcindex" --answers-file path/to/answers.txt --el
 
    If you prefer not to install the package, set `PYTHONPATH=.` and run `python3 -m arcindex.cli ...` instead.
 
-4. **Optional flags**:
+4. **Outputs**
+
+   Every run generates a dedicated directory under `runs/<run_id>/` containing:
+
+   - `workflow.json` – the current workflow snapshot.
+   - `discovery-summary.json` – structured discovery insights.
+   - `artifacts/…` – markdown/JSON artifacts grouped by phase and agent.
+   - `logs/events.ndjson` – the event stream suitable for SSE clients.
+
+   The legacy `arcindex/state/` directory is still populated for compatibility during the migration, but new tooling should read from the run-scoped location.
+
+5. **Optional flags**:
    - `--config` – point to a custom runtime configuration file.
    - `--mode` – override the operation mode (`interactive`, `batch`, or `yolo`).
    - `--answers-file` – provide a numbered answers file to skip interactive prompts.
@@ -187,7 +198,43 @@ Use the built-in harness to create disposable sandboxes so you can experiment wi
 arcindex/test-harness/scripts/run-test.sh
 ```
 
-Each run produces a new folder under `arcindex/test-harness/results/arcindex-local-<timestamp>/` containing a clean copy of the code and a pre-filled `discovery-inputs.txt`. Follow the printed instructions to install dependencies and run `arcindex start ...` inside the sandbox. Delete the folder when you're done.
+Each run produces a new folder under `arcindex/test-harness/results/arcindex-local-<timestamp>/` containing a clean copy of the code and a pre-filled `discovery-inputs.txt`. Follow the printed instructions to install dependencies and run `arcindex start ...` inside the sandbox. Inspect `runs/<run_id>/` in the sandbox to review artifacts and event logs. Delete the folder when you're done.
+
+### Stream Discovery Runs via the FastAPI Bridge
+
+Arcindex now exposes the discovery workflow over HTTP with Server-Sent Events for downstream consumers.
+
+1. **Start the bridge** (the default runtime config is used when no argument is provided):
+
+   ```bash
+   uvicorn --factory bridge.app:create_app --reload --host 127.0.0.1 --port 8000
+   ```
+
+2. **Create a run** by posting discovery answers:
+
+   ```bash
+   curl -X POST http://localhost:8000/jobs \
+     -H 'Content-Type: application/json' \
+     -d @payload.json
+   ```
+
+   The response contains the `run_id`.
+
+3. **Subscribe to events**:
+
+   ```bash
+   curl -N http://localhost:8000/events/<run_id>
+   ```
+
+   You will receive `phase`, `artifact`, and `end` events streamed directly from the runner.
+
+4. **Cancel a run** if needed:
+
+   ```bash
+   curl -X POST http://localhost:8000/cancel/<run_id>
+   ```
+
+   The bridge returns `cancelling` (if the run is still active) or `completed` if the run already finished.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 

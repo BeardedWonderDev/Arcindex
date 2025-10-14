@@ -39,10 +39,14 @@ arcindex/test-harness/
    arcindex start --project-name "Sandbox" --answers-file discovery-inputs.txt --elicitation-choice 1
    ```
 
-3. **Inspect outputs** inside the workspace (`arcindex/state/workflow.json`, `arcindex/state/discovery-summary.json`, generated docs, etc.). Delete the folder when you are finished.
+3. **Inspect outputs** inside the workspace. Every run writes to both the legacy state path and the run-scoped tree:
+   - `runs/<run_id>/workflow.json` – current workflow snapshot.
+   - `runs/<run_id>/discovery-summary.json` – structured discovery output.
+   - `runs/<run_id>/logs/events.ndjson` – event stream suitable for SSE clients.
+   The legacy copies in `arcindex/state/` remain for compatibility. Delete the folder when you are finished.
 
 ## Notes
 
 - Workspaces live under `arcindex/test-harness/results/` and are ignored by git.
 - The `archive/` directory exists for future automation (analysis scripts can move completed runs there).
-- The harness intentionally keeps dependencies minimal; expand as subsequent phases introduce additional workflows.
+- The harness intentionally keeps dependencies minimal; expand as subsequent phases introduce additional workflows or when wiring the FastAPI bridge into workspace tests.
