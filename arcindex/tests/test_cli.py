@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import re
 import shutil
 import textwrap
 from pathlib import Path
@@ -15,9 +16,11 @@ def test_cli_start_smoke(tmp_path: Path) -> None:
     config_dir = tmp_path / "config"
     workflows_dir = config_dir / "workflows"
     state_dir = tmp_path / "state"
+    runs_dir = tmp_path / "runs"
     config_dir.mkdir()
     workflows_dir.mkdir()
     state_dir.mkdir()
+    runs_dir.mkdir()
 
     template_src = Path("arcindex/state/workflow_template.json")
     template_dst = state_dir / "workflow_template.json"
@@ -30,6 +33,7 @@ def test_cli_start_smoke(tmp_path: Path) -> None:
     runtime_data["workflows"]["directory"] = "./workflows"
     runtime_data["state"]["persistence"] = str(state_dir)
     runtime_data["state"]["workflow_template"] = str(template_dst)
+    runtime_data.setdefault("runs", {})["root"] = str(runs_dir)
     runtime_data["elicitation"]["methods_source"] = str(
         Path("arcindex/resources/elicitation-methods.md").resolve()
     )
@@ -74,8 +78,16 @@ def test_cli_start_smoke(tmp_path: Path) -> None:
     assert result.exit_code == 0, result.output
     assert "Discovery phase complete" in result.output
 
+    run_id_match = re.search(r"Run ID: ([0-9a-f]{32})", result.output)
+    assert run_id_match, result.output
+    run_id = run_id_match.group(1)
+
     workflow_path = state_dir / "workflow.json"
     assert workflow_path.exists()
     workflow = json.loads(workflow_path.read_text())
     assert workflow["current_phase"] == "analyst"
     assert workflow["project_discovery"]["project_name"] == "Arcindex"
+
+    events_path = runs_dir / run_id / "logs" / "events.ndjson"
+    assert events_path.exists()
+    assert events_path.read_text(encoding="utf-8").strip()

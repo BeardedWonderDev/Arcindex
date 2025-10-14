@@ -6,6 +6,7 @@ Provides a minimal discovery workflow experience for the Phase 1 milestone.
 
 from __future__ import annotations
 
+import asyncio
 from pathlib import Path
 from typing import Dict, Optional, Tuple
 
@@ -23,6 +24,7 @@ except ImportError:  # pragma: no cover - optional dependency fallback
 
 from arcindex.orchestrator import OrchestratorController
 from arcindex.tools import ElicitationOption, current_timestamp
+from arcindex.runner import ArcindexRunner
 
 DEFAULT_CONFIG_PATH = Path(__file__).resolve().parent / "config" / "runtime.yaml"
 
@@ -76,6 +78,8 @@ def start(
 
     controller.ensure_no_active_workflow()
 
+    runner = ArcindexRunner(controller)
+
     operation_mode = mode or controller.config.elicitation.default_mode
     state, timestamp = controller.initialise_discovery(workflow_id, project_name, operation_mode)
 
@@ -90,6 +94,22 @@ def start(
     # Ensure project name is available in the answer set
     if project_name and "project_name" not in answers:
         answers["project_name"] = project_name
+
+    def _event_printer(event: Dict[str, object]) -> None:
+        event_type = event.get("event")
+        if event_type == "phase":
+            phase = event.get("phase")
+            status = event.get("status")
+            if status == "start":
+                click.echo(f"🚀 Phase '{phase}' started.")
+            elif status == "end":
+                click.echo(f"✅ Phase '{phase}' completed.")
+        elif event_type == "artifact":
+            artifact_type = event.get("artifact_type")
+            path = event.get("path")
+            click.echo(f"📝 Artifact saved: {artifact_type} → {path}")
+
+    run_context = runner.create_run(subscribers=[_event_printer])
 
     summary_markdown = controller.summary_markdown(answers, project_name)
 
@@ -128,12 +148,22 @@ def start(
         click.echo(summary_markdown)
         selection = None
 
-    result = controller.persist_summary(state, answers, timestamp, project_name)
-    summary_path = result.summary_path
-    controller.finalise_discovery(state, current_timestamp())
+    run_result = asyncio.run(
+        runner.complete_discovery(
+            run_context,
+            state,
+            answers,
+            timestamp,
+            project_name,
+        )
+    )
 
     click.echo("\n✅ Discovery phase complete!")
-    click.echo(f"🗂️  Discovery summary saved to {summary_path}")
+    click.echo(f"🆔 Run ID: {run_result.run_id}")
+    click.echo(f"🗂️  Discovery summary saved to {run_result.summary_path}")
+    if run_result.summary_artifact:
+        click.echo(f"📦  Artifact URI: {run_result.summary_artifact.uri}")
+    click.echo(f"🧾 Events log written to {run_result.events_path}")
     click.echo(f"🗄️  Workflow state written to {controller.config.state.workflow_path}")
 
 
