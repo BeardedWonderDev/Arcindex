@@ -164,8 +164,10 @@ Arcindex is currently in early migration. Until the new CLI is shipped, setup fo
 
 3. **Start the CLI**:
    ```bash
-   arcindex start --project-name "Arcindex" --answers-file path/to/answers.txt --elicitation-choice 1
-   ```
+arcindex start --project-name "Arcindex" --answers-file path/to/answers.txt --elicitation-choice 1
+```
+
+> Input tips: Press **Enter** to accept an answer, or **Ctrl + J** if you need to insert a newline while editing.
 
    If you prefer not to install the package, set `PYTHONPATH=.` and run `python3 -m arcindex.cli ...` instead.
 

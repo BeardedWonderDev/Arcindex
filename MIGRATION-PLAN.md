@@ -267,8 +267,8 @@ Schemas locked down, documentation reflects full workflow, packages/containers b
 
 ## Immediate Focus (Right now)
 
-1. **Fix the CLI newline bug** so ENTER submits discovery answers and Shift+Enter inserts newlines without interruption.
-2. **Run complete Phase 0 smoke tests**, including multi-line answer entry, to confirm discovery MVP stability.
-3. **Refresh documentation** (README, AGENTS, MIGRATION PLAN) to note the fix and Phase 0 verification results, paving the way for Phase 1 work.
+1. **Stand up the event emitter and artifact store** so discovery runs produce `runs/<run_id>/logs/events.ndjson` and artifact directories.
+2. **Wrap the discovery agent with the new BaseAgent** to call the Codex SDK for summaries and port the advanced elicitation task catalog.
+3. **Bring the runner + streaming CLI online** so `arcindex start …` uses the event pipeline and the upcoming SSE bridge can tap the same stream.
 
 Once these items are complete and tested, Phase 0 can be marked fully stable and the team can proceed confidently into the modernization tasks outlined above.
