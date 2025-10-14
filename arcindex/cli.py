@@ -170,7 +170,7 @@ def _load_answers(
 
     click.echo(
         "\nEnter responses for each question. Press ENTER to accept the answer. "
-        "Use Shift+ENTER for a newline if supported by your terminal.\n"
+        "Use Ctrl+ENTER for a newline if needed.\n"
     )
     answers: Dict[str, str] = {}
     for question, prompt in controller.discovery_questionnaire(project_name):
@@ -185,12 +185,14 @@ def _prompt_answer() -> str:
     if PROMPT_TOOLKIT_AVAILABLE:
         bindings = KeyBindings()
 
-        @bindings.add("enter")
+        @bindings.add("enter", eager=True)
         def _(event) -> None:  # type: ignore[no-redef]
-            if event.key_sequence and event.key_sequence[0].data == '':
-                event.app.current_buffer.validate_and_handle()
-            else:
-                event.current_buffer.insert_text('\n')
+            event.app.current_buffer.validate_and_handle()
+
+        @bindings.add("c-enter", eager=True)
+        @bindings.add("c-j", eager=True)
+        def _(event) -> None:  # type: ignore[no-redef]
+            event.current_buffer.insert_text("\n")
 
         session = PromptSession(multiline=True, key_bindings=bindings)
         try:
