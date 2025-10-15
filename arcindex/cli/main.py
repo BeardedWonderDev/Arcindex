@@ -23,10 +23,10 @@ except ImportError:  # pragma: no cover - optional dependency fallback
     KeyBindings = None  # type: ignore
 
 from arcindex.orchestrator import OrchestratorController
-from arcindex.tools import ElicitationOption, current_timestamp
 from arcindex.runner import ArcindexRunner
+from arcindex.tools import ElicitationOption, current_timestamp
 
-DEFAULT_CONFIG_PATH = Path(__file__).resolve().parent / "config" / "runtime.yaml"
+DEFAULT_CONFIG_PATH = Path(__file__).resolve().parent.parent / "config" / "runtime.yaml"
 
 
 @click.group(help="Arcindex CLI. Discovery orchestration is available in this release.")

@@ -27,10 +27,10 @@ dev = [
 ]
 
 [project.scripts]
-arcindex = "arcindex.cli:main"
+arcindex = "arcindex.cli.main:main"
 
 [tool.setuptools]
-packages = ["arcindex"]
+packages = ["arcindex", "arcindex.cli"]
 
 [tool.pytest.ini_options]
 testpaths = ["arcindex/tests"]
