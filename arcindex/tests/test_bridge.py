@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import json
 import shutil
-import textwrap
 from pathlib import Path
 
 import yaml
@@ -68,7 +67,9 @@ def test_bridge_streams_events(tmp_path: Path) -> None:
             },
         )
         assert response.status_code == 202, response.text
-        run_id = response.json()["run_id"]
+        payload = response.json()
+        run_id = payload["run_id"]
+        assert payload["status"] == "started"
 
         events = []
         with client.stream("GET", f"/events/{run_id}") as stream:
@@ -88,3 +89,66 @@ def test_bridge_streams_events(tmp_path: Path) -> None:
         cancel_response = client.post(f"/cancel/{run_id}")
         assert cancel_response.status_code == 200
         assert cancel_response.json()["status"] in {"completed", "cancelling"}
+
+
+def test_bridge_questions_and_interactive_flow(tmp_path: Path) -> None:
+    runtime_path = _prepare_runtime(tmp_path)
+    app = create_app(runtime_path)
+
+    with TestClient(app) as client:
+        questions_resp = client.get("/discovery/questions")
+        assert questions_resp.status_code == 200
+        questions_payload = questions_resp.json()
+        assert questions_payload["count"] == 9
+
+        create_resp = client.post("/jobs", json={})
+        assert create_resp.status_code == 202
+        run_info = create_resp.json()
+        assert run_info["status"] == "pending"
+        run_id = run_info["run_id"]
+
+        events = []
+        with client.stream("GET", f"/events/{run_id}") as stream:
+            # Process initial prompt event before submitting answers.
+            line = next(stream.iter_lines())
+            while line == "":
+                line = next(stream.iter_lines())
+            assert line.startswith("event: prompt")
+            data_line = next(stream.iter_lines())
+            assert data_line.startswith("data: ")
+            prompt_event = json.loads(data_line[6:])
+            assert prompt_event["event"] == "prompt"
+            assert len(prompt_event["questions"]) == 9
+            events.append(prompt_event)
+
+            answers_payload = {
+                "answers": {
+                    "project_name": "Arcindex",
+                    "project_concept": "Concept overview",
+                    "target_users": "Engineers",
+                    "user_research_status": "Interviews",
+                    "competitive_landscape": "Legacy CODEX",
+                    "market_opportunities": "Demand",
+                    "technical_constraints": "Python",
+                    "integration_requirements": "Git",
+                    "success_criteria": "Adoption",
+                }
+            }
+            update_resp = client.post(f"/jobs/{run_id}/answers", json=answers_payload)
+            assert update_resp.status_code == 200
+            assert update_resp.json()["status"] == "started"
+
+            # Continue consuming the stream until completion.
+            for line in stream.iter_lines():
+                if not line:
+                    continue
+                if not line.startswith("data: "):
+                    continue
+                event = json.loads(line[6:])
+                events.append(event)
+                if event.get("event") == "end":
+                    break
+
+        assert any(evt.get("event") == "answers" for evt in events)
+        assert any(evt.get("event") == "phase" and evt.get("status") == "start" for evt in events)
+        assert events[-1].get("event") == "end"

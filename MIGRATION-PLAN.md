@@ -267,8 +267,9 @@ Schemas locked down, documentation reflects full workflow, packages/containers b
 
 ## Immediate Focus (Right now)
 
-1. **Migrate workflow state into run directories** so snapshots write to `runs/<run_id>/workflow.json` and the legacy `arcindex/state` path becomes a compatibility shim. Include a migration helper and tests that verify state + summaries survive the move.
-2. **Draft the FastAPI bridge skeleton** (`bridge/app.py`, `bridge/adapter.py`) that exposes `POST /jobs`, `GET /events/{run_id}` (SSE), and `POST /cancel/{run_id}` backed by the new runner. Provide smoketests that stream discovery events.
-3. **Refresh docs and harness instructions** (README, MIGRATION-PLAN updates, `test-harness/README`) to highlight run-scoped artifacts/events and how external tools should consume them.
+1. **Harden the FastAPI bridge** — add SSE back-pressure protections/heartbeats, document concurrency limits, and provide optional auth/config toggles so external consumers can rely on the service.
+2. **Restore live discovery inference** — wire the BaseAgent-backed discovery persona to the OpenAI SDK (prompt catalog, streaming tokens/artifacts, replay-based tests, configuration hooks for credentials/models).
+3. **Publish interaction contracts** — ship the bridge/event API reference (schemas, prompt/answer lifecycle, curl examples) and capture the legacy→run directory migration guidance in docs.
+4. **Expand coverage & observability stubs** — add interactive bridge tests, BaseAgent replay coverage, harness updates, and drop placeholders for `metrics.jsonl` generation/monitoring so Phase 1 exit criteria are satisfied.
 
-Once these items are complete and tested, the discovery orchestrator will be fully modernized and ready for Phase 1’s bridge integration work.
+With these remaining tasks complete, Phase 1 will deliver full discovery parity on the modern runtime and a production-ready interface for downstream clients.

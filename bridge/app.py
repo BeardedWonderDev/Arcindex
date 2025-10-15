@@ -12,6 +12,7 @@ from fastapi.responses import JSONResponse, StreamingResponse
 from pydantic import BaseModel, Field
 
 from .adapter import RunJobManager
+from arcindex.orchestrator import OrchestratorController
 
 
 class BridgeSettings(BaseModel):
@@ -24,10 +25,17 @@ class JobRequest(BaseModel):
     """Payload for creating a discovery job."""
 
     project_name: Optional[str] = None
-    answers: Dict[str, str]
+    answers: Optional[Dict[str, str]] = None
     workflow_id: Optional[str] = None
     operation_mode: Optional[str] = None
     elicitation_choice: int = 1
+
+
+class AnswerUpdate(BaseModel):
+    """Incremental answer submission payload."""
+
+    answers: Dict[str, str]
+    elicitation_choice: Optional[int] = None
 
 
 def _default_runtime_config() -> Path:
@@ -44,19 +52,48 @@ def create_app(runtime_config_path: Optional[Path] = None) -> FastAPI:
     def get_manager() -> RunJobManager:
         return manager
 
+    @app.get("/discovery/questions")
+    async def list_questions() -> Dict[str, object]:
+        controller = OrchestratorController.from_config_path(settings.runtime_config)
+        questionnaire = controller.discovery_questionnaire(None)
+        questions = [
+            {
+                "number": question.number,
+                "key": question.key,
+                "prompt": prompt,
+            }
+            for question, prompt in questionnaire
+        ]
+        return {"questions": questions, "count": len(questions)}
+
     @app.post("/jobs", status_code=status.HTTP_202_ACCEPTED)
     async def create_job(request: JobRequest, mgr: RunJobManager = Depends(get_manager)):
-        job = await mgr.start_job(
+        job, status_value = await mgr.start_job(
             project_name=request.project_name,
-            answers=dict(request.answers),
+            answers=dict(request.answers or {}),
             workflow_id=request.workflow_id,
             operation_mode=request.operation_mode,
             elicitation_choice=request.elicitation_choice,
         )
         return JSONResponse(
             status_code=status.HTTP_202_ACCEPTED,
-            content={"run_id": job.run_id, "status": "started"},
+            content={"run_id": job.run_id, "status": status_value},
         )
+
+    @app.post("/jobs/{run_id}/answers")
+    async def submit_answers(
+        run_id: str,
+        payload: AnswerUpdate,
+        mgr: RunJobManager = Depends(get_manager),
+    ):
+        status_value = await mgr.submit_answers(
+            run_id,
+            dict(payload.answers),
+            elicitation_choice=payload.elicitation_choice,
+        )
+        if status_value == "not_found":
+            raise HTTPException(status_code=404, detail="Run not found")
+        return {"run_id": run_id, "status": status_value}
 
     @app.get("/events/{run_id}")
     async def stream_events(run_id: str, request: Request, mgr: RunJobManager = Depends(get_manager)):

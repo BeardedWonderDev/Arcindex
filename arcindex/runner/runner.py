@@ -25,10 +25,11 @@ class RunContext:
     """Holds per-run infrastructure."""
 
     run_id: str
-    started_at: str
+    started_at: Optional[str]
     emitter: EventEmitter
     artifact_store: ArtifactStore
     events_path: Path
+    phase_started: bool = False
     _unsubscribe: Tuple[Callable[[], None], ...] = field(default_factory=tuple)
 
     def close(self) -> None:
@@ -63,7 +64,12 @@ class ArcindexRunner:
         """Request cancellation of the active run."""
         self._cancel_token.cancel()
 
-    def create_run(self, subscribers: Iterable[EventSubscriber] = ()) -> RunContext:
+    def create_run(
+        self,
+        subscribers: Iterable[EventSubscriber] = (),
+        *,
+        emit_phase_start: bool = True,
+    ) -> RunContext:
         """
         Prepare run infrastructure and emit initial phase start event.
         """
@@ -76,15 +82,19 @@ class ArcindexRunner:
 
         self._controller.configure_run_context(emitter=emitter, artifact_store=artifact_store)
 
-        started_at = current_timestamp()
-        emitter.emit(
-            PhaseEvent(
-                run_id=run_id,
-                ts=started_at,
-                phase="discovery",
-                status="start",
+        started_at: Optional[str] = None
+        phase_started = False
+        if emit_phase_start:
+            started_at = current_timestamp()
+            emitter.emit(
+                PhaseEvent(
+                    run_id=run_id,
+                    ts=started_at,
+                    phase="discovery",
+                    status="start",
+                )
             )
-        )
+            phase_started = True
 
         return RunContext(
             run_id=run_id,
@@ -92,6 +102,7 @@ class ArcindexRunner:
             emitter=emitter,
             artifact_store=artifact_store,
             events_path=emitter.events_path,
+            phase_started=phase_started,
             _unsubscribe=unsubscribers,
         )
 
@@ -106,6 +117,18 @@ class ArcindexRunner:
         """
         Persist discovery artifacts, finalise workflow state, and emit terminal events.
         """
+        if not context.phase_started:
+            context.started_at = current_timestamp()
+            context.emitter.emit(
+                PhaseEvent(
+                    run_id=context.run_id,
+                    ts=context.started_at,
+                    phase="discovery",
+                    status="start",
+                )
+            )
+            context.phase_started = True
+
         start_perf = time.perf_counter()
         try:
             self._ensure_not_cancelled()
@@ -151,7 +174,7 @@ class ArcindexRunner:
             return RunResult(
                 run_id=context.run_id,
                 status="ok",
-                started_at=context.started_at,
+                started_at=context.started_at or completed_at,
                 completed_at=completed_at,
                 elapsed_ms=elapsed_ms,
                 summary_markdown=discovery_result.summary_markdown,
