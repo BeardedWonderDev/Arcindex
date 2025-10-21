@@ -1,16 +1,16 @@
-# Arcindex — Codex CLI Working Guide
+# Arcindex - Codex CLI Working Guide
 
-Use this file to prime Codex CLI before taking actions in the repository. It summarizes the current vision (Arcindex), architecture plans, and in-progress migration work so every session can hit the ground running.
+Use this file to prime the Codex CLI before making changes in the repository. It captures the Arcindex vision, the quickstart-aligned migration strategy, and the current priorities so every session stays in sync with the latest plan.
 
 ---
 
 ## 1. Mission Overview
 
 - **Project Name:** Arcindex (Adaptive Review & Coordination with Integrated Development Experience)
-- **Vision at Completion:** A self-contained CLI that orchestrates end-to-end software delivery by coordinating specialized agents (discovery → QA), capturing elicitation inputs, enforcing evidence-based quality gates, and generating implementation-ready artifacts that enable one-pass execution across multiple languages.
+- **Vision at Completion:** Deliver a Python-first CLI that orchestrates the full software-delivery workflow (discovery -> QA) by coordinating Codex SDK agents, enforcing guardrails, and persisting artefacts for one-pass execution across multiple languages.
 - **Lineage:** Builds on the BMAD Method (multi-agent planning, elicitation standards, checklist rigor) and the PRP system (context-rich implementation prompts) that informed the original CODEX implementation.
-- **Goal:** Rebuild the legacy CODEX orchestration platform as a Python CLI powered by the OpenAI Codex SDK, preserving quality gates, elicitation, and multi-agent workflow coordination while modernizing the runtime and SDK abstraction.
-- **Current Phase:** Phase 1 (discovery orchestrator parity – event/agent runtime overhaul).
+- **Goal:** Rebuild the legacy CODEX orchestration platform using the official OpenAI Codex Agents SDK quickstart patterns, keeping quality gates and multi-agent coordination while modernising the runtime.
+- **Current Phase:** Phase 0 (Codex quickstart alignment and MCP bootstrap).
 
 ---
 
@@ -18,99 +18,97 @@ Use this file to prime Codex CLI before taking actions in the repository. It sum
 
 | Path | Purpose | Notes |
 |------|---------|-------|
-| `arcindex/` | Future home of the new CLI runtime, orchestrator, agents, tools, configs, tests | Mostly scaffolding during Phase 0 |
+| `arcindex/` | Home for the new CLI runtime, agent workflows, guardrails, and tests | Tracks quickstart structures as modules are introduced |
+| `bridge/` | FastAPI and SSE bridge experiments | Will be updated after multi-agent parity lands |
 | `legacy/` | Archived CODEX implementation (reference only) | Contains `.codex/`, `.bmad-core/`, docs, PRPs, test harness |
-| `MIGRATION-PLAN.md` | Source of truth for phased rebuild | Review before scoping tasks |
-| `README.md` | Public-facing overview updated for Arcindex | Mirrors legacy structure with new status |
-| `.github/` | Issue/PR templates, workflows (legacy copies live in `legacy/.github`) | Adjust as migration matures |
+| `MIGRATION-PLAN.md` | Source of truth for the phased rebuild | Updated to mirror Codex quickstart workflows |
+| `README.md` | Public-facing overview | Hold off on edits until more development is complete |
 
-**Guardrail:** Avoid modifying `legacy/` unless a migration task explicitly calls for referencing or porting artifacts.
+**Guardrail:** Avoid modifying `legacy/` unless a migration task explicitly calls for referencing or porting artefacts.
 
 ---
 
-## 3. Active Objectives (Phase 1)
+## 3. Active Objectives (Phase 0)
 
-1. **Event & Artifact Infrastructure**
-   - Implement the Phase 1 event emitter and artifact store so discovery runs write to `runs/<run_id>/`.
-   - Update workflow/state persistence to operate against run-scoped directories.
-2. **Discovery Agent Modernization**
-   - Port the legacy discovery prompt into the new BaseAgent, generating summaries via the Codex SDK.
-   - Migrate `advanced-elicitation.md` and the method catalog so menu selections transform the summary.
-3. **Runner & Streaming CLI**
-   - Build the asynchronous runner skeleton and hook CLI output to the event stream.
-   - Prepare the SSE bridge adapter (FastAPI) so external clients can subscribe once discovery parity is verified.
+1. **Codex MCP Bootstrap**
+   - Install quickstart-required packages (`openai`, `openai-agents`, `python-dotenv`) inside the project virtual environment.
+   - Verify Node.js >=18 and confirm `npx codex --version` works.
+   - Add and smoke test `scripts/codex_mcp.py`, which launches the Codex CLI MCP server exactly like the quickstart (`npx -y codex mcp`).
+2. **Discovery Workflow Baseline**
+   - Implement `arcindex/workflows/discovery.py` using the quickstart single-agent example.
+   - Provide a thin CLI command (`arcindex discovery run`) that invokes the workflow coroutine.
+   - Write an integration test confirming `Runner.run` completes and Codex MCP startup/shutdown behaves as expected.
+3. **Multi-Agent Pipeline Scaffolding**
+   - Port the quickstart multi-agent orchestration (orchestrator -> discovery -> analyst) into `arcindex/workflows/discovery_to_analyst.py`.
+   - Ensure every agent attaches the Codex MCP server via `MCPServerStdio`.
+   - Begin drafting guardrail hooks for discovery and analyst outputs, following quickstart guardrail patterns.
 
 Reference `MIGRATION-PLAN.md` for the full roadmap through Phase 7.
 
 ---
 
-## 4. Key Documents & Where to Look
+## 4. Key Documents
 
-- `MIGRATION-PLAN.md` — phased implementation plan (primary reference).
-- `README.md` — up-to-date project description and expectations.
-- `legacy/docs/` — legacy briefs, PRDs, architecture docs; useful when porting behavior.
-- `legacy/.codex/` — legacy tasks, templates, workflows; source material for SDK translation.
-- `legacy/.bmad-core/` — BMAD method references (checklists, agent instructions).
+- `MIGRATION-PLAN.md` - Phased plan aligned with the Codex quickstart, including code scaffolds.
+- `README.md` - Public summary (avoid changes until the CLI milestones solidify).
+- `legacy/docs/` - Legacy briefs, PRDs, architecture docs; source material for porting behaviour.
+- `legacy/.codex/` - Legacy tasks, templates, workflows; use for understanding historical prompts.
+- `legacy/.bmad-core/` - BMAD method references (checklists, agent instructions).
 
 ---
 
 ## 5. Working with Arcindex CLI
 
-1. **Initialize Session**
-   - Read this file.
-   - Skim `MIGRATION-PLAN.md` for phase-specific details.
-   - Confirm target phase in README’s roadmap table.
-   - **Activate the virtual environment before any Python command**:
+1. **Initialize the Environment**
+   - Read this guide and skim `MIGRATION-PLAN.md` to confirm the current phase.
+   - Activate the project virtual environment before running Python commands:
      ```bash
      python3 -m venv .venv             # run once per machine
-     source .venv/bin/activate         # required for every session
+     source .venv/bin/activate         # required every session
      python -m pip install --upgrade pip
-     python -m pip install -r arcindex/requirements-dev.txt
+     python -m pip install openai openai-agents python-dotenv
      ```
-     Keep the venv active for all `python`, `pip`, `pytest`, and CLI interactions (`arcindex …`). Deactivate only after finishing the session (`deactivate`).
-
-2. **When Editing**
-   - Prefer `apply_patch` for single-file edits.
-   - Note any assumptions or TODOs inline (Markdown comments, Python `TODO`).
-
-3. **When Porting Legacy Artifacts**
-   - Extract intent, not literal markdown.
-   - Adapt structures for Python modules, YAML configs, or JSON state as appropriate.
-
+   - Keep the venv active for `python`, `pip`, `pytest`, and CLI interactions (`arcindex ...`). Deactivate only when the session ends (`deactivate`).
+   - Ensure Node.js >=18 and the Codex CLI are available: `npx codex --version`.
+2. **Start the Codex MCP Server (when required)**
+   - Run `python scripts/codex_mcp.py` to launch the Codex MCP server using `MCPServerStdio`.
+   - Leave the server running while local workflows execute; stop it once the session completes.
+3. **Editing Guidelines**
+   - Prefer `apply_patch` for single-file adjustments.
+   - Note assumptions or follow-ups inline using succinct comments or TODO markers.
 4. **Testing Philosophy**
-   - Create lightweight unit tests as you build out `arcindex/`.
-   - Use `arcindex/test-harness/scripts/run-test.sh` to spin up disposable sandboxes for manual validation.
-   - End-to-end harness will be reintroduced once discovery orchestrator is running.
-
+   - Add unit tests alongside new workflow or guardrail modules.
+   - Use integration tests to exercise `Runner.run` flows that depend on the Codex MCP server.
+   - Document manual validation steps when automated coverage is not yet possible.
 5. **Logging Decisions**
-   - Capture rationale in PR descriptions or short design notes (`docs/decisions/` once created).
+   - Capture rationale in PR descriptions or short notes (plan to add `docs/decisions/` once created).
 
 ---
 
-## 6. Persona Alignment (for future SDK agents)
+## 6. Persona Alignment (future SDK agents)
 
-These are the target personas the SDK will expose; keep them in mind as you define configs:
+Keep these target personas in mind when configuring instructions and handoffs:
 
 | ID | Title | Core Responsibility |
 |----|-------|---------------------|
-| `orchestrator` | Arcindex Orchestrator | Manage workflow lifecycle, state persistence |
+| `orchestrator` | Arcindex Orchestrator | Manage workflow lifecycle, state persistence, guardrail routing |
 | `discovery` | Discovery Guide | Elicit project context, stakeholders, goals |
 | `analyst` | Requirements Analyst | Generate structured requirements and insights |
 | `pm` | Product Planner | Produce PRDs, stories, acceptance criteria |
-| `architect` | System Architect | Craft architecture blueprints, epic-specific plans |
+| `architect` | System Architect | Craft architecture blueprints and implementation plans |
 | `prp` | PRP Author | Create implementation-ready PRPs with validation commands |
-| `dev` | Development Coordinator | Orchestrate validation levels, capture execution learnings |
-| `quality-gate` | Quality Gate Specialist | Run checklists, scoring, evidence capture |
-| `qa` | QA Reviewer | Deep quality analysis, failure escalation |
-| `feedback` | Feedback Steward | Manage bi-directional feedback loops and learnings |
+| `dev` | Development Coordinator | Coordinate execution plans and capture validation outcomes |
+| `quality-gate` | Quality Gate Specialist | Run checklists, scoring, and evidence capture |
+| `qa` | QA Reviewer | Perform deep quality analysis and escalate failures |
+| `feedback` | Feedback Steward | Manage bidirectional feedback loops and learnings |
 
 ---
 
 ## 7. Contribution Checklist
 
-Before finishing an Arcindex CLI session:
+Before finishing an Arcindex session:
 
-- [ ] Updated or confirmed relevant sections of README / migration plan / this guide.
-- [ ] Added or adjusted SDK scaffolding according to the active phase.
-- [ ] Documented new commands/tests or left TODO markers for follow-up.
-- [ ] Mentioned any blockers or open questions in your hand-off notes.
+- [ ] Confirmed relevant sections of `MIGRATION-PLAN.md` or this guide reflect the latest work.
+- [ ] Implemented or updated quickstart-aligned scaffolding for the current phase.
+- [ ] Documented new commands/tests or marked TODOs for follow-up.
+- [ ] Captured blockers or open questions in hand-off notes.

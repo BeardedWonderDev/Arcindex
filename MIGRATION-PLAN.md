@@ -1,208 +1,254 @@
-# Arcindex Migration Plan v3 — Agents SDK Alignment
+# Arcindex Migration Plan v4 - Codex Quickstart Alignment
 
 ## Preface
 
-Arcindex is rebuilding CODEX as a Python-first command line interface that orchestrates multi-agent software delivery (discovery → QA). This plan replaces prior incremental migrations with a ground-up adoption of the OpenAI Agents SDK. **Legacy behaviour is not preserved.** Everything below assumes a clean cutover to SDK-native agents, tracing, guardrails, and tool orchestration.
+Arcindex is rebuilding CODEX as a Python-first CLI that orchestrates the full multi-agent software delivery lifecycle (discovery -> QA). This revision of the migration plan locks the program to the official OpenAI Codex "Agents SDK Quickstart," including its **Expand to a multi-agent workflow** blueprint. We will treat the quickstart code as the canonical reference: the Codex CLI is launched as the sole MCP server (`npx -y codex mcp`), agents are declared with the SDK's `Agent` primitives, and handoffs are orchestrated via the `Runner`. No Arcindex-specific MCP server will be created or maintained.
 
 Key commitments:
 
-- Use the latest OpenAI `openai` and `openai-agents` packages for all model interactions.
-- Treat the Agents SDK `Agent` + `Runner` primitives as the authoritative orchestration layer.
-- Host Arcindex tools via the Model Context Protocol (MCP) so agents interact with project state through well-defined, server-backed tools.
-- Persist run artefacts and documentation in Arcindex’s filesystem layout while deriving event streams from official trace data (no custom emitters).
+- Install and configure the exact dependencies mandated by the quickstart (`openai`, `openai-agents`, `python-dotenv`) inside our Python virtual environment.
+- Launch Codex CLI as an MCP server using `MCPServerStdio` with the quickstart's parameters (`command="npx"`, `args=["-y", "codex", "mcp"]`, generous session timeout).
+- Model every agent, tool attachment, handoff, and runner invocation on the quickstart examples, extending them with Arcindex personas and artefact persistence only after the baseline scenario is green.
+- Keep tests, documentation, and CLI wrappers focused on verifying quickstart parity before layering Arcindex features.
 
-This plan spans seven phases. Each phase yields production-quality functionality backed by tests, SDK tracing, and documentation.
+This plan spans seven phases, each producing production-grade functionality, test coverage, and documentation while remaining quickstart-compliant.
 
 ---
 
-## Phase 0 – SDK Foundations & Environment
+## Phase 0 - Environment & Codex MCP Baseline
 
 **Objective**  
-Bootstrap the repository around the OpenAI Agents SDK and MCP infrastructure.
+Mirror the quickstart environment verbatim so Arcindex can run Codex's MCP server and Agents SDK locally.
 
 **Tasks**
-- Add dependencies: `openai>=1.40`, `openai-agents>=0.2`, `mcp>=latest`. Remove bespoke client shims.
-- Introduce a top-level `arcindex_sdk` module that configures API keys, tracing (Stream/Traces API), and default models via `set_default_openai_api`.
-- Implement Arcindex MCP server in `arcindex/mcp/server.py`, exposing project-aware tools:
-  - `filesystem.read` / `filesystem.write` for run artefacts.
-  - `elicitation.catalog` tool that returns elicitation options + prompt instructions.
-  - Discovery summary persistence tool.
-- Add developer docs covering environment variables, API key handling, and local MCP server launch.
-- Write smoke tests that ensure the MCP server starts and responds to tool discovery.
+- Activate the repo's Python virtual environment and install `openai`, `openai-agents`, and `python-dotenv` at or above the quickstart-specified versions.
+- Ensure Node.js >=18 is available (per Codex CLI requirements) and verify `npx codex --version`.
+- Commit the `.env` pattern used in the quickstart (`OPENAI_API_KEY`, optional `OPENAI_API_BASE_URL`), along with documentation that references `dotenv`.
+- Add `scripts/codex_mcp.py`, a verbatim port of the quickstart bootstrap, to start the Codex MCP server:
+
+```python
+# scripts/codex_mcp.py
+import asyncio
+import os
+from dotenv import load_dotenv
+from agents import set_default_openai_api
+from agents.mcp import MCPServerStdio
+
+load_dotenv(override=True)
+set_default_openai_api(os.getenv("OPENAI_API_KEY"))
+
+async def main() -> None:
+    async with MCPServerStdio(
+        "Codex CLI",
+        params={"command": "npx", "args": ["-y", "codex", "mcp"]},
+        client_session_timeout_seconds=360000,
+    ) as codex_mcp_server:
+        print("Codex MCP server started.")
+        await codex_mcp_server.wait_closed()
+
+if __name__ == "__main__":
+    asyncio.run(main())
+```
+
+- Document the manual smoke test: run `python scripts/codex_mcp.py` and confirm "Codex MCP server started." mirrors the quickstart output.
 
 **Exit Criteria**
-- `python -m arcindex.mcp.server` launches successfully and registers tools.
-- `python -m arcindex.sdk.check` verifies API configuration.
-- No legacy runner or agent classes remain.
+- `python scripts/codex_mcp.py` starts the Codex CLI MCP server with no Arcindex-specific tooling.
+- README and onboarding docs instruct contributors to follow the quickstart environment steps exactly.
 
 ---
 
-## Phase 1 – Discovery Agent via Agents SDK
+## Phase 1 - Discovery Orchestration with Quickstart Agents
 
 **Objective**  
-Ship the discovery workflow using SDK-native agents and the official Runner.
-
-**Architecture**
-- Define two agents in `arcindex/agents/`:
-  - `orchestrator`: handles workflow lifecycle, MCP tool invocation, and documentation persistence.
-  - `discovery`: generates summaries, applies elicitation methods, and writes artefacts through MCP tools.
-- Configure agents with:
-  - Instructions derived from legacy prompts but modernised for deterministic headings.
-  - Required tools (`elicitation.catalog`, `filesystem.write`, etc.).
-  - Tracing enabled by default.
-- Replace CLI entrypoint with `ArcindexRunner.run_discovery(project_name, answers, elicitation_choice)` that internally:
-  - Starts the MCP server.
-  - Invokes `Runner.run` with the orchestrator agent.
-  - Streams tokens/events through SDK callbacks directly to the CLI/bridge.
-- Capture run artefacts by subscribing to Runner’s trace stream and writing to `runs/<run_id>/`:
-  - Use trace metadata to populate `workflow.json`, `summary.json`, and docs under `docs/discovery/`.
-- Update FastAPI bridge to call the same helper, relay trace events via SSE, and expose trace IDs for observability.
-
-**Testing**
-- CLI integration test that seeds answers, runs discovery, and asserts:
-  - Runner returns `status="completed"`.
-  - `docs/discovery/<run_id>.md` exists with markdown headings.
-  - Trace ID is emitted.
-- Bridge tests covering interactive answer submission and SSE streaming.
-
-**Exit Criteria**
-- `arcindex start …` completes discovery using SDK agents, writes docs + run artefacts, and surfaces trace IDs.
-- No custom Responses API usage remains in discovery.
-
----
-
-## Phase 2 – Analyst Persona & Multi-Agent Handoffs
-
-**Objective**  
-Extend the runner to transition from discovery to analyst using SDK handoffs.
+Port the quickstart single-agent workflow into Arcindex, adapting instructions to our discovery persona while leaving the Codex CLI MCP attachment untouched.
 
 **Tasks**
-- Add `analyst` agent with instructions sourced from legacy content, adapted for SDK context.
-- Configure orchestrator agent to emit `handoff` actions after discovery completion.
-- Persist analyst artefacts via MCP filesystem tool.
-- Update workflow state schema to reference trace IDs, agent outputs, and guardrail results rather than manual history arrays.
-- Enhance CLI/bridge to surface phase transitions using Runner callbacks.
+- Create `arcindex/workflows/discovery.py` that reuses the quickstart pattern of instantiating an `Agent` and invoking `Runner.run`. Replace the "app builder" instructions with Arcindex discovery guidance, but keep the structure and parameters intact.
+- Add an initial `discovery` agent that invokes Codex MCP tools (e.g., code browsing) via the `mcp_servers` parameter exactly as shown in the quickstart.
+- Produce CLI glue command (`arcindex discovery run`) that simply calls the new module's `main()` coroutine.
+- Write an integration test that asserts `Runner.run(...).final_output` returns a non-empty summary and that Codex MCP startup/shutdown completes.
 
-**Testing**
-- Integration test that seeds discovery responses, triggers analyst phase, and verifies:
-  - Trace log shows handoff from orchestrator to analyst.
-  - Analyst artefacts saved in `runs/<run_id>/artifacts/analyst/`.
-  - Quality gate guardrail invoked (see Phase 3).
+**Quickstart-derived scaffold**
+
+```python
+# arcindex/workflows/discovery.py
+async def main() -> None:
+    async with MCPServerStdio(
+        "Codex CLI",
+        params={"command": "npx", "args": ["-y", "codex", "mcp"]},
+        client_session_timeout_seconds=360000,
+    ) as codex_mcp_server:
+        discovery_agent = Agent(
+            name="discovery",
+            instructions="You are the Arcindex discovery guide...",
+            model="gpt-4.1",
+            mcp_server_configs=[codex_mcp_server],
+        )
+        result = await Runner.run(
+            agent=discovery_agent,
+            task="Elicit project context for Arcindex",
+            max_turns=12,
+        )
+        print(result.final_output)
+```
 
 **Exit Criteria**
-- Analyst phase runs automatically post-discovery with artefacts persisted and trace metadata recorded.
+- Running `python -m arcindex.workflows.discovery` produces discovery output via `Runner.run` and Codex MCP.
+- The CLI wrapper and tests confirm no custom MCP server is introduced.
 
 ---
 
-## Phase 3 – Guardrails & Quality Gates
+## Phase 2 - Multi-Agent Workflow (Discovery -> Analyst)
 
 **Objective**  
-Leverage SDK guardrails to enforce quality gates instead of manual placeholders.
+Adopt the quickstart's multi-agent example wholesale, then customize agent instructions for Arcindex discovery and analyst personas.
 
 **Tasks**
-- Define guardrail callbacks using `@agents.guardrail` decorators that validate discovery/analyst outputs against checklists (ported from legacy markdown into structured JSON or YAML).
-- Guardrail outcomes update `runs/<run_id>/logs/guardrails.jsonl` and runner state.
-- CLI displays guardrail pass/fail status; bridge sends guardrail events in SSE stream.
-- Update template docs describing guardrail expectations and remediation paths.
+- Add `arcindex/workflows/discovery_to_analyst.py`, starting from the quickstart's `multi_agent_workflow.py`. Modify only agent names, instructions, and handoff tasks to reflect Arcindex roles.
+- Reuse quickstart concepts: a supervising orchestrator agent, downstream persona agents, explicit `result = await Runner.run(...)`, and `handoffs` arrays linking agents.
+- Introduce a shared `settings = ModelSettings(...)` block and optional `Reasoning` configuration identical to the quickstart baseline.
+- Ensure both `discovery` and `analyst` agents attach the Codex MCP server via `mcp_server_configs`.
+- Update tests to assert orchestrated handoffs succeed (Runner status "completed"), and capture persona outputs in temporary artefact files as a post-processing step.
 
-**Testing**
-- Unit tests for each guardrail with intentionally failing inputs.
-- Integration test verifying guardrail events appear in trace stream and abort run on critical failure (Runner should return `status="failed"`).
+**Quickstart-aligned core**
+
+```python
+# arcindex/workflows/discovery_to_analyst.py
+async def main() -> None:
+    settings = ModelSettings(
+        model="gpt-4.1",
+        extensions=[
+            WebSearchTool(),
+            Reasoning(strategy=ReasoningStrategy.on, effort=ReasoningEffort.low),
+        ],
+    )
+    async with MCPServerStdio(
+        "Codex CLI",
+        params={"command": "npx", "args": ["-y", "codex", "mcp"]},
+        client_session_timeout_seconds=360000,
+    ) as codex_mcp_server:
+        discovery = Agent(
+            name="discovery",
+            instructions="Lead elicitation for Arcindex...",
+            settings=settings,
+            mcp_server_configs=[codex_mcp_server],
+        )
+        analyst = Agent(
+            name="analyst",
+            instructions="Transform discovery notes into structured requirements...",
+            settings=settings,
+            mcp_server_configs=[codex_mcp_server],
+        )
+        orchestrator = Agent(
+            name="orchestrator",
+            instructions=(
+                "Coordinate agents. Ensure the discovery agent gathers context, "
+                "then hand off to the analyst for structured outputs."
+            ),
+            settings=settings,
+            handoffs=[discovery, analyst],
+            mcp_server_configs=[codex_mcp_server],
+        )
+        result = await Runner.run(
+            agent=orchestrator,
+            task="Execute Arcindex discovery-to-analyst workflow.",
+            handoffs=[discovery, analyst],
+            max_turns=30,
+        )
+        print(result.final_output)
+```
 
 **Exit Criteria**
-- Every phase uses guardrails for validation; manual `QualityGateResult.not_run` placeholders removed.
+- Runner logs show orchestrator -> discovery -> analyst handoffs identical to the quickstart flow.
+- Artefacts capture discovery notes and analyst requirements with trace metadata recorded for later phases.
 
 ---
 
-## Phase 4 – Product Management Agent & Artefacts
+## Phase 3 - Guardrails & Evidence Capture
 
 **Objective**  
-Introduce PM agent with SDK-native workflows.
+Layer guardrails using the Agents SDK guardrail decorators and quickstart patterns while keeping Codex MCP as the sole tooling interface.
 
 **Tasks**
-- Add `pm` agent definition, tools (e.g., `filesystem.write`, future PRP references), and guardrails.
-- Implement orchestrated fan-out if multiple PM perspectives are required (use Runner parallel execution).
-- Persist PRD markdown under `docs/pm/` and JSON artefacts under run directory.
-- Update CLI/bridge messaging to highlight PM outputs.
-
-**Testing**
-- Integration test covering discovery → analyst → PM run with guardrail success.
-- Snapshot tests ensuring PRD headings and metadata conform to expectations.
+- Port quickstart-style guardrail callbacks into `arcindex/guardrails/`. Use `@agents.guardrail` to check discovery summaries and analyst requirements.
+- Wire guardrails into the `handoffs=[...]` pipeline so failed validations force `Runner.run` to return `status="failed"`.
+- Persist guardrail outcomes beside the run artefacts (`runs/<run_id>/guardrails.jsonl`).
+- Add unit tests covering pass/fail cases.
 
 **Exit Criteria**
-- Full pipeline through PM runs via Agents SDK with artefacts and docs persisted.
+- Guardrails trigger for both personas and halt the workflow on critical violations.
+- Documentation explains how guardrails align with quickstart idioms.
 
 ---
 
-## Phase 5 – Architecture, PRP, and Development Agents
+## Phase 4 - Product Management Persona
 
 **Objective**  
-Expand to architecture planning, PRP authoring, and development coordination agents.
+Extend the quickstart multi-agent flow with a PM agent that consumes analyst output and produces PRDs.
 
 **Tasks**
-- Define `architect`, `prp`, and `dev` agents with handoffs chained from PM phase.
-- Introduce additional MCP tools as needed (e.g., repo introspection, command execution harness).
-- Implement parallel fan-out (multiple architects) with SDK reduce handlers.
-- Persist architecture blueprints, PRPs, and development checklists to docs + run directories.
-
-**Testing**
-- Integration suite verifying multi-agent fan-out, reduce events, and artefact persistence.
-- Guardrail tests for PRP validation commands.
+- Clone the quickstart handoff structure to add a `pm` agent after `analyst`, using identical `handoffs` wiring.
+- Persist PM artefacts under `runs/<run_id>/docs/pm/` using post-run hooks (no additional MCP servers).
+- Update integration tests to validate orchestrator -> discovery -> analyst -> PM progression.
 
 **Exit Criteria**
-- Pipeline produces architecture plans, PRPs, and development coordination outputs using SDK agents exclusively.
+- PM agent runs automatically after analyst with outputs saved to docs and run directories.
+- Runner trace includes all three persona transitions.
 
 ---
 
-## Phase 6 – Quality Gate & QA Agents
+## Phase 5 - Architecture, PRP, and Development Personas
 
 **Objective**  
-Complete workflow with quality gate specialist and QA reviewer personas.
+Continue chaining agents using the quickstart handoff pattern to cover architecture, PRP authoring, and development coordination.
 
 **Tasks**
-- Add `quality_gate` and `qa` agents with guardrails enforcing evidence capture.
-- Extend MCP tooling to fetch evidence artefacts, run test harness scripts, and attach logs.
-- CLI exposes quality gate scoring; bridge surfaces escalations via SSE.
-
-**Testing**
-- Scenario tests covering pass/fail gates, evidence persistence, and escalations.
-- Stress tests ensuring long runs stream cleanly with tracing.
+- Define `architect`, `prp`, and `dev` agents with tailored instructions but identical `settings`, `handoffs`, and `mcp_server_configs`.
+- Support parallel fan-out by leveraging quickstart-style runner loops (multiple `Agent` instances added to the same `handoffs` list).
+- Persist generated artefacts (architecture diagrams, PRPs, development checklists) using CLI post-processing.
 
 **Exit Criteria**
-- Full end-to-end workflow from discovery to QA runs within the SDK framework, with evidence stored under `runs/<run_id>/logs/evidence/`.
+- Multi-agent fan-out completes with consolidated artefacts and trace metadata.
+- Guardrails remain active across the expanded pipeline.
 
 ---
 
-## Phase 7 – FastAPI Bridge & External Integrations
+## Phase 6 - Quality Gate & QA Personas
 
 **Objective**  
-Harden the HTTP interface and prepare for external consumer integrations.
+Complete the workflow by attaching quality gate and QA reviewer agents that evaluate evidence using Codex MCP tools.
 
 **Tasks**
-- Refactor bridge endpoints to operate purely on Runner APIs and trace IDs.
-- Provide webhook or WebSocket hooks for guardrail events and artefact updates.
-- Add API documentation (OpenAPI schema) and example client libraries.
-- Ensure bridge supports cancelling/monitoring runs via Runner cancellation tokens.
-
-**Testing**
-- End-to-end tests simulating an external client (answer submission, cancellation, guardrail handling).
-- Load tests validating SSE/WebSocket performance with long-running traces.
+- Add `quality_gate` and `qa` agents with guardrails that parse prior artefacts.
+- Extend integration tests to cover pass/fail evidence scenarios and SSE-friendly trace outputs.
 
 **Exit Criteria**
-- External clients can launch, monitor, and cancel runs purely through bridge endpoints, relying on Agents SDK tracing data for observability.
+- Full discovery -> QA pipeline executes with Codex MCP, Agents SDK handoffs, and guardrails.
+- Evidence artefacts stored under `runs/<run_id>/logs/evidence/`.
+
+---
+
+## Phase 7 - CLI Bridge & External Integrations
+
+**Objective**  
+Expose the quickstart-aligned runner via Arcindex's CLI and FastAPI bridge without altering the MCP topology.
+
+**Tasks**
+- Wrap each workflow coroutine in CLI commands (`arcindex run discovery`, `arcindex run pipeline`).
+- Update the FastAPI SSE bridge to stream Runner events and trace IDs using the SDK's callbacks.
+- Provide OpenAPI docs and sample client snippets that demonstrate launching the pipeline via HTTP.
+
+**Exit Criteria**
+- External clients can start, monitor, and cancel runs using the bridge while Codex MCP remains the single tool host.
 
 ---
 
 ## Cross-Cutting Concerns
 
-- **Documentation**: Update `README.md`, developer onboarding docs, and per-phase notes to reflect SDK usage, API credentials, and MCP workflow. Provide trace troubleshooting steps.
-- **State Schema**: Replace legacy `workflow.json` template with an SDK-aware document capturing `run_id`, `trace_id`, agent outputs, guardrail results, and artefact URIs.
-- **Testing Strategy**: Use deterministic fixtures by swapping SDK clients with replay adapters in unit tests. Integration tests should run with the real SDK using mocked MCP backends where necessary.
-- **Tool Security**: Guard MCP filesystem operations with allowlists and ensure docs/artefacts directories are the only writable locations.
-- **Observability**: Integrate with OpenAI Trace viewer and emit run metadata (trace URL, guardrail summary) in CLI/bridge outputs.
+- **Documentation**: Every phase must cite the relevant quickstart section and show diff snippets proving parity. Update README and developer docs after each phase.
+- **Testing**: Prefer replay fixtures for unit tests; integration suites should launch the real Codex MCP server via the shared bootstrap script.
+- **Artefacts**: Continue writing outputs to `runs/<run_id>/`, but never extend MCP beyond the Codex CLI server.
+- **Observability**: Surface trace IDs and guardrail summaries in CLI output, mirroring quickstart logging conventions.
 
----
-
-## Conclusion
-
-This migration abandons bespoke orchestration in favour of the OpenAI Agents SDK. Every agent interaction, guardrail, and tool invocation must flow through the SDK stack. Legacy compatibility is explicitly out of scope; new functionality, tests, and documentation should all reference SDK concepts (Agents, Runner, MCP, guardrails, tracing). Completing Phase 7 delivers a modern, maintainable Arcindex CLI aligned with the official getting started flow and ready for future multi-agent extensions. 
+This roadmap keeps Arcindex on the official Agents SDK path, ensuring future quickstart updates can be adopted with minimal friction.
