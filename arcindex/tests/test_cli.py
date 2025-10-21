@@ -136,3 +136,36 @@ def test_cli_discovery_run_quickstart(monkeypatch):
     assert captured_kwargs["task"] == "Custom task"
     assert captured_kwargs["model"] == "gpt-test"
     assert captured_kwargs["max_turns"] == 3
+
+
+def test_cli_discovery_pipeline_quickstart(monkeypatch):
+    """Ensure the multi-agent CLI command invokes the handoff workflow."""
+
+    class DummyResult:
+        def __init__(self) -> None:
+            self.final_output = "Multi-agent summary"
+
+    captured_kwargs = {}
+
+    async def fake_multi_agent_run(**kwargs):
+        captured_kwargs.update(kwargs)
+        return DummyResult()
+
+    monkeypatch.setattr(
+        cli_main.multi_agent_workflow,
+        "run_discovery_to_analyst",
+        fake_multi_agent_run,
+    )
+
+    runner = CliRunner()
+    result = runner.invoke(
+        arcindex,
+        ["discovery", "pipeline", "--task", "Pipeline task", "--model", "gpt-test", "--max-turns", "10"],
+        catch_exceptions=False,
+    )
+
+    assert result.exit_code == 0, result.output
+    assert "Multi-agent summary" in result.output
+    assert captured_kwargs["task"] == "Pipeline task"
+    assert captured_kwargs["model"] == "gpt-test"
+    assert captured_kwargs["max_turns"] == 10

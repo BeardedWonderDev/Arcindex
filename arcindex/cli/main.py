@@ -26,6 +26,7 @@ from arcindex.orchestrator import OrchestratorController
 from arcindex.runner import ArcindexRunner
 from arcindex.tools import ElicitationOption, current_timestamp
 from arcindex.workflows import discovery as discovery_workflow
+from arcindex.workflows import discovery_to_analyst as multi_agent_workflow
 
 DEFAULT_CONFIG_PATH = Path(__file__).resolve().parent.parent / "config" / "runtime.yaml"
 
@@ -64,6 +65,39 @@ def run_discovery(task: str, model: str, max_turns: int) -> None:
     """Run the discovery workflow using the quickstart template."""
     result = asyncio.run(
         discovery_workflow.run_discovery(
+            task=task,
+            model=model,
+            max_turns=max_turns,
+        )
+    )
+    click.echo(result.final_output)
+
+@discovery_group.command(
+    name="pipeline", help="Execute the Codex quickstart multi-agent discovery-to-analyst workflow."
+)
+@click.option(
+    "--task",
+    default=multi_agent_workflow.DEFAULT_DISCOVERY_TO_ANALYST_TASK,
+    show_default=True,
+    help="Task prompt that the orchestrator agent receives.",
+)
+@click.option(
+    "--model",
+    default=discovery_workflow.DEFAULT_MODEL,
+    show_default=True,
+    help="Model identifier to use across agents.",
+)
+@click.option(
+    "--max-turns",
+    default=24,
+    show_default=True,
+    type=click.IntRange(1, 120),
+    help="Maximum number of turns across the orchestrated workflow.",
+)
+def run_discovery_pipeline(task: str, model: str, max_turns: int) -> None:
+    """Run the multi-agent pipeline and print the orchestrator's final output."""
+    result = asyncio.run(
+        multi_agent_workflow.run_discovery_to_analyst(
             task=task,
             model=model,
             max_turns=max_turns,
