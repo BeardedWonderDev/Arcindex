@@ -35,7 +35,8 @@ arcindex/test-harness/
    source .venv/bin/activate
    pip install -e '.[dev]'
    cp ../../.env .    # optional: reuse your API key in the sandbox
-   arcindex start --task "$(< discovery-task.txt)"
+   cat discovery-task.txt   # copy the prompt text
+   arcindex start --task "<paste prompt here>"
    ```
 
 3. **Inspect outputs** inside the workspace. Every run writes to the quickstart run tree:
@@ -44,7 +45,28 @@ arcindex/test-harness/
    - `runs/<run_id>/logs/events.ndjson` – event stream suitable for SSE clients.
    Delete the folder when you are finished.
 
-4. **Repeatable runs**. The copied `discovery-task.txt` contains the canonical discovery answers lifted from the legacy workflow. Edit or swap it with `--task <file>` when invoking `run-test.sh` if you need different scenarios.
+4. **Repeatable runs**. The copied `discovery-task.txt` contains the canonical discovery answers lifted from the legacy workflow. Edit or swap it with `--task <file>` when invoking `run-test.sh` if you need different scenarios. A quick reference is provided below for copy/paste:
+
+```
+Arcindex Discovery Baseline
+
+Goal:
+Summarize the Arcindex project context using the canonical responses so the analyst handoff produces deterministic requirements.
+
+Discovery Answers:
+1. Project Name: Arcindex
+2. Concept Overview: Adaptive Review & Coordination with Integrated Development Experience (CLI orchestrator for multi-agent delivery)
+3. Stakeholders: Engineering leads, product managers, and internal delivery teams
+4. Research / Discovery: Interviews with internal users; beta program planned
+5. Existing Solutions: Legacy CODEX scripts and ad-hoc tooling
+6. Business Drivers: Growing demand for orchestrated AI workflows and evidence-based quality gates
+7. Technical Stack: Python CLI, JSON state files, reusable OpenAI Codex SDK bindings
+8. Integrations: Git, OpenAI APIs, future FastAPI bridge for SSE clients
+9. Success Metrics: Workflow completion rate, onboarding time, and quality gate pass rates
+
+Instructions:
+Use these details to produce the discovery summary with headings Overview, Stakeholders, Goals, Risks, and Open Questions before handing off to the analyst.
+```
 
 ## Notes
 

@@ -80,7 +80,9 @@ Next steps:
   source .venv/bin/activate
   pip install -e '.[dev]'
   cp ../../.env .    # optional: reuse your API key for the sandbox
-  arcindex start --task "\$(< discovery-task.txt)"
+  cat discovery-task.txt
+  # Copy the full prompt above (including numbered answers)
+  arcindex start --task "<paste prompt here>"
 
 When you're finished, remove the workspace by deleting the directory.
 Artifacts and event logs will be written under runs/<run_id>/ within the workspace.
