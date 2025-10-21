@@ -10,6 +10,7 @@ import yaml
 from click.testing import CliRunner
 
 from arcindex.cli import arcindex
+from arcindex.cli import main as cli_main
 
 
 def test_cli_start_smoke(tmp_path: Path) -> None:
@@ -106,3 +107,32 @@ def test_cli_start_smoke(tmp_path: Path) -> None:
     assert docs_summary_path.exists()
     contents = docs_summary_path.read_text(encoding="utf-8")
     assert "Discovery Summary" in contents
+
+
+def test_cli_discovery_run_quickstart(monkeypatch):
+    """Ensure the quickstart-aligned CLI command invokes the workflow coroutine."""
+
+    class DummyResult:
+        def __init__(self) -> None:
+            self.final_output = "Quickstart discovery summary"
+
+    captured_kwargs = {}
+
+    async def fake_run_discovery(**kwargs):
+        captured_kwargs.update(kwargs)
+        return DummyResult()
+
+    monkeypatch.setattr(cli_main.discovery_workflow, "run_discovery", fake_run_discovery)
+
+    runner = CliRunner()
+    result = runner.invoke(
+        arcindex,
+        ["discovery", "run", "--task", "Custom task", "--model", "gpt-test", "--max-turns", "3"],
+        catch_exceptions=False,
+    )
+
+    assert result.exit_code == 0, result.output
+    assert "Quickstart discovery summary" in result.output
+    assert captured_kwargs["task"] == "Custom task"
+    assert captured_kwargs["model"] == "gpt-test"
+    assert captured_kwargs["max_turns"] == 3

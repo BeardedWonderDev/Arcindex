@@ -24,7 +24,7 @@ MCP_PARAMS: Final[dict[str, object]] = {
 MCP_SESSION_TIMEOUT_SECONDS: Final[int] = 360_000
 
 
-def _configure_openai() -> None:
+def configure_openai() -> None:
     """Load environment variables and configure API defaults for the SDK."""
     load_dotenv(override=True)
     api_key = os.getenv("OPENAI_API_KEY")
@@ -38,7 +38,7 @@ def _configure_openai() -> None:
 
 async def main() -> None:
     """Start the Codex CLI MCP server and keep it alive until the process exits."""
-    _configure_openai()
+    configure_openai()
     async with MCPServerStdio(
         name=MCP_NAME,
         params=MCP_PARAMS,

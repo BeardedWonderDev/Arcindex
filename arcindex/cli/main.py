@@ -25,6 +25,7 @@ except ImportError:  # pragma: no cover - optional dependency fallback
 from arcindex.orchestrator import OrchestratorController
 from arcindex.runner import ArcindexRunner
 from arcindex.tools import ElicitationOption, current_timestamp
+from arcindex.workflows import discovery as discovery_workflow
 
 DEFAULT_CONFIG_PATH = Path(__file__).resolve().parent.parent / "config" / "runtime.yaml"
 
@@ -32,6 +33,43 @@ DEFAULT_CONFIG_PATH = Path(__file__).resolve().parent.parent / "config" / "runti
 @click.group(help="Arcindex CLI. Discovery orchestration is available in this release.")
 def arcindex() -> None:
     """Primary command group for Arcindex."""
+
+
+@arcindex.group(name="discovery", help="Codex quickstart-aligned discovery workflows.")
+def discovery_group() -> None:
+    """Commands for running the Codex quickstart discovery pipeline."""
+
+
+@discovery_group.command(name="run", help="Execute the Codex quickstart discovery workflow.")
+@click.option(
+    "--task",
+    default=discovery_workflow.DEFAULT_DISCOVERY_TASK,
+    show_default=True,
+    help="Task prompt to provide to the discovery agent.",
+)
+@click.option(
+    "--model",
+    default=discovery_workflow.DEFAULT_MODEL,
+    show_default=True,
+    help="Model identifier to use for the discovery agent.",
+)
+@click.option(
+    "--max-turns",
+    default=12,
+    show_default=True,
+    type=click.IntRange(1, 100),
+    help="Maximum number of turns the runner may execute.",
+)
+def run_discovery(task: str, model: str, max_turns: int) -> None:
+    """Run the discovery workflow using the quickstart template."""
+    result = asyncio.run(
+        discovery_workflow.run_discovery(
+            task=task,
+            model=model,
+            max_turns=max_turns,
+        )
+    )
+    click.echo(result.final_output)
 
 
 @arcindex.command(help="Start a discovery workflow run.")
