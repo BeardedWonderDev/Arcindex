@@ -8,8 +8,18 @@ quickstart, adapted with Arcindex-specific instructions and defaults.
 from __future__ import annotations
 
 import os
-from agents import Agent, Runner, set_default_openai_api
-from agents.mcp import MCPServerStdio
+
+try:
+    from agents import Agent, Runner, set_default_openai_api
+    from agents.mcp import MCPServerStdio
+except ImportError as import_error:  # pragma: no cover - dependency guard
+    Agent = None  # type: ignore[assignment]
+    Runner = None  # type: ignore[assignment]
+    set_default_openai_api = None  # type: ignore[assignment]
+    MCPServerStdio = None  # type: ignore[assignment]
+    _AGENTS_IMPORT_ERROR = import_error
+else:
+    _AGENTS_IMPORT_ERROR = None
 from dotenv import load_dotenv
 
 from scripts.codex_mcp import (
@@ -28,13 +38,23 @@ DEFAULT_MODEL: str = "gpt-4.1"
 
 
 def _configure_openai_from_env() -> None:
+    _ensure_agents_sdk_available()
     load_dotenv(override=True)
     api_key = os.getenv("OPENAI_API_KEY")
     if not api_key:
         raise RuntimeError(
             "OPENAI_API_KEY is not set. Ensure the .env file follows the Codex quickstart instructions."
         )
+    assert set_default_openai_api is not None  # for type checkers
     set_default_openai_api(api_key)
+
+
+def _ensure_agents_sdk_available() -> None:
+    if Agent is None or Runner is None or MCPServerStdio is None or set_default_openai_api is None:
+        raise RuntimeError(
+            "OpenAI Agents SDK is not installed. Run `pip install openai-agents` "
+            "per the Codex quickstart before invoking this workflow."
+        ) from _AGENTS_IMPORT_ERROR
 
 
 async def run_discovery(

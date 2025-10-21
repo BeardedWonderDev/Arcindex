@@ -1,8 +1,6 @@
-import asyncio
-
 import pytest
 
-from scripts import codex_mcp
+codex_mcp = pytest.importorskip("scripts.codex_mcp")
 
 
 def test_mcp_params_match_quickstart():
