@@ -2,12 +2,12 @@
 
 ## Preface
 
-Arcindex is rebuilding CODEX as a Python-first CLI that orchestrates the full multi-agent software delivery lifecycle (discovery -> QA). This revision of the migration plan locks the program to the official OpenAI Codex "Agents SDK Quickstart," including its **Expand to a multi-agent workflow** blueprint. We will treat the quickstart code as the canonical reference: the Codex CLI is launched as the sole MCP server (`npx -y codex mcp`), agents are declared with the SDK's `Agent` primitives, and handoffs are orchestrated via the `Runner`. No Arcindex-specific MCP server will be created or maintained.
+Arcindex is rebuilding CODEX as a Python-first CLI that orchestrates the full multi-agent software delivery lifecycle (discovery -> QA). This revision of the migration plan locks the program to the official OpenAI Codex "Agents SDK Quickstart," including its **Expand to a multi-agent workflow** blueprint. We will treat the quickstart code as the canonical reference: the Codex CLI is launched as the sole MCP server (`npx -y codex mcp-server`), agents are declared with the SDK's `Agent` primitives, and handoffs are orchestrated via the `Runner`. No Arcindex-specific MCP server will be created or maintained.
 
 Key commitments:
 
 - Install and configure the exact dependencies mandated by the quickstart (`openai`, `openai-agents`, `python-dotenv`) inside our Python virtual environment.
-- Launch Codex CLI as an MCP server using `MCPServerStdio` with the quickstart's parameters (`command="npx"`, `args=["-y", "codex", "mcp"]`, generous session timeout).
+- Launch Codex CLI as an MCP server using `MCPServerStdio` with the quickstart's parameters (`command="npx"`, `args=["-y", "codex", "mcp-server"]`, generous session timeout).
 - Model every agent, tool attachment, handoff, and runner invocation on the quickstart examples, extending them with Arcindex personas and artefact persistence only after the baseline scenario is green.
 - Keep tests, documentation, and CLI wrappers focused on verifying quickstart parity before layering Arcindex features.
 - Remove or quarantine legacy orchestration/runtime code as soon as the quickstart equivalents exist. Legacy modules may stay only as read-only references and must not power the CLI.
@@ -41,7 +41,7 @@ set_default_openai_api(os.getenv("OPENAI_API_KEY"))
 async def main() -> None:
     async with MCPServerStdio(
         "Codex CLI",
-        params={"command": "npx", "args": ["-y", "codex", "mcp"]},
+        params={"command": "npx", "args": ["-y", "codex", "mcp-server"]},
         client_session_timeout_seconds=360000,
     ) as codex_mcp_server:
         print("Codex MCP server started.")
@@ -77,7 +77,7 @@ Port the quickstart single-agent workflow into Arcindex, adapting instructions t
 async def main() -> None:
     async with MCPServerStdio(
         "Codex CLI",
-        params={"command": "npx", "args": ["-y", "codex", "mcp"]},
+        params={"command": "npx", "args": ["-y", "codex", "mcp-server"]},
         client_session_timeout_seconds=360000,
     ) as codex_mcp_server:
         discovery_agent = Agent(
@@ -127,7 +127,7 @@ async def main() -> None:
     )
     async with MCPServerStdio(
         "Codex CLI",
-        params={"command": "npx", "args": ["-y", "codex", "mcp"]},
+        params={"command": "npx", "args": ["-y", "codex", "mcp-server"]},
         client_session_timeout_seconds=360000,
     ) as codex_mcp_server:
         discovery = Agent(

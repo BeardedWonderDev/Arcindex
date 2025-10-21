@@ -19,7 +19,7 @@ from agents.mcp import MCPServerStdio
 MCP_NAME: Final[str] = "Codex CLI"
 MCP_PARAMS: Final[dict[str, object]] = {
     "command": "npx",
-    "args": ["-y", "codex", "mcp"],
+    "args": ["-y", "codex", "mcp-server"],
 }
 MCP_SESSION_TIMEOUT_SECONDS: Final[int] = 360_000
 
@@ -45,7 +45,8 @@ async def main() -> None:
         client_session_timeout_seconds=MCP_SESSION_TIMEOUT_SECONDS,
     ) as codex_mcp_server:
         print("Codex MCP server started.")
-        await codex_mcp_server.wait_closed()
+        # Block forever so the MCP server stays alive; interrupt with Ctrl-C.
+        await asyncio.Event().wait()
 
 
 if __name__ == "__main__":

@@ -33,7 +33,7 @@ Use this file to prime the Codex CLI before making changes in the repository. It
 1. **Codex MCP Bootstrap**
    - Install quickstart-required packages (`openai`, `openai-agents`, `python-dotenv`) inside the project virtual environment.
    - Verify Node.js >=18 and confirm `npx codex --version` works.
-   - Add and smoke test `scripts/codex_mcp.py`, which launches the Codex CLI MCP server exactly like the quickstart (`npx -y codex mcp`).
+   - Add and smoke test `scripts/codex_mcp.py`, which launches the Codex CLI MCP server exactly like the quickstart (`npx -y codex mcp-server`).
 2. **Discovery Workflow Baseline**
    - Implement `arcindex/workflows/discovery.py` using the quickstart single-agent example.
    - Wire `arcindex start` to call the workflow so the CLI depends solely on Codex SDK primitives.
