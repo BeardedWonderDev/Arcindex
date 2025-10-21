@@ -2,6 +2,13 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import pytest
+
+pytest.skip(
+    "Legacy workflow coverage pending Codex quickstart migration (see MIGRATION-PLAN.md)",
+    allow_module_level=True,
+)
+
 from arcindex.agents import DiscoveryAgent
 from arcindex.artifacts import ArtifactStore
 

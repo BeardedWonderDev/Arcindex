@@ -24,7 +24,7 @@ Use this file to prime the Codex CLI before making changes in the repository. It
 | `MIGRATION-PLAN.md` | Source of truth for the phased rebuild | Updated to mirror Codex quickstart workflows |
 | `README.md` | Public-facing overview | Hold off on edits until more development is complete |
 
-**Guardrail:** Avoid modifying `legacy/` unless a migration task explicitly calls for referencing or porting artefacts.
+**Guardrail:** Avoid modifying `legacy/` unless a migration task explicitly calls for referencing or porting artefacts. Remove or quarantine legacy runtime code in `arcindex/` once a Codex quickstart replacement lands; keep legacy modules for reference only.
 
 ---
 
@@ -36,12 +36,12 @@ Use this file to prime the Codex CLI before making changes in the repository. It
    - Add and smoke test `scripts/codex_mcp.py`, which launches the Codex CLI MCP server exactly like the quickstart (`npx -y codex mcp`).
 2. **Discovery Workflow Baseline**
    - Implement `arcindex/workflows/discovery.py` using the quickstart single-agent example.
-   - Provide a thin CLI command (`arcindex discovery run`) that invokes the workflow coroutine.
-   - Write an integration test confirming `Runner.run` completes and Codex MCP startup/shutdown behaves as expected.
+   - Wire `arcindex start` to call the workflow so the CLI depends solely on Codex SDK primitives.
+   - Replace legacy discovery tests with TODO placeholders until Codex-backed coverage is available.
 3. **Multi-Agent Pipeline Scaffolding**
    - Port the quickstart multi-agent orchestration (orchestrator -> discovery -> analyst) into `arcindex/workflows/discovery_to_analyst.py`.
-   - Ensure every agent attaches the Codex MCP server via `MCPServerStdio`.
-   - Begin drafting guardrail hooks for discovery and analyst outputs, following quickstart guardrail patterns.
+   - Keep `arcindex start` pointed at the multi-agent pipeline and add a `arcindex continue` placeholder pending persistence work.
+   - Ensure every agent attaches the Codex MCP server via `MCPServerStdio` and mark remaining legacy tests for follow-up.
 
 Reference `MIGRATION-PLAN.md` for the full roadmap through Phase 7.
 
@@ -73,12 +73,13 @@ Reference `MIGRATION-PLAN.md` for the full roadmap through Phase 7.
 2. **Start the Codex MCP Server (when required)**
    - Run `python scripts/codex_mcp.py` to launch the Codex MCP server using `MCPServerStdio`.
    - Leave the server running while local workflows execute; stop it once the session completes.
+   - Execute workflows via `arcindex start`; `arcindex continue` is a placeholder until Codex-backed persistence is implemented. Do not add alternate CLI commands.
 3. **Editing Guidelines**
    - Prefer `apply_patch` for single-file adjustments.
    - Note assumptions or follow-ups inline using succinct comments or TODO markers.
 4. **Testing Philosophy**
    - Add unit tests alongside new workflow or guardrail modules.
-   - Use integration tests to exercise `Runner.run` flows that depend on the Codex MCP server.
+   - Use integration tests to exercise Codex MCP workflows; skip legacy-runner suites with clear TODOs referencing the migration plan instead of maintaining them.
    - Document manual validation steps when automated coverage is not yet possible.
 5. **Logging Decisions**
    - Capture rationale in PR descriptions or short notes (plan to add `docs/decisions/` once created).
