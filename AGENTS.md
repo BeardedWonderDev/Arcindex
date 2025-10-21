@@ -60,7 +60,14 @@ Reference `MIGRATION-PLAN.md` for the full roadmap through Phase 7.
    - Read this file.
    - Skim `MIGRATION-PLAN.md` for phase-specific details.
    - Confirm target phase in README’s roadmap table.
-   - Activate the project virtual environment (`source .venv/bin/activate`) so CLI commands and tests run against the repo-managed Python toolchain.
+   - **Activate the virtual environment before any Python command**:
+     ```bash
+     python3 -m venv .venv             # run once per machine
+     source .venv/bin/activate         # required for every session
+     python -m pip install --upgrade pip
+     python -m pip install -r arcindex/requirements-dev.txt
+     ```
+     Keep the venv active for all `python`, `pip`, `pytest`, and CLI interactions (`arcindex …`). Deactivate only after finishing the session (`deactivate`).
 
 2. **When Editing**
    - Prefer `apply_patch` for single-file edits.

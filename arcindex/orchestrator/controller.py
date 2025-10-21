@@ -43,6 +43,7 @@ class OrchestratorController:
         self._discovery_agent = DiscoveryAgent()
         self._legacy_state_dir = runtime_config.state.persistence
         self._current_run_dir: Optional[Path] = None
+        self._active_workflow_type: str = runtime_config.system.default_workflow
 
     def configure_run_context(
         self,
@@ -105,6 +106,7 @@ class OrchestratorController:
         state = self._state_store.initialize(params)
         initialise_quality_gate(state)
         self._state_store.save(state)
+        self._active_workflow_type = workflow_id
         return state, timestamp
 
     def load_state(self) -> MutableMapping[str, Any]:
@@ -144,6 +146,7 @@ class OrchestratorController:
             project_name=project_name,
             timestamp=timestamp,
             legacy_dir=legacy_dir,
+            docs_root=self._config.docs.root,
         )
         self._state_store.save(state)
         return result
@@ -154,7 +157,11 @@ class OrchestratorController:
         project_name: Optional[str],
     ) -> str:
         """Build the human-readable discovery summary."""
-        return self._discovery_agent.build_summary_markdown(answers, project_name)
+        return self._discovery_agent.build_summary_markdown(
+            answers,
+            project_name,
+            workflow_type=self._active_workflow_type,
+        )
 
     def elicitation_menu(self) -> str:
         """Return the formatted elicitation menu."""
@@ -186,6 +193,35 @@ class OrchestratorController:
             }
         )
         self._state_store.save(state)
+
+    def apply_elicitation(
+        self,
+        state: MutableMapping[str, Any],
+        answers: Mapping[str, str],
+        selection: int,
+        option: ElicitationOption,
+        project_name: Optional[str],
+    ) -> str:
+        """
+        Apply the chosen elicitation method using the Agent SDK and persist history.
+        """
+        response = self._discovery_agent.apply_elicitation_method(
+            method_label=option.label,
+            answers=answers,
+            project_name=project_name,
+            workflow_type=self._active_workflow_type,
+        )
+
+        self.record_elicitation_history(
+            state,
+            selection_number=selection,
+            selection_label=option.label,
+            timestamp=current_timestamp(),
+            user_feedback=None,
+            applied_changes=response.notes,
+        )
+        self._state_store.save(state)
+        return response.markdown
 
     def finalise_discovery(self, state: MutableMapping[str, Any], timestamp: str) -> None:
         """Mark the discovery phase as complete and prepare for analyst handoff."""

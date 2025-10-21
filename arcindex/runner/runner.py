@@ -50,6 +50,7 @@ class RunResult:
     summary_markdown: str
     summary_path: Path
     summary_artifact: Optional[ArtifactRecord]
+    docs_markdown_path: Optional[Path]
     events_path: Path
 
 
@@ -167,6 +168,11 @@ class ArcindexRunner:
                             if discovery_result.summary_artifact
                             else None
                         ),
+                        "docs_markdown_path": (
+                            str(discovery_result.docs_markdown_path)
+                            if discovery_result.docs_markdown_path
+                            else None
+                        ),
                     },
                 )
             )
@@ -180,6 +186,7 @@ class ArcindexRunner:
                 summary_markdown=discovery_result.summary_markdown,
                 summary_path=discovery_result.summary_path,
                 summary_artifact=discovery_result.summary_artifact,
+                docs_markdown_path=discovery_result.docs_markdown_path,
                 events_path=context.events_path,
             )
         except CancellationError:

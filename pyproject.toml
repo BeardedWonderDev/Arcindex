@@ -16,6 +16,7 @@ dependencies = [
     "prompt_toolkit>=3.0",
     "fastapi>=0.111",
     "uvicorn>=0.30",
+    "openai>=1.40",
 ]
 
 [project.optional-dependencies]

@@ -19,6 +19,8 @@ def _prepare_runtime(tmp_path: Path) -> Path:
     workflows_dir.mkdir()
     state_dir.mkdir()
     runs_dir.mkdir()
+    docs_dir = tmp_path / "docs"
+    docs_dir.mkdir()
 
     template_src = Path("arcindex/state/workflow_template.json")
     template_dst = state_dir / "workflow_template.json"
@@ -32,6 +34,7 @@ def _prepare_runtime(tmp_path: Path) -> Path:
     runtime_data.setdefault("state", {})["persistence"] = str(state_dir)
     runtime_data["state"]["workflow_template"] = str(template_dst)
     runtime_data.setdefault("runs", {})["root"] = str(runs_dir)
+    runtime_data.setdefault("docs", {})["root"] = str(docs_dir)
     runtime_data.setdefault("elicitation", {})["methods_source"] = str(
         Path("arcindex/resources/elicitation-methods.md").resolve()
     )

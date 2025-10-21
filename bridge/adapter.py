@@ -229,23 +229,37 @@ class RunJobManager:
         answers = dict(job.answers)
         project_name = job.project_name
 
-        controller.summary_markdown(answers, project_name)
+        summary_markdown = controller.summary_markdown(answers, project_name)
+        job.queue.put_nowait(
+            {
+                "event": "summary",
+                "summary": summary_markdown,
+            }
+        )
 
         if job.elicitation_choice != 1:
             options = controller.elicitation_options()
-            selected_label = next(
-                (opt.label for opt in options if opt.number == job.elicitation_choice),
+            selected_option = next(
+                (opt for opt in options if opt.number == job.elicitation_choice),
                 None,
             )
-            if selected_label:
-                controller.record_elicitation_history(
-                    state,
-                    selection_number=job.elicitation_choice,
-                    selection_label=selected_label,
-                    timestamp=job.timestamp,
-                    user_feedback=None,
-                    applied_changes=None,
-                )
+            if selected_option is None:
+                raise ValueError(f"Invalid elicitation selection: {job.elicitation_choice}")
+            summary_markdown = controller.apply_elicitation(
+                state,
+                answers,
+                job.elicitation_choice,
+                selected_option,
+                project_name,
+            )
+            job.queue.put_nowait(
+                {
+                    "event": "elicitation",
+                    "method": selected_option.label,
+                    "description": selected_option.description,
+                    "summary": summary_markdown,
+                }
+            )
 
         async def _execute_run() -> RunResult:
             try:

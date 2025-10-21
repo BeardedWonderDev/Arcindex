@@ -20,6 +20,8 @@ def _prepare_controller(tmp_path: Path) -> OrchestratorController:
     workflows_dir.mkdir()
     state_dir.mkdir()
     runs_dir.mkdir()
+    docs_dir = tmp_path / "docs"
+    docs_dir.mkdir()
 
     template_src = Path("arcindex/state/workflow_template.json")
     template_dst = state_dir / "workflow_template.json"
@@ -33,6 +35,7 @@ def _prepare_controller(tmp_path: Path) -> OrchestratorController:
     runtime_data.setdefault("state", {})["persistence"] = str(state_dir)
     runtime_data["state"]["workflow_template"] = str(template_dst)
     runtime_data.setdefault("runs", {})["root"] = str(runs_dir)
+    runtime_data.setdefault("docs", {})["root"] = str(docs_dir)
     runtime_data.setdefault("elicitation", {})["methods_source"] = str(
         Path("arcindex/resources/elicitation-methods.md").resolve()
     )
@@ -85,6 +88,8 @@ def test_runner_complete_discovery_emits_events(tmp_path: Path) -> None:
     assert result.summary_path.exists()
     if result.summary_artifact:
         assert result.summary_artifact.path.exists()
+    if result.docs_markdown_path:
+        assert result.docs_markdown_path.exists()
 
     workflow = json.loads(controller.config.state.workflow_path.read_text())
     assert workflow["current_phase"] == "analyst"

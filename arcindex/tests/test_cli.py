@@ -21,6 +21,8 @@ def test_cli_start_smoke(tmp_path: Path) -> None:
     workflows_dir.mkdir()
     state_dir.mkdir()
     runs_dir.mkdir()
+    docs_dir = tmp_path / "docs"
+    docs_dir.mkdir()
 
     template_src = Path("arcindex/state/workflow_template.json")
     template_dst = state_dir / "workflow_template.json"
@@ -34,6 +36,7 @@ def test_cli_start_smoke(tmp_path: Path) -> None:
     runtime_data["state"]["persistence"] = str(state_dir)
     runtime_data["state"]["workflow_template"] = str(template_dst)
     runtime_data.setdefault("runs", {})["root"] = str(runs_dir)
+    runtime_data.setdefault("docs", {})["root"] = str(docs_dir)
     runtime_data["elicitation"]["methods_source"] = str(
         Path("arcindex/resources/elicitation-methods.md").resolve()
     )
@@ -98,3 +101,8 @@ def test_cli_start_smoke(tmp_path: Path) -> None:
     events_path = runs_dir / run_id / "logs" / "events.ndjson"
     assert events_path.exists()
     assert events_path.read_text(encoding="utf-8").strip()
+
+    docs_summary_path = docs_dir / "discovery" / f"{workflow['workflow_id']}-summary.md"
+    assert docs_summary_path.exists()
+    contents = docs_summary_path.read_text(encoding="utf-8")
+    assert "Discovery Summary" in contents

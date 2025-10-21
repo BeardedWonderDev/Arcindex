@@ -18,6 +18,9 @@ state:
 runs:
   root: "../runs"
 
+docs:
+  root: "../docs"
+
 elicitation:
   default_mode: "interactive"
   methods_source: "../../legacy/.codex/data/elicitation-methods.md"  # TODO: migrate in Phase 1

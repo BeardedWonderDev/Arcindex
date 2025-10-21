@@ -4,3 +4,4 @@ pyyaml>=6.0
 prompt_toolkit>=3.0
 fastapi>=0.111
 uvicorn>=0.30
+openai>=1.40

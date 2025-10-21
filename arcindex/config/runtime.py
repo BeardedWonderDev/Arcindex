@@ -58,6 +58,13 @@ class RunsSettings:
 
 
 @dataclass
+class DocsSettings:
+    """Documentation output configuration."""
+
+    root: Path
+
+
+@dataclass
 class RuntimeConfig:
     """Resolved runtime configuration."""
 
@@ -67,6 +74,7 @@ class RuntimeConfig:
     state: StateSettings
     runs: RunsSettings
     elicitation: ElicitationSettings
+    docs: DocsSettings
 
 
 def load_runtime_config(path: Path) -> RuntimeConfig:
@@ -83,6 +91,7 @@ def load_runtime_config(path: Path) -> RuntimeConfig:
     state = _parse_state_settings(base, data.get("state", {}))
     runs = _parse_runs_settings(base, data.get("runs", {}))
     elicitation = _parse_elicitation_settings(base, data.get("elicitation", {}))
+    docs = _parse_docs_settings(base, data.get("docs", {}))
 
     return RuntimeConfig(
         root=base,
@@ -91,6 +100,7 @@ def load_runtime_config(path: Path) -> RuntimeConfig:
         state=state,
         runs=runs,
         elicitation=elicitation,
+        docs=docs,
     )
 
 
@@ -150,3 +160,9 @@ def _parse_runs_settings(base: Path, data: Mapping[str, Any]) -> RunsSettings:
         raise ValueError(msg)
     runs_root = (base / str(root)).resolve()
     return RunsSettings(root=runs_root)
+
+
+def _parse_docs_settings(base: Path, data: Mapping[str, Any]) -> DocsSettings:
+    root = data.get("root", "../docs")
+    docs_root = (base / str(root)).resolve()
+    return DocsSettings(root=docs_root)

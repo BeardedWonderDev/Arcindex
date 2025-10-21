@@ -1,6 +1,7 @@
 """Configuration helpers for the Arcindex SDK."""
 
 from .runtime import (
+    DocsSettings,
     ElicitationSettings,
     RuntimeConfig,
     RunsSettings,
@@ -11,6 +12,7 @@ from .runtime import (
 )
 
 __all__ = [
+    "DocsSettings",
     "ElicitationSettings",
     "RuntimeConfig",
     "RunsSettings",

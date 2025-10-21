@@ -133,18 +133,18 @@ def start(
         if selection == 1:
             break
 
-        selected_label = _lookup_option_label(options, selection)
-        controller.record_elicitation_history(
+        selected_option = _lookup_option(options, selection)
+        summary_markdown = controller.apply_elicitation(
             state,
-            selection_number=selection,
-            selection_label=selected_label,
-            timestamp=current_timestamp(),
-            user_feedback=None,
-            applied_changes=None,
+            answers,
+            selection,
+            selected_option,
+            project_name,
         )
 
         click.echo(
-            "🔁 Discovery elicitation methods are not yet automated; summary remains unchanged."
+            f"\n🧠 Applied elicitation method: {selected_option.label}\n"
+            f"{selected_option.description or ''}".rstrip()
         )
         click.echo(summary_markdown)
         selection = None
@@ -164,6 +164,8 @@ def start(
     click.echo(f"🗂️  Discovery summary saved to {run_result.summary_path}")
     if run_result.summary_artifact:
         click.echo(f"📦  Artifact URI: {run_result.summary_artifact.uri}")
+    if run_result.docs_markdown_path:
+        click.echo(f"📚  Documentation summary saved to {run_result.docs_markdown_path}")
     click.echo(f"🧾 Events log written to {run_result.events_path}")
     click.echo(f"🗄️  Workflow state written to {controller.config.state.workflow_path}")
 
@@ -236,14 +238,14 @@ def _prompt_elicitation_selection() -> int:
     return click.prompt("Selection", type=click.IntRange(1, 9))
 
 
-def _lookup_option_label(
+def _lookup_option(
     options: Tuple[ElicitationOption, ...],
     selection: int,
-) -> str:
+) -> ElicitationOption:
     for option in options:
         if option.number == selection:
-            return option.label
-    return "Proceed"
+            return option
+    raise click.UsageError(f"Invalid elicitation selection: {selection}")
 
 
 def main() -> None:
