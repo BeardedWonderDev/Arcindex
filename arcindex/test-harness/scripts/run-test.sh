@@ -5,15 +5,15 @@ usage() {
   cat <<'EOF'
 Arcindex test harness
 
-Usage: run-test.sh [--answers <file>]
+Usage: run-test.sh [--task <file>] [-h|--help]
 
 Options:
-  --answers <file>   Use a custom discovery answers file for the workspace template.
-  -h, --help         Show this help message.
+  --task <file>  Use a custom discovery task prompt for the workflow.
+  -h, --help   Show this help message.
 
 Examples:
   ./run-test.sh
-  ./run-test.sh --answers ~/custom-inputs.txt
+  ./run-test.sh --task ~/custom-task.txt
 EOF
 }
 
@@ -23,13 +23,12 @@ HARNESS_DIR="$ROOT_DIR/arcindex/test-harness"
 RESULTS_DIR="$HARNESS_DIR/results"
 ARCHIVE_DIR="$HARNESS_DIR/archive"
 TEMPLATES_DIR="$HARNESS_DIR/templates"
-
-ANSWERS_TEMPLATE="$TEMPLATES_DIR/discovery-inputs.txt"
+TASK_TEMPLATE="$TEMPLATES_DIR/discovery-task.txt"
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    --answers)
-      ANSWERS_TEMPLATE="$2"
+    --task)
+      TASK_TEMPLATE="$2"
       shift 2
       ;;
     -h|--help)
@@ -44,16 +43,16 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-if [[ ! -f "$ANSWERS_TEMPLATE" ]]; then
-  echo "❌ Answers template not found: $ANSWERS_TEMPLATE" >&2
-  exit 1
-fi
-
 TIMESTAMP=$(date +%Y%m%d-%H%M%S)
 RUN_ID="arcindex-local-${TIMESTAMP}"
 TARGET_DIR="$RESULTS_DIR/$RUN_ID"
 
 mkdir -p "$TARGET_DIR" "$ARCHIVE_DIR"
+
+if [[ ! -f "$TASK_TEMPLATE" ]]; then
+  echo "❌ Task template not found: $TASK_TEMPLATE" >&2
+  exit 1
+fi
 
 # Copy runtime
 rsync -a \
@@ -68,22 +67,20 @@ for file in pyproject.toml README.md MIGRATION-PLAN.md AGENTS.md LICENSE; do
   fi
 done
 
-cp "$ANSWERS_TEMPLATE" "$TARGET_DIR/discovery-inputs.txt"
+cp "$TASK_TEMPLATE" "$TARGET_DIR/discovery-task.txt"
 
 cat <<EOF
 ✅ Created Arcindex test workspace
 
 Location: $TARGET_DIR
-Template answers: $ANSWERS_TEMPLATE
 
 Next steps:
   cd "$TARGET_DIR"
   python3 -m venv .venv
   source .venv/bin/activate
   pip install -e '.[dev]'
-  arcindex start --project-name "Arcindex Test" \\
-    --answers-file discovery-inputs.txt \\
-    --elicitation-choice 1
+  cp ../../.env .    # optional: reuse your API key for the sandbox
+  arcindex start --task "\$(< discovery-task.txt)"
 
 When you're finished, remove the workspace by deleting the directory.
 Artifacts and event logs will be written under runs/<run_id>/ within the workspace.

@@ -12,7 +12,7 @@ arcindex/test-harness/
 ├── scripts/
 │   └── run-test.sh        # Create a new isolated workspace
 ├── templates/
-│   └── discovery-inputs.txt
+│   └── discovery-task.txt  # Canonical discovery prompt
 ├── results/               # Generated workspaces (gitignored)
 └── archive/               # Reserved for future automation (gitignored)
 ```
@@ -22,12 +22,10 @@ arcindex/test-harness/
 1. **Create a workspace**
 
    ```bash
-   arcindex/test-harness/scripts/run-test.sh --local
+   arcindex/test-harness/scripts/run-test.sh
    ```
 
-   - `--local` copies the current working tree (including uncommitted changes).
-   - `--branch <name>` exports a clean copy of `<name>` using `git archive`.
-   - `--answers <file>` overrides the default discovery inputs template.
+   Pass `--task <file>` to reuse an alternative prompt file.
 
 2. **Follow the instructions** the script prints to initialise a virtual environment and run the CLI:
 
@@ -36,14 +34,17 @@ arcindex/test-harness/
    python3 -m venv .venv
    source .venv/bin/activate
    pip install -e '.[dev]'
-   arcindex start --project-name "Sandbox" --answers-file discovery-inputs.txt --elicitation-choice 1
+   cp ../../.env .    # optional: reuse your API key in the sandbox
+   arcindex start --task "$(< discovery-task.txt)"
    ```
 
-3. **Inspect outputs** inside the workspace. Every run writes to both the legacy state path and the run-scoped tree:
+3. **Inspect outputs** inside the workspace. Every run writes to the quickstart run tree:
    - `runs/<run_id>/workflow.json` – current workflow snapshot.
    - `runs/<run_id>/discovery-summary.json` – structured discovery output.
    - `runs/<run_id>/logs/events.ndjson` – event stream suitable for SSE clients.
-   The legacy copies in `arcindex/state/` remain for compatibility. Delete the folder when you are finished.
+   Delete the folder when you are finished.
+
+4. **Repeatable runs**. The copied `discovery-task.txt` contains the canonical discovery answers lifted from the legacy workflow. Edit or swap it with `--task <file>` when invoking `run-test.sh` if you need different scenarios.
 
 ## Notes
 
